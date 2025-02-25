@@ -87,7 +87,7 @@ class JHOVE # rubocop:disable Metrics/ClassLength
 
     err_lines = @raw_output.chomp.split("\n")
     err_lines.each do |line|
-      next if ['failure!', 'success!'].include? line
+      next if ['failure!', 'success!', ''].include? line
 
       process_feed_validate_line line
     end
@@ -171,6 +171,8 @@ class JHOVE # rubocop:disable Metrics/ClassLength
   # Strip off any leading or trailing non-numeric characters
   # and convert to integer.
   def sequentialize!(err)
+    return nil unless err[:file]
+
     file = err[:file].split(File::SEPARATOR).last
     match = file.match(/^.*?([0-9]+)\.(?:tif|jp2)$/)
     err[:seq] = match.nil? ? 0 : match[1].to_i
