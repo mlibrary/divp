@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'open3'
+require "open3"
 
 # Wrapper for Open3 invocation of external binaries
 class Command
@@ -20,9 +20,9 @@ class Command
     end
 
     @end = Time.now
-    @status = { stdout: stdout_str,
-                stderr: stderr_str,
-                code: code,
-                time: Time.now - @start }
+    @status = {stdout: stdout_str,
+               stderr: stderr_str,
+               code: code,
+               time: Time.now - @start}
   end
 end

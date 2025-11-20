@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'json'
-require 'tempfile'
-require 'time'
+require "json"
+require "tempfile"
+require "time"
 
-require 'config'
-require 'error'
-require 'progress_bar'
-require 'symbolize'
+require "config"
+require "error"
+require "progress_bar"
+require "symbolize"
 
 # Base class for conversion stages
 class Stage # rubocop:disable Metrics/ClassLength
@@ -16,23 +16,23 @@ class Stage # rubocop:disable Metrics/ClassLength
   attr_accessor :name, :config, :shipment
 
   def self.json_create(hash)
-    data = Symbolize.symbolize hash['data']
+    data = Symbolize.symbolize hash["data"]
     new nil, **data
   end
 
   def self.json_time(time)
-    time.nil? ? '' : time.strftime('%Y-%m-%d %H:%M:%S.%N %z')
+    time.nil? ? "" : time.strftime("%Y-%m-%d %H:%M:%S.%N %z")
   end
 
   def to_json(*args)
     {
-      'json_class' => self.class.name,
-      'data' => { name: @name,
-                  errors: @errors,
-                  warnings: @warnings,
-                  data: @data,
-                  start: Stage.json_time(@start),
-                  end: Stage.json_time(@end) }
+      "json_class" => self.class.name,
+      "data" => {name: @name,
+                 errors: @errors,
+                 warnings: @warnings,
+                 data: @data,
+                 start: Stage.json_time(@start),
+                 end: Stage.json_time(@end)}
     }.to_json(*args)
   end
 
@@ -50,23 +50,23 @@ class Stage # rubocop:disable Metrics/ClassLength
     @warnings = args[:warnings] || [] # Nonfatal conditions, Array of Error
     @data = args[:data] || {} # Misc data structure including log
     # Time the stage was last run
-    @start = if args[:start].to_s == ''
-               nil
-             else
-               Time.parse args[:start]
-             end
+    @start = if args[:start].to_s == ""
+      nil
+    else
+      Time.parse args[:start]
+    end
     # Time the stage last finished running
     # Currently used by #complete?
-    @end = if args[:end].to_s == ''
-             nil
-           else
-             Time.parse args[:end]
-           end
+    @end = if args[:end].to_s == ""
+      nil
+    else
+      Time.parse args[:end]
+    end
     @bar = if config[:no_progress]
-             SilentProgressBar.new(self.class)
-           else
-             ProgressBar.new(self.class)
-           end
+      SilentProgressBar.new(self.class)
+    else
+      ProgressBar.new(self.class)
+    end
   end
 
   # Get rid of errors, warnings, and anything that may have been memoized
@@ -83,7 +83,7 @@ class Stage # rubocop:disable Metrics/ClassLength
     run agenda
     cleanup
     @end = Time.now
-    @bar.done! format('%.3f sec', @end - @start)
+    @bar.done! format("%.3f sec", @end - @start)
   end
 
   # This is the method that needs to be implemented by a subclass
@@ -196,7 +196,7 @@ class Stage # rubocop:disable Metrics/ClassLength
   end
 
   # Prefix is useful when debugging image processing pipelines.
-  def create_tempdir(prefix = '')
+  def create_tempdir(prefix = "")
     unless File.directory? shipment.tmp_directory
       Dir.mkdir shipment.tmp_directory
     end
@@ -210,12 +210,12 @@ class Stage # rubocop:disable Metrics/ClassLength
   # source is copied to destination on success,
   # left alone on failure.
   def copy_on_success(source, destination, objid)
-    (@copy_on_success ||= []) << { source: source, destination: destination,
-                                   objid: objid }
+    (@copy_on_success ||= []) << {source: source, destination: destination,
+                                  objid: objid}
   end
 
   def delete_on_success(path, objid = nil)
-    (@delete_on_success ||= []) << { path: path, objid: objid }
+    (@delete_on_success ||= []) << {path: path, objid: objid}
   end
 
   def objids
@@ -223,7 +223,7 @@ class Stage # rubocop:disable Metrics/ClassLength
   end
 
   def log(entry, time = nil)
-    entry += format(' (%.3f sec)', time) unless time.nil?
+    entry += format(" (%.3f sec)", time) unless time.nil?
     (@data[:log] ||= []) << entry
   end
 
@@ -239,7 +239,7 @@ class Stage # rubocop:disable Metrics/ClassLength
     shipment.objid_directories
   end
 
-  def image_files(type = 'tif')
+  def image_files(type = "tif")
     shipment.image_files(type)
   end
 end

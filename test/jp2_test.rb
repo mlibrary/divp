@@ -1,18 +1,18 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-require 'jp2'
+require "minitest/autorun"
+require "jp2"
 
 class TIFFTest < Minitest::Test
   def test_new
-    shipment = TestShipment.new(test_name, 'BC J contone 1')
+    shipment = TestShipment.new(test_name, "BC J contone 1")
     jp2 = JP2.new(shipment.image_files.first.path)
-    refute_nil jp2, 'JP2 is not nil'
+    refute_nil jp2, "JP2 is not nil"
   end
 
   def test_info # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-    shipment = TestShipment.new(test_name, 'BC J contone 1')
+    shipment = TestShipment.new(test_name, "BC J contone 1")
     jp2 = JP2.new(shipment.image_files.first.path)
     info = jp2.info
     assert_instance_of Hash, info

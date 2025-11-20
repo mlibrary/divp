@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'luhn'
-require 'fixtures'
-require_relative '../lib/shipment'
+require "luhn"
+require "fixtures"
+require_relative "../lib/shipment"
 
 class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
   attr_reader :ordered_objids
 
-  PATH = File.join(__dir__, 'shipments').freeze
+  PATH = File.join(__dir__, "shipments").freeze
 
   # Yes, we want this shared with subclasses
   def self.test_shipments
@@ -29,7 +29,7 @@ class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
 
   # Randomly-generated objid that passes Luhn check
   def self.generate_objid(valid = true)
-    objid = '39015' + (8.times.map { rand 10 }).join
+    objid = "39015" + (8.times.map { rand 10 }).join
     if valid
       objid + Luhn.checksum(objid).to_s
     else
@@ -45,7 +45,7 @@ class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
   # [TIF name, dest] copy TIF fixture to dest (which can be a range)
   # [F dest] create zero-length file at dest
   # [DIR] cwd to shipment directory
-  def initialize(name, spec = '')
+  def initialize(name, spec = "")
     self.class.add_test_shipment(name)
     @name = name
     dir = File.join(PATH, @name)
@@ -61,17 +61,17 @@ class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
     elements = spec.split(/\s+/)
     while elements.any?
       case op = elements.shift
-      when 'BC'
+      when "BC"
         handle_objid_op
-      when 'BBC'
+      when "BBC"
         handle_bogus_objid_op
-      when 'T'
+      when "T"
         handle_tiff_op(elements.shift, elements.shift)
-      when 'J'
+      when "J"
         handle_jp2_op(elements.shift, elements.shift)
-      when 'F'
+      when "F"
         FileUtils.touch(File.join(@current_dir, elements.shift))
-      when 'DIR'
+      when "DIR"
         @current_dir = @dir
       else
         raise StandardError, "Unrecognized opcode #{op}"
@@ -99,13 +99,13 @@ class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
     fixture = Fixtures.tiff_fixture(name)
     case dest
     when /^\d+$/
-      dest = format '%<filename>08d.tif', { filename: dest }
+      dest = format "%<filename>08d.tif", {filename: dest}
       FileUtils.cp fixture, File.join(@current_dir, dest)
     when /^\d+-\d+$/
-      first, last = dest.split('-').map(&:to_i)
+      first, last = dest.split("-").map(&:to_i)
       first, last = last, first if first > last
       (first..last).each do |n|
-        dest = format '%<filename>08d.tif', { filename: n }
+        dest = format "%<filename>08d.tif", {filename: n}
         FileUtils.cp fixture, File.join(@current_dir, dest)
       end
     else
@@ -117,13 +117,13 @@ class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
     fixture = Fixtures.jp2_fixture(name)
     case dest
     when /^\d+$/
-      dest = format '%<filename>08d.jp2', { filename: dest }
+      dest = format "%<filename>08d.jp2", {filename: dest}
       FileUtils.cp fixture, File.join(@current_dir, dest)
     when /^\d+-\d+$/
-      first, last = dest.split('-').map(&:to_i)
+      first, last = dest.split("-").map(&:to_i)
       first, last = last, first if first > last
       (first..last).each do |n|
-        dest = format '%<filename>08d.jp2', { filename: n }
+        dest = format "%<filename>08d.jp2", {filename: n}
         FileUtils.cp fixture, File.join(@current_dir, dest)
       end
     else
@@ -135,15 +135,15 @@ end
 class DLXSTestShipment < TestShipment
   # Randomly-generated DLXS id/volume/number objid abcde/XXXX/YYY
   def self.generate_objid(valid = true)
-    objid = [[*('a'..'z'), *('0'..'9')].sample(8).join,
-             4.times.map { rand 10 }.join,
-             3.times.map { rand 10 }.join].join('.')
+    objid = [[*("a".."z"), *("0".."9")].sample(8).join,
+      4.times.map { rand 10 }.join,
+      3.times.map { rand 10 }.join].join(".")
     valid ? objid : objid.reverse
   end
 
   def handle_objid_op
     objid = self.class.generate_objid(true)
-    components = objid.split '.'
+    components = objid.split "."
     path = @dir
     components.each do |component|
       path = File.join(path, component)
@@ -155,7 +155,7 @@ class DLXSTestShipment < TestShipment
 
   def handle_bogus_objid_op
     objid = self.class.generate_objid(false)
-    components = objid.split '.'
+    components = objid.split "."
     path = @dir
     components.each do |component|
       path = File.join(path, component)

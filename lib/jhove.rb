@@ -1,24 +1,24 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'pathname'
+require "pathname"
 
-require 'command'
-require 'error'
-require 'symbolize'
+require "command"
+require "error"
+require "symbolize"
 
 # Wrapper for feed validate Perl script which invokes JHOVE
 class JHOVE # rubocop:disable Metrics/ClassLength
   attr_reader :errors, :raw_output
 
   UNUSED_FIELDS = %i[description file namespace objid
-                     remediable seq stage].freeze
+    remediable seq stage].freeze
 
   # Convert error Hash to Postflight Error object
   def self.error_object(err, objid = nil)
     fields = err.reject { |k, _v| JHOVE::UNUSED_FIELDS.include? k }
     desc = "#{err[:description]}: " +
-           fields.map { |k, v| "#{k}: #{v}" }.join(', ')
+      fields.map { |k, v| "#{k}: #{v}" }.join(", ")
     Error.new desc, objid, err[:file]
   end
 
@@ -63,21 +63,21 @@ class JHOVE # rubocop:disable Metrics/ClassLength
     # May be able to use something like https://github.com/upserve/docker-api
     # to reuse container.
     if @config[:feed_validate_script]
-      ['perl', @config[:feed_validate_script], 'simple test', @dir]
+      ["perl", @config[:feed_validate_script], "simple test", @dir]
     else
       feed_validate_script_docker
-    end.join ' '
+    end.join " "
   end
 
   def feed_validate_script_docker
     local = Pathname.new(@dir)
-    mount = Pathname.new('/images') + local.basename
+    mount = Pathname.new("/images") + local.basename
     [
       "docker run --rm -v '#{local}:#{mount}'",
-      'ghcr.io/hathitrust/feed',
-      'perl',
-      '/usr/local/feed/bin/validate_images.pl',
-      'simple test',
+      "ghcr.io/hathitrust/feed",
+      "perl",
+      "/usr/local/feed/bin/validate_images.pl",
+      "simple test",
       mount.to_s
     ]
   end
@@ -87,7 +87,7 @@ class JHOVE # rubocop:disable Metrics/ClassLength
 
     err_lines = @raw_output.chomp.split("\n")
     err_lines.each do |line|
-      next if ['failure!', 'success!'].include? line
+      next if ["failure!", "success!"].include? line
 
       process_feed_validate_line line
     end
@@ -117,7 +117,7 @@ class JHOVE # rubocop:disable Metrics/ClassLength
     err = fields[1..].map do |field|
       field.scan(/(.+?)\s*:\s*(.+)/).first
     end.compact.to_h.symbolize
-    err[:description] = fields[0].sub(/^(warn|error) - /i, '').downcase
+    err[:description] = fields[0].sub(/^(warn|error) - /i, "").downcase
     # This is the sort key (just in case we get errors out of order)
     # and the means by which we merge summaries into ranges
     # err[:seq] = filename_to_sequence err[:file]
@@ -126,7 +126,7 @@ class JHOVE # rubocop:disable Metrics/ClassLength
 
   # Remove ANSI color and leading runtime info and pid
   def normalize_line(line)
-    line.decolorize.sub(/.+?(?=(ERROR|WARN))/, '')
+    line.decolorize.sub(/.+?(?=(ERROR|WARN))/, "")
   end
 
   def redundant_error?(err)

@@ -17,7 +17,7 @@
 class ProgressBar
   attr_accessor :error, :warning, :steps, :done
 
-  def initialize(owner = '')
+  def initialize(owner = "")
     @done = nil
     @steps = 0
     @owner = owner
@@ -26,7 +26,7 @@ class ProgressBar
     @newline = false
   end
 
-  def step!(done, action = '')
+  def step!(done, action = "")
     return if done?
 
     @done = done
@@ -34,7 +34,7 @@ class ProgressBar
     draw action
   end
 
-  def next!(action = '')
+  def next!(action = "")
     step! (@done.nil? ? 0 : @done + 1), action
   end
 
@@ -42,18 +42,18 @@ class ProgressBar
     (@done || 0) >= @steps && @newline
   end
 
-  def done!(action = '')
+  def done!(action = "")
     step! @steps, action
   end
 
   # The \033[K is to erase the entire line in case a previous action string
   # might not be completely overwritten by a subsequent shorter one.
-  def draw(action = '')
+  def draw(action = "")
     return if @newline
 
     progress = @steps.zero? ? 10 : 10 * (@done || 0) / @steps
     printf("\r\033[K%-16s |%s| (#{done}/#{steps}) #{action}",
-           @owner, bar(progress))
+      @owner, bar(progress))
     return unless progress >= 10
 
     puts "\n"
@@ -63,8 +63,8 @@ class ProgressBar
   private
 
   def bar(progress)
-    segment ||= '█'.encode('utf-8')
-    bar = format '%<segments>-10s', segments: segment * progress
+    segment ||= "█".encode("utf-8")
+    bar = format "%<segments>-10s", segments: segment * progress
     bar = bar.brown if @warning && !@error
     bar = bar.red if @error
     bar
@@ -73,7 +73,7 @@ end
 
 # ProgressBar that doesn't draw anything
 class SilentProgressBar < ProgressBar
-  def draw(action = '')
+  def draw(action = "")
     # No-op
   end
 end

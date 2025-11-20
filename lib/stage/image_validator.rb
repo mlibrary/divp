@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'command'
-require 'jp2'
-require 'stage'
-require 'tiff'
+require "command"
+require "jp2"
+require "stage"
+require "tiff"
 
 # TIFF Validation Stage
 class ImageValidator < Stage
@@ -15,7 +15,7 @@ class ImageValidator < Stage
     return unless agenda.any?
 
     tiff_files = image_files.select { |file| agenda.include? file.objid }
-    jp2_files = image_files('jp2').select { |file| agenda.include? file.objid }
+    jp2_files = image_files("jp2").select { |file| agenda.include? file.objid }
     @bar.steps = tiff_files.count + jp2_files.count
     tiff_files.each do |image_file|
       @bar.next! image_file.objid_file
@@ -39,7 +39,7 @@ class ImageValidator < Stage
   def run_tiffinfo(image_file) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     begin
       info = TIFF.new(image_file.path).info
-    rescue StandardError => e
+    rescue => e
       add_error Error.new(e.message, image_file.objid, image_file.file)
       return nil
     end
@@ -59,7 +59,7 @@ class ImageValidator < Stage
   # bps of 1 requires spp=1 and xres=BITONAL_RES and yres=BITONAL_RES
   # bps of 8 requires spp in [1,3,4] and xres=CONTONE_RES and yres=CONTONE_RES
   def evaluate_tiff(image_file, info) # rubocop:disable Metrics/MethodLength
-    if info[:res_unit] != 'pixels/inch'
+    if info[:res_unit] != "pixels/inch"
       image_error image_file, "must have pixels/inch, not #{info[:res_unit]}"
     end
     case info[:bps]
@@ -94,7 +94,7 @@ class ImageValidator < Stage
   def run_jp2info(image_file) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     begin
       info = JP2.new(image_file.path).info
-    rescue StandardError => e
+    rescue => e
       add_error Error.new(e.message, image_file.objid, image_file.file)
       return nil
     end
@@ -109,7 +109,7 @@ class ImageValidator < Stage
   end
 
   def evaluate_jp2(image_file, info)
-    unless info[:res_unit] == 'inches'
+    unless info[:res_unit] == "inches"
       image_error(image_file, "resolution unit '#{info[:res_unit]}'")
     end
     return if info[:x_res] == CONTONE_RES && info[:y_res] == CONTONE_RES

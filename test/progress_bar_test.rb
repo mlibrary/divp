@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-require 'progress_bar'
+require "minitest/autorun"
+require "progress_bar"
 
 class ProgressBarTest < Minitest::Test
   def test_new
     bar = ProgressBar.new
-    refute_nil bar, 'progress bar successfully created'
+    refute_nil bar, "progress bar successfully created"
   end
 
   def test_output
@@ -16,11 +16,11 @@ class ProgressBarTest < Minitest::Test
     out, _err = capture_io do
       bar.step! 1
     end
-    assert_match(/\u2588/, out, 'draws one block')
+    assert_match(/\u2588/, out, "draws one block")
     out, _err = capture_io do
       bar.next!
     end
-    assert_match(/\u2588\u2588/, out, 'draws two blocks')
+    assert_match(/\u2588\u2588/, out, "draws two blocks")
   end
 
   def test_done!
@@ -29,7 +29,7 @@ class ProgressBarTest < Minitest::Test
     capture_io do
       bar.done!
     end
-    assert_equal 10, bar.done, 'bar.done! sets done=steps'
+    assert_equal 10, bar.done, "bar.done! sets done=steps"
   end
 
   def test_step!
@@ -38,11 +38,11 @@ class ProgressBarTest < Minitest::Test
     capture_io do
       bar.step! 2
     end
-    assert_equal 2, bar.done, 'bar.step!(2) increments by 2'
+    assert_equal 2, bar.done, "bar.step!(2) increments by 2"
     capture_io do
       bar.step! 20
     end
-    assert_equal bar.steps, bar.done, 'bar.step!(20) stops at bar.steps'
+    assert_equal bar.steps, bar.done, "bar.step!(20) stops at bar.steps"
   end
 
   def test_next!
@@ -51,11 +51,11 @@ class ProgressBarTest < Minitest::Test
     capture_io do
       bar.next!
     end
-    assert_equal 0, bar.done, 'bar.next! sets progress to 0 initially'
+    assert_equal 0, bar.done, "bar.next! sets progress to 0 initially"
     capture_io do
       bar.next!
     end
-    assert_equal 1, bar.done, 'bar.next! sets progress to 1 subsequently'
+    assert_equal 1, bar.done, "bar.next! sets progress to 1 subsequently"
   end
 
   def test_done?
@@ -63,7 +63,7 @@ class ProgressBarTest < Minitest::Test
     capture_io do
       bar.done!
     end
-    assert bar.done?, 'bar.done? true at progress 1/1'
+    assert bar.done?, "bar.done? true at progress 1/1"
   end
 
   def test_error
@@ -72,6 +72,6 @@ class ProgressBarTest < Minitest::Test
     out, _err = capture_io do
       bar.done!
     end
-    assert_match(/\e\[31m/, out, 'error turns output red')
+    assert_match(/\e\[31m/, out, "error turns output red")
   end
 end
