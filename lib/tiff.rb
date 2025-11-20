@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'command'
+require "command"
 
 # TIFF info and tagging utility
 class TIFF
@@ -38,10 +38,10 @@ class TIFF
   def set(tag, value) # rubocop:disable Metrics/MethodLength
     cmd = "tiffset -s #{tag} '#{value}' #{@path}"
     status = Command.new(cmd).run
-    tiffset = { cmd: cmd,
-                time: status[:time],
-                warnings: [],
-                errors: [] }
+    tiffset = {cmd: cmd,
+               time: status[:time],
+               warnings: [],
+               errors: []}
     status[:stderr].chomp.split("\n").each do |err|
       if /warning/i.match? err
         tiffset[:warnings] << err

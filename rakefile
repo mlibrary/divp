@@ -2,6 +2,6 @@
 
 task default: :test
 task :test do
-  require_relative 'test/test_helper.rb'
-  Dir.glob('./test/*_test.rb').sort.each { |file| require file }
+  require_relative "test/test_helper"
+  Dir.glob("./test/*_test.rb").sort.each { |file| require file }
 end

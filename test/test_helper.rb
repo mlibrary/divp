@@ -1,7 +1,11 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'simplecov'
+require "dotenv"
+
+Dotenv.load
+
+require "simplecov"
 
 SimpleCov.start do
   add_filter do |file|
@@ -9,13 +13,13 @@ SimpleCov.start do
   end
 end
 
-require_relative '../rsvp'
+require_relative "../rsvp"
 TEST_ROOT = File.expand_path(__dir__)
 $LOAD_PATH << TEST_ROOT
 
-require 'minitest'
-require 'test_shipment'
-require 'string_color'
+require "minitest"
+require "test_shipment"
+require "string_color"
 
 # Clean up any leftover test shipments
 if File.directory? TestShipment::PATH
@@ -26,7 +30,7 @@ module Minitest
   class Test
     @generated_tests = {}
     def test_name
-      [self.class.to_s, caller_locations(1..1)[0].label].join '_'
+      [self.class.to_s, caller_locations(1..1)[0].label].join "_"
     end
 
     def self.add_test(name)
@@ -47,24 +51,24 @@ module Minitest
     # routine and then invokes them with this at the end of the file:
     def self.generate_tests(name, block) # rubocop:disable Metrics/MethodLength
       add_test name
-      ['', 'DLXS'].each do |type|
+      ["", "DLXS"].each do |type|
         method_name = "test_#{name}"
-        method_name += "_#{type}" unless type == ''
-        shipment_class_name = 'Shipment'
-        test_shipment_class_name = 'TestShipment'
+        method_name += "_#{type}" unless type == ""
+        shipment_class_name = "Shipment"
+        test_shipment_class_name = "TestShipment"
         opts = {}
-        if type == 'DLXS'
-          require 'dlxs_shipment'
-          shipment_class_name = 'DLXSShipment'
-          test_shipment_class_name = 'DLXSTestShipment'
-          opts = { config_profile: 'dlxs' }
+        if type == "DLXS"
+          require "dlxs_shipment"
+          shipment_class_name = "DLXSShipment"
+          test_shipment_class_name = "DLXSTestShipment"
+          opts = {config_profile: "dlxs"}
         end
         test_shipment_class = Object.const_get(test_shipment_class_name)
         shipment_class = Object.const_get(shipment_class_name)
         test_shipment_dir = "#{self}_#{method_name}"
         define_method(method_name.to_sym) do
           instance_exec(shipment_class, test_shipment_class,
-                        test_shipment_dir, opts, &block)
+            test_shipment_dir, opts, &block)
         end
       end
     end

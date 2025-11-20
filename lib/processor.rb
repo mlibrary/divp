@@ -1,21 +1,21 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'json'
-require 'pathname'
-require 'yaml'
+require "json"
+require "pathname"
+require "yaml"
 
-require 'agenda'
-require 'config'
-require 'error'
-require 'progress_bar'
-require 'shipment'
-require 'stage'
-require 'string_color'
-require 'symbolize'
+require "agenda"
+require "config"
+require "error"
+require "progress_bar"
+require "shipment"
+require "stage"
+require "string_color"
+require "symbolize"
 
-Dir[File.join(__dir__, 'stage', '*.rb')].sort.each { |file| require file }
-Dir[File.join(__dir__, 'shipment', '*.rb')].sort.each { |file| require file }
+Dir[File.join(__dir__, "stage", "*.rb")].sort.each { |file| require file }
+Dir[File.join(__dir__, "shipment", "*.rb")].sort.each { |file| require file }
 
 # Processor
 class Processor # rubocop:disable Metrics/ClassLength
@@ -33,7 +33,7 @@ class Processor # rubocop:disable Metrics/ClassLength
   end
 
   def shipment_class
-    Object.const_get(@config[:shipment_class] || 'Shipment')
+    Object.const_get(@config[:shipment_class] || "Shipment")
   end
 
   def run # rubocop:disable Metrics/MethodLength
@@ -56,9 +56,9 @@ class Processor # rubocop:disable Metrics/ClassLength
   def finalize
     return unless stages.all?(&:complete?)
 
-    bar = ProgressBar.new('(Finalize)')
+    bar = ProgressBar.new("(Finalize)")
     bar.steps = 1
-    bar.next! 'finalizing shipment'
+    bar.next! "finalizing shipment"
     shipment.finalize
     bar.done!
   end
@@ -69,7 +69,7 @@ class Processor # rubocop:disable Metrics/ClassLength
     return if objids == []
     return unless File.directory? shipment.source_directory
 
-    bar = ProgressBar.new('(Restore)')
+    bar = ProgressBar.new("(Restore)")
     bar.steps = @shipment.source_objid_directories.count
     @shipment.restore_from_source_directory(objids) do |objid|
       bar.next! "copying from source/#{objid}"
@@ -147,7 +147,7 @@ class Processor # rubocop:disable Metrics/ClassLength
   end
 
   def status_file
-    @status_file ||= File.join(@dir, 'status.json')
+    @status_file ||= File.join(@dir, "status.json")
   end
 
   def status_file?
@@ -156,12 +156,12 @@ class Processor # rubocop:disable Metrics/ClassLength
 
   def write_status_file
     puts "Writing status file #{status_file}" if config[:verbose]
-    File.open(status_file, 'w') do |file|
+    File.open(status_file, "w") do |file|
       config_copy = @config.dup
       config_copy.delete :restart_all
-      file.write JSON.pretty_generate({ config: config_copy,
-                                        shipment: shipment,
-                                        stages: stages })
+      file.write JSON.pretty_generate({config: config_copy,
+                                       shipment: shipment,
+                                       stages: stages})
     end
   end
 
@@ -184,8 +184,8 @@ class Processor # rubocop:disable Metrics/ClassLength
       stage.run! stage_agenda
     rescue Interrupt
       puts "\nInterrupted".red
-      stage.add_error Error.new('Interruped')
-    rescue StandardError => e
+      stage.add_error Error.new("Interruped")
+    rescue => e
       stage.add_error Error.new("#{e.inspect} #{e.backtrace}")
       puts "#{e.inspect} #{e.backtrace}"
     ensure
@@ -205,12 +205,12 @@ class Processor # rubocop:disable Metrics/ClassLength
     raise JSON::ParserError, "unable to parse #{status_file}" if status.nil?
 
     unless status.key?(:shipment) && status[:shipment].is_a?(Shipment)
-      raise StandardError, 'status.json has no Shipment object'
+      raise StandardError, "status.json has no Shipment object"
     end
 
     unless status.key?(:stages) && status[:stages].is_a?(Array) &&
-           status[:stages].all? { |stage| stage.is_a? Stage }
-      raise StandardError, 'status.json has no Stage array'
+        status[:stages].all? { |stage| stage.is_a? Stage }
+      raise StandardError, "status.json has no Stage array"
     end
 
     if config[:restart_all]
@@ -237,8 +237,8 @@ class Processor # rubocop:disable Metrics/ClassLength
   def changed_objids
     fixity = shipment.fixity_check
     [fixity[:added].collect(&:objid),
-     fixity[:removed].collect(&:objid),
-     fixity[:changed].collect(&:objid)].flatten.uniq
+      fixity[:removed].collect(&:objid),
+      fixity[:changed].collect(&:objid)].flatten.uniq
   end
 
   # Verbose printing of progress information

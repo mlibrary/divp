@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'stage'
-require 'tag_data'
-require 'tiff'
+require "stage"
+require "tag_data"
+require "tiff"
 
 # TIFF Metadata update stage
 # The only thing that is required here is that the artist tag for 'dcu'
@@ -26,13 +26,13 @@ class Tagger < Stage
   private
 
   def calculate_tags # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
-    artist = config[:tagger_artist] || 'dcu'
+    artist = config[:tagger_artist] || "dcu"
     @artist_tag ||= if TagData::ARTIST[artist].nil?
-                      add_warning Error.new("using custom artist '#{artist}'")
-                      artist
-                    else
-                      TagData::ARTIST[artist]
-                    end
+      add_warning Error.new("using custom artist '#{artist}'")
+      artist
+    else
+      TagData::ARTIST[artist]
+    end
     scanner = config[:tagger_scanner]
     unless scanner.nil?
       if TagData::SCANNER[scanner].nil?
@@ -42,7 +42,7 @@ class Tagger < Stage
         end
 
         add_warning Error.new("using custom scanner '#{scanner}'")
-        @make_tag, @model_tag = scanner.split('|')
+        @make_tag, @model_tag = scanner.split("|")
       else
         @make_tag, @model_tag = TagData::SCANNER[scanner]
       end
@@ -59,18 +59,18 @@ class Tagger < Stage
   end
 
   def tag(image_file) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-    tagged_name = image_file.path.split(File::SEPARATOR)[-1] + '.tagged'
+    tagged_name = image_file.path.split(File::SEPARATOR)[-1] + ".tagged"
     tagged_path = File.join(tempdir_for_file(image_file), tagged_name)
     tagged = ImageFile.new(image_file.objid, tagged_path,
-                           File.join(image_file.objid,
-                                     image_file.path + '.tagged'),
-                           image_file.file)
+      File.join(image_file.objid,
+        image_file.path + ".tagged"),
+      image_file.file)
     FileUtils.cp(image_file.path, tagged_path)
     copy_on_success(tagged_path, image_file.path, image_file.objid)
     tag_artist tagged
     tag_scanner tagged
     tag_software tagged
-    run_tiffset(tagged, TIFF::TIFFTAG_ORIENTATION, '1')
+    run_tiffset(tagged, TIFF::TIFFTAG_ORIENTATION, "1")
   end
 
   def tag_artist(image_file)
@@ -104,7 +104,7 @@ class Tagger < Stage
   def run_tiffset(image_file, tag, value) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     begin
       info = TIFF.new(image_file.path).set(tag, value)
-    rescue StandardError => e
+    rescue => e
       add_error Error.new(e.message, image_file.objid, image_file.file)
       return
     end

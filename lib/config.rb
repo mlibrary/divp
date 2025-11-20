@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'pathname'
-require 'yaml'
+require "pathname"
+require "yaml"
 
-require 'symbolize'
+require "symbolize"
 
 # Handles parsing the config directory and the files in it.
 # Config files live by default in the app-level config directory,
@@ -25,11 +25,11 @@ require 'symbolize'
 # presence of a key to function correctly.
 class Config
   def self.json_create(hash)
-    new hash['data']
+    new hash["data"]
   end
 
   def initialize(options = {})
-    raise 'non-Hash options passed to Config.new' unless options.is_a? Hash
+    raise "non-Hash options passed to Config.new" unless options.is_a? Hash
 
     @options = options
     config.merge! Symbolize.symbolize(options)
@@ -41,8 +41,8 @@ class Config
 
   def to_json(*args)
     {
-      'json_class' => self.class.name,
-      'data' => @config
+      "json_class" => self.class.name,
+      "data" => @config
     }.to_json(*args)
   end
 
@@ -83,11 +83,11 @@ class Config
 
   def config_dir
     @config_dir ||= @options[:config_dir] ||
-                    File.expand_path('../config', __dir__)
+      File.expand_path("../config", __dir__)
   end
 
   def config_path(profile = nil)
-    file = profile.nil? ? 'config.yml' : "config.#{profile}.yml"
+    file = profile.nil? ? "config.yml" : "config.#{profile}.yml"
     path = File.join(config_dir, file)
     unless File.exist? path
       raise Errno::ENOENT, "can't locate config file #{path}"
@@ -97,7 +97,7 @@ class Config
   end
 
   def local_config_path(profile = nil)
-    file = profile.nil? ? 'config.local.yml' : "config.#{profile}.local.yml"
+    file = profile.nil? ? "config.local.yml" : "config.#{profile}.local.yml"
     File.join(config_dir, file)
   end
 end

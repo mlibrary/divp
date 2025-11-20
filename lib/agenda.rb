@@ -18,7 +18,7 @@ class Agenda
   def update(source_stage) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     @stages.each do |stage|
       next if @stage_to_index[stage.name.to_sym] <=
-              @stage_to_index[source_stage.name.to_sym]
+        @stage_to_index[source_stage.name.to_sym]
 
       if source_stage.fatal_error?
         agenda[stage.name.to_sym] = []

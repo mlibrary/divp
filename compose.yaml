@@ -1,0 +1,6 @@
+services:
+  test:
+    build: .
+    volumes:
+      - .:/usr/src/app
+    command: bundle exec rake test

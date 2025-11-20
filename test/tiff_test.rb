@@ -1,18 +1,18 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-require 'tiff'
+require "minitest/autorun"
+require "tiff"
 
 class TIFFTest < Minitest::Test
   def test_new
-    shipment = TestShipment.new(test_name, 'BC T contone 1')
+    shipment = TestShipment.new(test_name, "BC T contone 1")
     tiff = TIFF.new(shipment.image_files.first.path)
-    refute_nil tiff, 'TIFF is not nil'
+    refute_nil tiff, "TIFF is not nil"
   end
 
   def test_info # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-    shipment = TestShipment.new(test_name, 'BC T contone 1')
+    shipment = TestShipment.new(test_name, "BC T contone 1")
     tiff = TIFF.new(shipment.image_files.first.path)
     info = tiff.info
     assert_instance_of Hash, info
@@ -36,23 +36,23 @@ class TIFFTest < Minitest::Test
   end
 
   def test_info_fail
-    shipment = TestShipment.new(test_name, 'BC F bogus_file')
+    shipment = TestShipment.new(test_name, "BC F bogus_file")
     tiff = TIFF.new(File.join(shipment.directory,
-                              shipment.objid_to_path(shipment.objids.first),
-                              'bogus_file'))
-    assert_raises(StandardError, 'raises StandardError on bogus file') do
+      shipment.objid_to_path(shipment.objids.first),
+      "bogus_file"))
+    assert_raises(StandardError, "raises StandardError on bogus file") do
       tiff.info
     end
   end
 
   def test_set
-    shipment = TestShipment.new(test_name, 'BC T contone 1')
+    shipment = TestShipment.new(test_name, "BC T contone 1")
     tiff = TIFF.new(shipment.image_files.first.path)
-    info = tiff.set(TIFF::TIFFTAG_ARTIST, 'blah')
-    assert_instance_of Hash, info, '#set returns Hash'
-    assert_instance_of Array, info[:warnings], '#set warnings is Array'
-    assert_empty info[:warnings], '#set warnings is empty'
-    assert_instance_of Array, info[:errors], '#set errors is Array'
-    assert_empty info[:errors], '#set errors is empty'
+    info = tiff.set(TIFF::TIFFTAG_ARTIST, "blah")
+    assert_instance_of Hash, info, "#set returns Hash"
+    assert_instance_of Array, info[:warnings], "#set warnings is Array"
+    assert_empty info[:warnings], "#set warnings is empty"
+    assert_instance_of Array, info[:errors], "#set errors is Array"
+    assert_empty info[:errors], "#set errors is empty"
   end
 end

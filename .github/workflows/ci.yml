@@ -15,11 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Create .env file
+        run: cat env.example > .env
+
       - name: Set up tests
-        run: docker-compose build
+        run: docker compose build
 
       - name: Run rubocop
-        run: docker-compose run test bundle exec rubocop
+        run: docker compose run test bundle exec standardrb
 
       - name: Run tests
-        run: docker-compose run test
+        run: docker compose run test

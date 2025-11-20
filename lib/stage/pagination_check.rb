@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'stage'
+require "stage"
 
 # Pagination Stage
 class PaginationCheck < Stage
@@ -21,12 +21,12 @@ class PaginationCheck < Stage
     pages = pages_in_dir(dir)
     missing = missing_pages(pages)
     if missing.count.positive?
-      add_error Error.new("missing pages {#{missing.join(', ')}}", objid)
+      add_error Error.new("missing pages {#{missing.join(", ")}}", objid)
     end
     duplicate = duplicate_pages(pages)
     return unless duplicate.count.positive?
 
-    add_error Error.new("duplicate pages {#{duplicate.join(', ')}}", objid)
+    add_error Error.new("duplicate pages {#{duplicate.join(", ")}}", objid)
   end
 
   def pages_in_dir(dir)

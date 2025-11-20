@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'digest'
-require 'json'
-require 'luhn'
+require "digest"
+require "json"
+require "luhn"
 
 # Errors arising from trying to destructively manipulate a finalized shipment.
 class FinalizedShipmentError < StandardError
@@ -14,11 +14,11 @@ ImageFile = Struct.new(:objid, :path, :objid_file, :file)
 # Shipment directory class
 class Shipment # rubocop:disable Metrics/ClassLength
   PATH_COMPONENTS = 1
-  OBJID_SEPARATOR = '/'
+  OBJID_SEPARATOR = "/"
   attr_reader :metadata
 
   def self.json_create(hash)
-    new hash['data']['dir'], hash['data']['metadata']
+    new hash["data"]["dir"], hash["data"]["metadata"]
   end
 
   def self.top_level_directory_entries(dir)
@@ -42,8 +42,8 @@ class Shipment # rubocop:disable Metrics/ClassLength
   end
 
   def initialize(dir, metadata = nil)
-    raise 'nil dir passed to Shipment#initialize' if dir.nil?
-    raise 'invalid dir passed to Shipment#initialize' if dir.is_a? Shipment
+    raise "nil dir passed to Shipment#initialize" if dir.nil?
+    raise "invalid dir passed to Shipment#initialize" if dir.is_a? Shipment
 
     @dir = dir
     @metadata = metadata || {}
@@ -52,8 +52,8 @@ class Shipment # rubocop:disable Metrics/ClassLength
 
   def to_json(*args)
     {
-      'json_class' => self.class.name,
-      'data' => { dir: @dir, metadata: @metadata }
+      "json_class" => self.class.name,
+      "data" => {dir: @dir, metadata: @metadata}
     }.to_json(*args)
   end
 
@@ -72,11 +72,11 @@ class Shipment # rubocop:disable Metrics/ClassLength
   end
 
   def source_directory
-    @source_directory ||= File.join @dir, 'source'
+    @source_directory ||= File.join @dir, "source"
   end
 
   def tmp_directory
-    @tmp_directory ||= File.join @dir, 'tmp'
+    @tmp_directory ||= File.join @dir, "tmp"
   end
 
   def path_to_objid(path_components)
@@ -118,10 +118,10 @@ class Shipment # rubocop:disable Metrics/ClassLength
 
   # Returns an error message or nil
   def validate_objid(objid)
-    Luhn.valid?(objid) ? nil : 'Luhn checksum failed'
+    Luhn.valid?(objid) ? nil : "Luhn checksum failed"
   end
 
-  def image_files(type = 'tif', dir = @dir) # rubocop:disable Metrics/MethodLength
+  def image_files(type = "tif", dir = @dir) # rubocop:disable Metrics/MethodLength
     files = []
     find_objids(dir).each do |objid|
       objid_path = objid_to_path objid
@@ -130,13 +130,13 @@ class Shipment # rubocop:disable Metrics/ClassLength
         next unless entry.end_with? type
 
         files << ImageFile.new(objid, File.join(objid_dir, entry),
-                               File.join(objid_path, entry), entry)
+          File.join(objid_path, entry), entry)
       end
     end
     files
   end
 
-  def source_image_files(type = 'tif')
+  def source_image_files(type = "tif")
     return [] unless File.directory? source_directory
 
     image_files(type, source_directory)
@@ -158,7 +158,7 @@ class Shipment # rubocop:disable Metrics/ClassLength
       yield objid if block_given?
       components = objid_to_path objid
       FileUtils.copy_entry(File.join(@dir, components[0]),
-                           File.join(source_directory, components[0]))
+        File.join(source_directory, components[0]))
     end
   end
 
@@ -214,7 +214,7 @@ class Shipment # rubocop:disable Metrics/ClassLength
 
   # Returns Hash with keys {added, changed, removed} -> Array of ImageFile
   def fixity_check # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
-    fixity = { added: [], removed: [], changed: [] }
+    fixity = {added: [], removed: [], changed: []}
     return fixity if metadata[:checksums].nil?
 
     source_image_files.each do |image_file|
@@ -230,8 +230,8 @@ class Shipment # rubocop:disable Metrics/ClassLength
       components = objid_file.split(File::SEPARATOR)
       objid = path_to_objid(components[0..-2])
       image_file = ImageFile.new(objid,
-                                 File.join(source_directory, objid_file),
-                                 objid_file, components[-1])
+        File.join(source_directory, objid_file),
+        objid_file, components[-1])
       yield image_file if block_given?
       fixity[:removed] << image_file unless File.exist? image_file.path
     end

@@ -1,18 +1,18 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'stage'
-require 'tiff'
+require "stage"
+require "tiff"
 
 JP2_LEVEL_MIN = 5
 JP2_LAYERS = 8
-JP2_ORDER = 'RLCP'
-JP2_USE_SOP = 'yes'
-JP2_USE_EPH = 'yes'
+JP2_ORDER = "RLCP"
+JP2_USE_SOP = "yes"
+JP2_USE_EPH = "yes"
 JP2_MODES = '"RESET|RESTART|CAUSAL|ERTERM|SEGMARK"'
 JP2_SLOPE = 42_988
 
-TIFF_DATE_FORMAT = '%Y:%m:%d %H:%M:%S'
+TIFF_DATE_FORMAT = "%Y:%m:%d %H:%M:%S"
 
 # TIFF to JP2/TIFF compression stage
 class Compressor < Stage # rubocop:disable Metrics/ClassLength
@@ -24,7 +24,7 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
     files.each_with_index do |image_file, i|
       begin
         tiffinfo = TIFF.new(image_file.path).info
-      rescue StandardError => e
+      rescue => e
         add_error Error.new(e.message, image_file.objid, image_file.file)
         next
       end
@@ -34,7 +34,7 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
         @bar.step! i, "#{image_file.objid_file} JP2"
         begin
           handle_8_bps_conversion(image_file, tiffinfo)
-        rescue StandardError => e
+        rescue => e
           add_error Error.new(e.message, image_file.objid, image_file.file)
         end
       when 1
@@ -42,12 +42,12 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
         @bar.step! i, "#{image_file.objid_file} G4"
         begin
           handle_1_bps_conversion(image_file, tiffinfo)
-        rescue StandardError => e
+        rescue => e
           add_error Error.new(e.message, image_file.objid, image_file.file)
         end
       else
         add_error Error.new("invalid source TIFF BPS #{tiffinfo[:bps]}",
-                            image_file.objid, image_file.file)
+          image_file.objid, image_file.file)
       end
     end
   end
@@ -56,12 +56,12 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
 
   def handle_8_bps_conversion(image_file, tiffinfo) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     tmpdir = create_tempdir
-    sparse = File.join(tmpdir, 'sparse.tif')
-    new_image = File.join(tmpdir, 'new.jp2')
-    final_image_name = File.basename(image_file.path, '.*') + '.jp2'
+    sparse = File.join(tmpdir, "sparse.tif")
+    new_image = File.join(tmpdir, "new.jp2")
+    final_image_name = File.basename(image_file.path, ".*") + ".jp2"
     final_image = File.join(File.dirname(image_file.path), final_image_name)
     document_name = File.join(shipment.objid_to_path(image_file.objid),
-                              final_image_name)
+      final_image_name)
     on_disk_temp_image = final_image.sub(shipment.directory, shipment.tmp_directory)
     system("mkdir -p #{File.dirname(on_disk_temp_image)}")
 
@@ -115,7 +115,7 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
   end
 
   def remove_tiff_alpha(path)
-    tmp = path + '.alphaoff'
+    tmp = path + ".alphaoff"
     cmd = "convert #{path} -alpha off #{tmp}"
     status = Command.new(cmd).run
     log cmd, status[:time]
@@ -123,11 +123,11 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
   end
 
   def strip_tiff_profiles(path) # rubocop:disable Metrics/MethodLength
-    tmp = path + '.stripped'
+    tmp = path + ".stripped"
     cmd = "convert #{path} -strip #{tmp}"
     begin
       status = Command.new(cmd).run
-    rescue StandardError => e
+    rescue => e
       warning = "couldn't remove ICC profile (#{cmd}) (#{e.message})"
       add_warning Error.new(warning, objid_from_path(path), path)
     else
@@ -155,10 +155,10 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
     # want to add the current date.
     # date "%Y-%m-%dT%H:%M:%S"
     datetime = if tiffinfo[:date_time]
-                 '-IFD0:ModifyDate>XMP-tiff:DateTime'
-               else
-                 "-XMP-tiff:DateTime=#{Time.now.strftime('%FT%T')}"
-               end
+      "-IFD0:ModifyDate>XMP-tiff:DateTime"
+    else
+      "-XMP-tiff:DateTime=#{Time.now.strftime("%FT%T")}"
+    end
     cmd = "exiftool -tagsFromFile #{source}"                  \
           " '-XMP-dc:source=#{document_name}'"                \
           " '-XMP-tiff:Compression=JPEG 2000'"                \
@@ -196,7 +196,7 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
   def handle_1_bps_conversion(image_file, tiffinfo) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     tmpdir = create_tempdir
     compressed = File.join(tmpdir,
-                           "#{File.basename(image_file.path)}-compressed")
+      "#{File.basename(image_file.path)}-compressed")
     page1 = File.join(tmpdir, "#{File.basename(image_file.path)}-page1")
     compress_tiff(image_file.path, compressed)
     copy_tiff_metadata(image_file.path, compressed)
@@ -207,8 +207,8 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
     if tiffinfo[:software]
       write_tiff_software(page1, tiffinfo[:software])
     else
-      add_warning Error.new('could not extract software', image_file.objid,
-                            image_file.path)
+      add_warning Error.new("could not extract software", image_file.objid,
+        image_file.path)
     end
     copy_on_success page1, image_file.path, image_file.objid
   end

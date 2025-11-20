@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'digest'
-require 'luhn'
-require 'stage'
+require "digest"
+require "luhn"
+require "stage"
 
 # Shipment directory well-formedness and content check.
 # The only changes this stage makes to the filesystem is deletion
@@ -13,7 +13,7 @@ class Preflight < Stage
   JP2_REGEX = /^\d{8}\.jp2$/i.freeze
   REMOVABLE_FILES = %w[.DS_Store Thumbs.db].freeze
   IGNORABLE_FILES = %w[aiim.tif aiim.jp2 notes.txt rit.tif rit.jp2
-                       checksum.md5 prodnote.tif].freeze
+    checksum.md5 prodnote.tif].freeze
 
   # NOTE: currently there is no config to tell the processor to only look
   # for TIFF files and emit an error on JP2 files. The simplest approach
@@ -71,10 +71,10 @@ class Preflight < Stage
       next if File.directory? path
 
       if self.class.removable_files.include? entry
-        add_warning Error.new('unnecessary file deleted', nil, path)
+        add_warning Error.new("unnecessary file deleted", nil, path)
         delete_on_success path
       else
-        add_error Error.new('unknown file', nil, path)
+        add_error Error.new("unknown file", nil, path)
       end
     end
   end
@@ -94,15 +94,15 @@ class Preflight < Stage
       elsif self.class.image_file? entry
         have_image = true
       elsif self.class.ignorable_files.include? entry
-        add_warning Error.new('file ignored', objid, entry)
+        add_warning Error.new("file ignored", objid, entry)
       elsif self.class.removable_files.include? entry
-        add_warning Error.new('file deleted', objid, entry)
+        add_warning Error.new("file deleted", objid, entry)
         delete_on_success path
       else
-        add_error Error.new('unknown file', objid, entry)
+        add_error Error.new("unknown file", objid, entry)
       end
     end
-    add_error Error.new('no image files found', objid) unless have_image
+    add_error Error.new("no image files found", objid) unless have_image
   end
 
   def setup_source_directory
