@@ -22,7 +22,7 @@ jobs:
         run: docker compose build
 
       - name: Run rubocop
-        run: docker compose run test bundle exec rubocop
+        run: docker compose run test bundle exec standardrb
 
       - name: Run tests
         run: docker compose run test
