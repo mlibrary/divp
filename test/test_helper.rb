@@ -1,6 +1,10 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'dotenv'
+
+Dotenv.load
+
 require 'simplecov'
 
 SimpleCov.start do

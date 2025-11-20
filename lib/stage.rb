@@ -200,9 +200,10 @@ class Stage # rubocop:disable Metrics/ClassLength
     unless File.directory? shipment.tmp_directory
       Dir.mkdir shipment.tmp_directory
     end
-    Dir.mkdir "/quod-prep/rsvp" unless File.directory? "/quod-prep/rsvp"
+    datadir = ENV.fetch("DATA_DIR", "/quod-prep/rsvp")
+    Dir.mkdir datadir unless File.directory? datadir
     prefix = self.class.to_s + prefix
-    (@tempdirs ||= []) << Dir.mktmpdir(prefix, "/quod-prep/rsvp")
+    (@tempdirs ||= []) << Dir.mktmpdir(prefix, datadir)
     @tempdirs[-1]
   end
 
