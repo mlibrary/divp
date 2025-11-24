@@ -1,6 +1,15 @@
 services:
+  app:
+    build:
+      context: .
+      target: development
+    volumes:
+      - .:/usr/src/app
+
   test:
-    build: .
+    build:
+      context: .
+      target: test
     volumes:
       - .:/usr/src/app
     command: bundle exec rake test

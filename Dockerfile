@@ -1,4 +1,7 @@
-FROM ruby:2.7.4
+################################################################################
+# BASE
+################################################################################
+FROM ruby:2.7.4 AS base
 ARG KAKADU_FILE=KDU841_Demo_Apps_for_Linux-x86-64_231117.zip
 ARG FEED_VERSION=feed_v1.14.1
 
@@ -12,14 +15,25 @@ RUN mv /tmp/kakadu/kdu* /usr/local/bin
 RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/kakadu.conf
 RUN ldconfig
 
+RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
+    libtiff-tools\ 
+    exiftool \
+    netpbm
+
+ENV APP_PATH=/usr/src/app
+RUN mkdir -p $APP_PATH
+
+################################################################################
+# HATHIFEED                                                                    #
+################################################################################
+FROM base AS hathifeed
+
+WORKDIR /tmp
 RUN wget https://github.com/hathitrust/feed/archive/refs/tags/$FEED_VERSION.zip
 RUN unzip $FEED_VERSION.zip 
 RUN mv /tmp/feed-$FEED_VERSION /usr/local/feed
 
 RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
-    libtiff-tools exiftool \
-    netpbm \
-    # for validator
     cpanminus \
     libyaml-libyaml-perl \
     liblog-log4perl-perl \
@@ -45,9 +59,22 @@ ENV PERL5LIB="/extlib/lib/perl5:$FEED_HOME/lib"
 ENV FEED_VALIDATE_SCRIPT=/usr/local/feed/bin/validate_images.pl
 
 
-# Set up app path
-ENV BUNDLE_PATH /usr/src/app/vendor/bundle
-ENV APP_PATH=/usr/src/app
-RUN mkdir -p $APP_PATH
+
+################################################################################
+# DEVELOPMENT                                                                  # 
+################################################################################
+FROM hathifeed AS development
+
 WORKDIR $APP_PATH
 
+ENV BUNDLE_PATH="/usr/src/app/vendor/bundle"
+
+################################################################################
+# TEST                                                                         # 
+################################################################################
+FROM base AS test
+
+WORKDIR $APP_PATH
+
+COPY Gemfile* /usr/src/app/
+RUN bundle install

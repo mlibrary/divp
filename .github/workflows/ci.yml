@@ -18,11 +18,21 @@ jobs:
       - name: Create .env file
         run: cat env.example > .env
 
-      - name: Set up tests
-        run: docker compose build
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Run rubocop
-        run: docker compose run test bundle exec standardrb
+      - name: Build
+        uses: docker/bake-action@v6
+        with:
+          files: compose.yaml
+          targets: test
+          load: true
+          set: |
+            *.cache-to=type=gha
+            *.cache-from=type=gha
+
+      - name: Run standard
+        run: docker compose run --rm test bundle exec standardrb
 
       - name: Run tests
-        run: docker compose run test
+        run: docker compose run --rm test
