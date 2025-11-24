@@ -21,6 +21,9 @@ jobs:
       - name: Set up tests
         run: docker compose build
 
+      - name: Install gems
+        run: docker compose run test bundle
+
       - name: Run rubocop
         run: docker compose run test bundle exec standardrb
 
