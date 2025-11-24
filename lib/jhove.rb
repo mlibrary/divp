@@ -64,6 +64,8 @@ class JHOVE # rubocop:disable Metrics/ClassLength
     # to reuse container.
     if @config[:feed_validate_script]
       ["perl", @config[:feed_validate_script], "simple test", @dir]
+    elsif ENV["FEED_VALIDATE_SCRIPT"]
+      ["perl", ENV["FEED_VALIDATE_SCRIPT"], "simple test", @dir]
     else
       feed_validate_script_docker
     end.join " "
@@ -91,7 +93,7 @@ class JHOVE # rubocop:disable Metrics/ClassLength
 
       process_feed_validate_line line
     end
-    @errors.sort! { |a, b| a[:seq] <=> b[:seq] }
+    @errors.sort_by! { |a| a[:seq] }
   end
 
   # Process error/warning lines into error hashes.

@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "digest"
-require "set"
+require "set" # standard:disable all
 
 require "jhove"
 require "stage"
