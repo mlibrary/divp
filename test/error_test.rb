@@ -32,7 +32,7 @@ class ErrorTest < Minitest::Test
   def test_json
     err = Error.new("some error", "12345678", "00000001.tif")
     # rubocop:disable Security/JSONLoad
-    err2 = JSON.load(err.to_json)
+    err2 = JSON.unsafe_load(err.to_json)
     # rubocop:enable Security/JSONLoad
     assert err.description == err2.description &&
       err.objid == err2.objid &&
