@@ -5,7 +5,7 @@ require "stage"
 
 # Pagination Stage
 class PaginationCheck < Stage
-  IMAGE_FILE_RE = /^([0-9]{8})\.(?:tif|jp2)$/.freeze
+  IMAGE_FILE_RE = /^([0-9]{8})\.(?:tif|jp2)$/
 
   def run(agenda)
     agenda.each do |objid|

@@ -9,8 +9,8 @@ require "stage"
 # The only changes this stage makes to the filesystem is deletion
 # of Thumbs.db and .DS_Store
 class Preflight < Stage
-  TIFF_REGEX = /^\d{8}\.tif$/i.freeze
-  JP2_REGEX = /^\d{8}\.jp2$/i.freeze
+  TIFF_REGEX = /^\d{8}\.tif$/i
+  JP2_REGEX = /^\d{8}\.jp2$/i
   REMOVABLE_FILES = %w[.DS_Store Thumbs.db].freeze
   IGNORABLE_FILES = %w[aiim.tif aiim.jp2 notes.txt rit.tif rit.jp2
     checksum.md5 prodnote.tif].freeze

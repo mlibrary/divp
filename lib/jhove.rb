@@ -16,7 +16,7 @@ class JHOVE # rubocop:disable Metrics/ClassLength
 
   # Convert error Hash to Postflight Error object
   def self.error_object(err, objid = nil)
-    fields = err.reject { |k, _v| JHOVE::UNUSED_FIELDS.include? k }
+    fields = err.except(*JHOVE::UNUSED_FIELDS)
     desc = "#{err[:description]}: " +
       fields.map { |k, v| "#{k}: #{v}" }.join(", ")
     Error.new desc, objid, err[:file]

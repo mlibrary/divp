@@ -29,7 +29,7 @@ class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
 
   # Randomly-generated objid that passes Luhn check
   def self.generate_objid(valid = true)
-    objid = "39015" + (8.times.map { rand 10 }).join
+    objid = "39015" + 8.times.map { rand 10 }.join
     if valid
       objid + Luhn.checksum(objid).to_s
     else
@@ -51,7 +51,7 @@ class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
     dir = File.join(PATH, @name)
     FileUtils.rm_r(dir, force: true) if File.directory? dir
     Dir.mkdir(dir)
-    super dir
+    super(dir)
     @ordered_objids = []
     process_spec spec
   end

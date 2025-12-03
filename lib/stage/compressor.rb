@@ -105,7 +105,7 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
     size = [tiffinfo[:width], tiffinfo[:height]].max
     # Calculate appropriate Clevels.
     clevels = (Math.log(size.to_i / 100.0) / Math.log(2)).to_i
-    clevels < JP2_LEVEL_MIN ? JP2_LEVEL_MIN : clevels
+    (clevels < JP2_LEVEL_MIN) ? JP2_LEVEL_MIN : clevels
   end
 
   def remove_tiff_metadata(path, destination)
@@ -159,24 +159,24 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
     else
       "-XMP-tiff:DateTime=#{Time.now.strftime("%FT%T")}"
     end
-    cmd = "exiftool -tagsFromFile #{source}"                  \
-          " '-XMP-dc:source=#{document_name}'"                \
-          " '-XMP-tiff:Compression=JPEG 2000'"                \
-          " '-IFD0:ImageWidth>XMP-tiff:ImageWidth'"           \
-          " '-IFD0:ImageHeight>XMP-tiff:ImageHeight'"         \
-          " '-IFD0:BitsPerSample>XMP-tiff:BitsPerSample'"     \
-          " '-IFD0:PhotometricInterpretation>XMP-tiff:"       \
-          "PhotometricInterpretation'"                        \
-          " '-IFD0:Orientation>XMP-tiff:Orientation'"         \
+    cmd = "exiftool -tagsFromFile #{source}" \
+          " '-XMP-dc:source=#{document_name}'" \
+          " '-XMP-tiff:Compression=JPEG 2000'" \
+          " '-IFD0:ImageWidth>XMP-tiff:ImageWidth'" \
+          " '-IFD0:ImageHeight>XMP-tiff:ImageHeight'" \
+          " '-IFD0:BitsPerSample>XMP-tiff:BitsPerSample'" \
+          " '-IFD0:PhotometricInterpretation>XMP-tiff:" \
+          "PhotometricInterpretation'" \
+          " '-IFD0:Orientation>XMP-tiff:Orientation'" \
           " '-IFD0:SamplesPerPixel>XMP-tiff:SamplesPerPixel'" \
-          " '-IFD0:XResolution>XMP-tiff:XResolution'"         \
-          " '-IFD0:YResolution>XMP-tiff:YResolution'"         \
-          " '-IFD0:ResolutionUnit>XMP-tiff:ResolutionUnit'"   \
-          " '-IFD0:Artist>XMP-tiff:Artist'"                   \
-          " '-IFD0:Make>XMP-tiff:Make'"                       \
-          " '-IFD0:Model>XMP-tiff:Model'"                     \
-          " '-IFD0:Software>XMP-tiff:Software'"               \
-          " '#{datetime}'"                                    \
+          " '-IFD0:XResolution>XMP-tiff:XResolution'" \
+          " '-IFD0:YResolution>XMP-tiff:YResolution'" \
+          " '-IFD0:ResolutionUnit>XMP-tiff:ResolutionUnit'" \
+          " '-IFD0:Artist>XMP-tiff:Artist'" \
+          " '-IFD0:Make>XMP-tiff:Make'" \
+          " '-IFD0:Model>XMP-tiff:Model'" \
+          " '-IFD0:Software>XMP-tiff:Software'" \
+          " '#{datetime}'" \
           " -overwrite_original #{destination}"
     status = Command.new(cmd).run
     log cmd, status[:time]
@@ -184,10 +184,10 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
 
   def copy_jp2_alphaless_metadata(source, destination)
     cmd = "exiftool -tagsFromFile #{source}" \
-            " '-IFD0:BitsPerSample>XMP-tiff:BitsPerSample'"     \
+            " '-IFD0:BitsPerSample>XMP-tiff:BitsPerSample'" \
             " '-IFD0:SamplesPerPixel>XMP-tiff:SamplesPerPixel'" \
-            " '-IFD0:PhotometricInterpretation>XMP-tiff:"       \
-            "PhotometricInterpretation'"                        \
+            " '-IFD0:PhotometricInterpretation>XMP-tiff:" \
+            "PhotometricInterpretation'" \
             " -overwrite_original '#{destination}'"
     status = Command.new(cmd).run
     log cmd, status[:time]
@@ -223,18 +223,18 @@ class Compressor < Stage # rubocop:disable Metrics/ClassLength
   end
 
   def copy_tiff_metadata(path, destination) # rubocop:disable Metrics/MethodLength
-    cmd = "exiftool -tagsFromFile #{path}"     \
-          " '-IFD0:DocumentName'"              \
-          " '-IFD0:ImageDescription='"         \
-          " '-IFD0:Orientation'"               \
-          " '-IFD0:XResolution'"               \
-          " '-IFD0:YResolution'"               \
-          " '-IFD0:ResolutionUnit'"            \
-          " '-IFD0:ModifyDate'"                \
-          " '-IFD0:Artist'"                    \
-          " '-IFD0:Make'"                      \
-          " '-IFD0:Model'"                     \
-          " '-IFD0:Software'"                  \
+    cmd = "exiftool -tagsFromFile #{path}" \
+          " '-IFD0:DocumentName'" \
+          " '-IFD0:ImageDescription='" \
+          " '-IFD0:Orientation'" \
+          " '-IFD0:XResolution'" \
+          " '-IFD0:YResolution'" \
+          " '-IFD0:ResolutionUnit'" \
+          " '-IFD0:ModifyDate'" \
+          " '-IFD0:Artist'" \
+          " '-IFD0:Make'" \
+          " '-IFD0:Model'" \
+          " '-IFD0:Software'" \
           " -overwrite_original '#{destination}'"
     status = Command.new(cmd).run
     log cmd, status[:time]
