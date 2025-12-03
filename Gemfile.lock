@@ -31,7 +31,7 @@ GEM
     launchy (2.5.0)
       addressable (~> 2.7)
     luhn-ruby (1.0.0)
-    minitest (5.14.3)
+    minitest (5.26.2)
     parallel (1.27.0)
     parser (3.0.1.0)
       ast (~> 2.4.1)
