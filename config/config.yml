@@ -12,8 +12,8 @@ stages:
   - name: Tagger
     class: Tagger
     file: tagger
-  - name: Compressor
-    class: Compressor
+  - name: Compression
+    class: Compression
     file: compressor
   - name: Postflight
     class: Postflight

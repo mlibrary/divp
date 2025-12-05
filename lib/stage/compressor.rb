@@ -15,10 +15,9 @@ JP2_SLOPE = 42_988
 TIFF_DATE_FORMAT = "%Y:%m:%d %H:%M:%S"
 
 # TIFF to JP2/TIFF compression stage
-class Compressor < Stage # rubocop:disable Metrics/ClassLength
+class Compression < Stage # rubocop:disable Metrics/ClassLength
   def run(agenda) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
     return unless agenda.any?
-
     files = image_files.select { |file| agenda.include? file.objid }
     @bar.steps = files.count
     files.each_with_index do |image_file, i|

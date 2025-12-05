@@ -20,7 +20,7 @@ class DLXSCompressorTest < Minitest::Test
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Compressor.new(shipment, config: opts.merge(@config))
+      stage = Compression.new(shipment, config: opts.merge(@config))
       stage.run!
       assert_equal(0, stage.errors.count, "compressor runs without errors")
       stage = DLXSCompressor.new(shipment, config: opts.merge(@config))
