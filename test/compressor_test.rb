@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "minitest/autorun"
-require "compressor"
+require "compression"
 require "fixtures"
 
 class CompressionTest < Minitest::Test # rubocop:disable Metrics/ClassLength
