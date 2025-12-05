@@ -222,9 +222,12 @@ class Stage # rubocop:disable Metrics/ClassLength
     @objids ||= shipment.objids
   end
 
+  def log_collection
+    @data[:log] ||= Log.new
+  end
+
   def log(entry, time = nil)
-    entry += format(" (%.3f sec)", time) unless time.nil?
-    (@data[:log] ||= []) << entry
+    log_collection.log(entry, time)
   end
 
   def shipment_directory
@@ -241,5 +244,32 @@ class Stage # rubocop:disable Metrics/ClassLength
 
   def image_files(type = "tif")
     shipment.image_files(type)
+  end
+
+  class Log
+    include Enumerable
+
+    def initialize
+      @log = []
+    end
+
+    def each
+      @log.each do |line|
+        yield line
+      end
+    end
+
+    def log(entry, time)
+      entry += format(" (%.3f sec)", time) unless time.nil?
+      @log << entry
+    end
+
+    def log_it(entry, time)
+      log(entry, time)
+    end
+
+    def to_json(state = nil, *)
+      JSON::State.from_state(state).generate(@log)
+    end
   end
 end

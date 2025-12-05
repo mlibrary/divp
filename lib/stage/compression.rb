@@ -23,7 +23,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     @bar.steps = files.count
     files.each_with_index do |image_file, i|
       begin
-        compressor = Compressor.new(image_file: image_file, tmpdir: create_tempdir)
+        compressor = Compressor.new(image_file: image_file, tmpdir: create_tempdir, shipment: shipment)
         tiffinfo = compressor.tiffinfo
       rescue => e
         add_error Error.new(e.message, image_file.objid, image_file.file)
