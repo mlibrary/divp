@@ -3,6 +3,7 @@
 
 require "stage"
 require "tiff"
+require "compressor"
 
 JP2_LEVEL_MIN = 5
 JP2_LAYERS = 8
@@ -22,7 +23,8 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     @bar.steps = files.count
     files.each_with_index do |image_file, i|
       begin
-        tiffinfo = TIFF.new(image_file.path).info
+        compressor = Compressor.new(image_file: image_file, tmpdir: create_tempdir)
+        tiffinfo = compressor.tiffinfo
       rescue => e
         add_error Error.new(e.message, image_file.objid, image_file.file)
         next
@@ -32,7 +34,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
         # It's a contone, so we convert to JP2.
         @bar.step! i, "#{image_file.objid_file} JP2"
         begin
-          handle_8_bps_conversion(image_file, tiffinfo)
+          handle_8_bps_conversion(compressor)
         rescue => e
           add_error Error.new(e.message, image_file.objid, image_file.file)
         end
@@ -40,7 +42,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
         # It's bitonal, so we G4 compress it.
         @bar.step! i, "#{image_file.objid_file} G4"
         begin
-          handle_1_bps_conversion(image_file, tiffinfo)
+          handle_1_bps_conversion(compressor)
         rescue => e
           add_error Error.new(e.message, image_file.objid, image_file.file)
         end
@@ -53,8 +55,10 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
 
   private
 
-  def handle_8_bps_conversion(image_file, tiffinfo) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-    tmpdir = create_tempdir
+  def handle_8_bps_conversion(compressor) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    image_file = compressor.image_file
+    tiffinfo = compressor.tiffinfo
+    tmpdir = compressor.tmpdir
     sparse = File.join(tmpdir, "sparse.tif")
     new_image = File.join(tmpdir, "new.jp2")
     final_image_name = File.basename(image_file.path, ".*") + ".jp2"
@@ -192,8 +196,10 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     log cmd, status[:time]
   end
 
-  def handle_1_bps_conversion(image_file, tiffinfo) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-    tmpdir = create_tempdir
+  def handle_1_bps_conversion(compressor) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    image_file = compressor.image_file
+    tiffinfo = compressor.tiffinfo
+    tmpdir = compressor.tmpdir
     compressed = File.join(tmpdir,
       "#{File.basename(image_file.path)}-compressed")
     page1 = File.join(tmpdir, "#{File.basename(image_file.path)}-page1")
