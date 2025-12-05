@@ -9,7 +9,7 @@ class StringColorTest < Minitest::Test
     bg_black bg_red bg_green bg_brown bg_blue bg_magenta
     bg_cyan bg_gray
     bold italic underline blink reverse_color].freeze
-  REGEX = /\e\[\d\d?m/.freeze
+  REGEX = /\e\[\d\d?m/
 
   def test_colors
     StringColorTest::METHODS.each do |m|

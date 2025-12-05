@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require_relative '../rsvp'
 require 'json'
 require 'optparse'
 require 'pathname'
 require 'yaml'
 
-require_relative '../rsvp'
 require 'processor'
 require 'query_tool'
 require 'string_color'

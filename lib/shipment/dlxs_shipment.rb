@@ -6,7 +6,7 @@ class DLXSShipment < Shipment
   PATH_COMPONENTS = 3
   OBJID_SEPARATOR = "."
   def initialize(dir, metadata = nil)
-    super dir, metadata
+    super
   end
 
   # Returns an error message or nil

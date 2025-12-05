@@ -1,11 +1,11 @@
 ################################################################################
 # BASE
 ################################################################################
-FROM ruby:2.7.4 AS base
+FROM ruby:3.4-bullseye AS base
 ARG KAKADU_FILE=KDU841_Demo_Apps_for_Linux-x86-64_231117.zip
 ARG FEED_VERSION=feed_v1.14.1
 
-RUN gem install bundler -v 2.4.22
+RUN gem install bundler
 
 WORKDIR /tmp
 RUN wget https://kakadusoftware.com/wp-content/uploads/$KAKADU_FILE

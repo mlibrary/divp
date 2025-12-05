@@ -200,7 +200,7 @@ class Processor # rubocop:disable Metrics/ClassLength
     # In order to reconstitute Error objects we need to use JSON.load
     # instead of JSON.parse. So we explicitly symbolize the output.
     # rubocop:disable Security/JSONLoad
-    status = Symbolize.symbolize JSON.load File.new(status_file)
+    status = Symbolize.symbolize JSON.unsafe_load File.new(status_file)
     # rubocop:enable Security/JSONLoad
     raise JSON::ParserError, "unable to parse #{status_file}" if status.nil?
 

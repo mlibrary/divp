@@ -9,6 +9,7 @@ require "json"
 # In particular when an objid is included, @path should just be a filename.
 class Error
   include Comparable
+
   attr_reader :description, :objid, :path
 
   def self.json_create(hash)

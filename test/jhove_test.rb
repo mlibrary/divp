@@ -53,7 +53,7 @@ class JHOVETest < Minitest::Test
         @jhove = JHOVE.new(@shipment.directory, @config.merge(opts))
         @jhove.run
         assert @jhove.errors.is_a?(Array), "JHOVE #errors returns an Array"
-        tiff_regex = /#{Regexp.escape('00000001.tif')}/
+        tiff_regex = /#{Regexp.escape("00000001.tif")}/
         assert @jhove.errors.any? { |err| tiff_regex.match? err.to_s },
           "TIFF file in feed validate error with #{var}"
         assert @jhove.errors.none? { |err| /failure!/i.match? err.to_s },

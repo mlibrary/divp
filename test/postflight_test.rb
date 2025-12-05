@@ -89,7 +89,7 @@ class PostflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
         stage.run!
         assert stage.errors.any? { |e| /missing field value/i.match? e.to_s },
           "error(s) from feed validate with #{var}"
-        tiff_regex = /#{Regexp.escape('00000001.tif')}/
+        tiff_regex = /#{Regexp.escape("00000001.tif")}/
         assert stage.errors.any? { |e| tiff_regex.match? e.to_s },
           "TIFF file in feed validate error with #{var}"
         assert stage.errors.none? { |e| /failure!/i.match? e.to_s },
