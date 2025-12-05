@@ -15,10 +15,14 @@ RUN mv /tmp/kakadu/kdu* /usr/local/bin
 RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/kakadu.conf
 RUN ldconfig
 
+RUN curl https://hathitrust.github.io/debian/hathitrust-archive-keyring.gpg -o /usr/share/keyrings/hathitrust-archive-keyring.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/hathitrust-archive-keyring.gpg] https://hathitrust.github.io/debian/ bullseye main" > /etc/apt/sources.list.d/hathitrust.list
+
 RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
     libtiff-tools\ 
     exiftool \
-    netpbm
+    netpbm \ 
+    grokj2k-tools
 
 ENV APP_PATH=/usr/src/app
 RUN mkdir -p $APP_PATH
