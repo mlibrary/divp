@@ -23,7 +23,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     @bar.steps = files.count
     files.each_with_index do |image_file, i|
       begin
-        compressor = Compressor.new(image_file: image_file, tmpdir: create_tempdir, shipment: shipment)
+        compressor = Compressor.new(image_file: image_file, tmpdir: create_tempdir, shipment: shipment, log: log_collection)
         tiffinfo = compressor.tiffinfo
       rescue => e
         add_error Error.new(e.message, image_file.objid, image_file.file)
@@ -59,7 +59,8 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     image_file = compressor.image_file
     tiffinfo = compressor.tiffinfo
     tmpdir = compressor.tmpdir
-    sparse = File.join(tmpdir, "sparse.tif")
+    sparse = compressor.sparse_path
+    # sparse = File.join(tmpdir, "sparse.tif")
     new_image = File.join(tmpdir, "new.jp2")
     final_image_name = File.basename(image_file.path, ".*") + ".jp2"
     final_image = File.join(File.dirname(image_file.path), final_image_name)
@@ -68,10 +69,8 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     on_disk_temp_image = final_image.sub(shipment.directory, shipment.tmp_directory)
     system("mkdir -p #{File.dirname(on_disk_temp_image)}")
 
-    # We don't want any XMP metadata to be copied over on its own. If
-    # it's been a while since we last ran exiftool, this might take a sec.
-    remove_tiff_metadata(image_file.path, sparse)
-
+    compressor.run
+    # need a test that looks for this
     remove_tiff_alpha(sparse) if tiffinfo[:alpha]
 
     strip_tiff_profiles(sparse) if tiffinfo[:icc]

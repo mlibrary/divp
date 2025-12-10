@@ -264,8 +264,8 @@ class Stage # rubocop:disable Metrics/ClassLength
       @log << entry
     end
 
-    def log_it(entry, time)
-      log(entry, time)
+    def log_it(data)
+      log(data.command, data.time)
     end
 
     def to_json(state = nil, *)
