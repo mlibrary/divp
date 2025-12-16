@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+# !/usr/bin/env ruby
 # frozen_string_literal: true
 
 require "json"
@@ -46,9 +46,10 @@ class Stage # rubocop:disable Metrics/ClassLength
     @shipment = shipment
     @name = args[:name] || self.class.to_s
     @config = args[:config] || {} # Top-level Config object
-    @errors = args[:errors] || [] # Fatal conditions, Array of Error
-    @warnings = args[:warnings] || [] # Nonfatal conditions, Array of Error
-    @data = args[:data] || {} # Misc data structure including log
+    @data = args[:data] || {log: Log.new} # Misc data structure including log
+    if @data[:log].class.to_s == "Array"
+      @data[:log] = Log.new(@data[:log])
+    end
     # Time the stage was last run
     @start = if args[:start].to_s == ""
       nil
@@ -67,12 +68,15 @@ class Stage # rubocop:disable Metrics/ClassLength
     else
       ProgressBar.new(self.class)
     end
+    @errors = Errors.new(bar: @bar, objids: objids, list: args[:errors])
+    @warnings = Warnings.new(bar: @bar, objids: objids, list: args[:errors])
+    # @warnings = args[:warnings] || [] # Nonfatal conditions, Array of Error
   end
 
   # Get rid of errors, warnings, and anything that may have been memoized
   def reinitialize!
-    @errors = []
-    @warnings = []
+    @errors = Errors.new(bar: @bar, objids: objids)
+    @warnings = Warnings.new(bar: @bar, objids: objids)
     @bar.done = nil
   end
 
@@ -92,22 +96,24 @@ class Stage # rubocop:disable Metrics/ClassLength
   end
 
   def add_error(err)
-    raise "#{err.class} passed to add_error" unless err.is_a? Error
-    unless err.objid.nil? || objids.member?(err.objid)
-      raise "unknown error objid #{err.objid}"
-    end
+    @errors.add(err)
+    # raise "#{err.class} passed to add_error" unless err.is_a? Error
+    # unless err.objid.nil? || objids.member?(err.objid)
+    # raise "unknown error objid #{err.objid}"
+    # end
 
-    @bar.error = true
-    @errors << err
+    # @bar.error = true
+    # @errors << err
   end
 
   def add_warning(err)
-    unless err.objid.nil? || objids.member?(err.objid)
-      raise "unknown warning objid #{err.objid}"
-    end
+    @warnings.add(err)
+    # unless err.objid.nil? || objids.member?(err.objid)
+    # raise "unknown warning objid #{err.objid}"
+    # end
 
-    @bar.warning = true
-    @warnings << err
+    # @bar.warning = true
+    # @warnings << err
   end
 
   # Map of objids + nil -> [Errors]
@@ -133,14 +139,6 @@ class Stage # rubocop:disable Metrics/ClassLength
   # Any error with objid == nil is fatal.
   def fatal_error?
     errors_by_objid.key? nil
-  end
-
-  def delete_errors_for_objid(objid)
-    @errors.delete_if { |err| err.objid == objid }
-  end
-
-  def delete_warnings_for_objid(objid)
-    @warnings.delete_if { |err| err.objid == objid }
   end
 
   # OK to make destructive changes to the shipment for this objid?
@@ -218,7 +216,7 @@ class Stage # rubocop:disable Metrics/ClassLength
   end
 
   def objids
-    @objids ||= shipment.objids
+    @objids ||= shipment&.objids || []
   end
 
   def log_collection
@@ -248,8 +246,8 @@ class Stage # rubocop:disable Metrics/ClassLength
   class Log
     include Enumerable
 
-    def initialize
-      @log = []
+    def initialize(log = [])
+      @log = log
     end
 
     def each
@@ -273,6 +271,72 @@ class Stage # rubocop:disable Metrics/ClassLength
 
     def to_json(state = nil, *)
       JSON::State.from_state(state).generate(@log)
+    end
+  end
+
+  class Exceptions
+    include Enumerable
+
+    attr_reader :list, :objids
+
+    def initialize(bar:, objids:, list: nil)
+      @list = list || []
+      @bar = bar
+      @objids = objids
+    end
+
+    def each
+      @list.each do |line|
+        yield line
+      end
+    end
+
+    def [](index)
+      @list[index]
+    end
+
+    def []=(index, value)
+      @list[index] = value
+    end
+
+    def to_json(state = nil, *)
+      JSON::State.from_state(state).generate(@list)
+    end
+
+    def add(err)
+      unless err.objid.nil? || objids.member?(err.objid)
+        raise "unknown #{kind} objid #{err.objid}"
+      end
+      set_bar
+      @list << err
+    end
+
+    def kind
+      raise NotImplementedError
+    end
+
+    def set_bar
+      raise NotImplementedError
+    end
+  end
+
+  class Errors < Exceptions
+    def kind
+      :error
+    end
+
+    def set_bar
+      @bar.error = true
+    end
+  end
+
+  class Warnings < Exceptions
+    def kind
+      :warning
+    end
+
+    def set_bar
+      @bar.warning = true
     end
   end
 end
