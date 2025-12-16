@@ -31,7 +31,7 @@ class Compressor
     # We don't want any XMP metadata to be copied over on its own. If
     # it's been a while since we last ran exiftool, this might take a sec.
     @log.log_it ExifTool.remove_tiff_metadata(source: @image_file.path, destination: sparse_path)
-    # @log.log_it ImageMagick.remove_tiff_alpha(sparse_path) if tiffinfo[:alpha]
+    @log.log_it ImageMagick.remove_tiff_alpha(sparse_path) if tiffinfo[:alpha]
   end
 
   def sparse_path

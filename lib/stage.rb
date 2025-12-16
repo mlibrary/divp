@@ -102,7 +102,6 @@ class Stage # rubocop:disable Metrics/ClassLength
   end
 
   def add_warning(err)
-    raise "#{err.class} passed to add_warning" unless err.is_a? Error
     unless err.objid.nil? || objids.member?(err.objid)
       raise "unknown warning objid #{err.objid}"
     end
@@ -257,6 +256,10 @@ class Stage # rubocop:disable Metrics/ClassLength
       @log.each do |line|
         yield line
       end
+    end
+
+    def entries
+      @log
     end
 
     def log(entry, time)
