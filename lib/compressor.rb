@@ -16,6 +16,14 @@ module ImageMagick
     FileUtils.mv(tmp, path)
     OpenStruct.new(command: cmd, time: status[:time])
   end
+
+  def self.strip_tiff_profiles(path)
+    tmp = path + ".stripped"
+    cmd = "convert #{path} -strip #{tmp}"
+    status = Command.new(cmd).run
+    FileUtils.mv(tmp, path)
+    OpenStruct.new(command: cmd, time: status[:time])
+  end
 end
 
 class Compressor
@@ -32,6 +40,7 @@ class Compressor
     # it's been a while since we last ran exiftool, this might take a sec.
     @log.log_it ExifTool.remove_tiff_metadata(source: @image_file.path, destination: sparse_path)
     @log.log_it ImageMagick.remove_tiff_alpha(sparse_path) if tiffinfo[:alpha]
+    @log.log_it ImageMagick.strip_tiff_profiles(sparse_path) if tiffinfo[:icc]
   end
 
   def sparse_path
