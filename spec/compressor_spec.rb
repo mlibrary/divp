@@ -3,39 +3,43 @@ describe Compressor do
 
   context "#run" do
     let(:log) { Stage::Log.new }
+    let(:compressor) do
+      image_file = double("image_file", path: @path)
+      Compressor.new(image_file: image_file, tmpdir: Pathname(temp_dir), log: log)
+    end
 
     before(:each) do
       @path = "spec/fixtures/10_10_8_400.tif"
     end
 
-    subject do
-      image_file = double("image_file", path: @path)
-      compressor = Compressor.new(image_file: image_file, tmpdir: Pathname(temp_dir), log: log)
-      compressor.run
-    end
-
     it "removes alpha when it exists" do
       @path = "spec/fixtures/10_10_8_400_alpha.tif"
-      subject
+      compressor.run
       expect(log.entries).to include(match("-alpha off"))
     end
 
     it "ignores alpha when it doesn't exist" do
-      subject
+      compressor.run
       expect(log.entries).not_to include(match("-alpha off"))
     end
 
     it "strips tiff profile data when it exists" do
       @path = "spec/fixtures/10_10_8_400_icc.tif"
-      subject
+      compressor.run
       expect(log.entries).to include(match("-strip"))
     end
 
     it "ignores tiff profile when it doesn't exist" do
-      image_file = double("image_file", path: @path)
-      compressor = Compressor.new(image_file: image_file, tmpdir: Pathname(temp_dir), log: log)
       compressor.run
       expect(log.entries).not_to include(match("-strip"))
+    end
+
+    it "handles warnings" do
+      @path = "spec/fixtures/10_10_8_400_icc.tif"
+      error = instance_double(Error, objid: nil)
+      image_magick = class_double(ImageMagick, remove_tiff_alpha: nil, strip_tiff_profiles: OpenStruct.new(error: error, level: :warning))
+      compressor.run(image_magick)
+      expect(log.warnings.first).to eq(error)
     end
   end
 end
@@ -59,9 +63,6 @@ describe ImageMagick do
       expect(TIFF.new(tiff_path).info[:icc]).to eq(true)
       ImageMagick.strip_tiff_profiles(tiff_path)
       expect(TIFF.new(tiff_path).info[:icc]).to eq(false)
-    end
-
-    xit "gives a warning if tiff profile strip fails" do
     end
   end
 end

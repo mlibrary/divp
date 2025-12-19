@@ -246,8 +246,9 @@ class Stage # rubocop:disable Metrics/ClassLength
   class Log
     include Enumerable
 
-    def initialize(log = [])
+    def initialize(log: [], warnings: Warnings.new)
       @log = log
+      @warnings = warnings
     end
 
     def each
@@ -260,13 +261,26 @@ class Stage # rubocop:disable Metrics/ClassLength
       @log
     end
 
+    def warnings
+      @warnings.list
+    end
+
     def log(entry, time)
       entry += format(" (%.3f sec)", time) unless time.nil?
       @log << entry
     end
 
     def log_it(data)
-      log(data.command, data.time)
+      case(data.level)
+      when :info
+        log(data.command, data.time)
+      when :warning
+        add_warning(data.error)
+      end
+    end
+
+    def add_warning(warning)
+      @warnings.add(warning)
     end
 
     def to_json(state = nil, *)
@@ -279,7 +293,7 @@ class Stage # rubocop:disable Metrics/ClassLength
 
     attr_reader :list, :objids
 
-    def initialize(bar:, objids:, list: nil)
+    def initialize(bar: SilentProgressBar.new, objids: [], list: nil)
       @list = list || []
       @bar = bar
       @objids = objids
