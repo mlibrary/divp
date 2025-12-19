@@ -2,7 +2,7 @@ describe Compressor do
   include_context "uses temp dir"
 
   context "#run" do
-    let(:log) { Stage::Log.new }
+    let(:log) { Log.new }
     let(:compressor) do
       image_file = double("image_file", path: @path)
       Compressor.new(image_file: image_file, tmpdir: Pathname(temp_dir), log: log)
