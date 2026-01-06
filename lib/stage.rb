@@ -56,7 +56,7 @@ class Stage # rubocop:disable Metrics/ClassLength
     @warnings = Warnings.new(bar: @bar, objids: objids, list: args[:errors])
 
     @data = args[:data] || {log: Log.new(warnings: @warnings)} # Misc data structure including log
-    if @data[:log].class.to_s == "Array" || @data[:log].nil?
+    if @data[:log].instance_of?(::Array) || @data[:log].nil?
       @data[:log] = Log.new(log: @data[:log], warnings: @warnings)
     end
     # Time the stage was last run

@@ -47,6 +47,9 @@ class Compressor
     @log.log_it ExifTool.remove_tiff_metadata(source: @image_file.path, destination: sparse_path)
     @log.log_it image_magick.remove_tiff_alpha(sparse_path) if tiffinfo[:alpha]
     @log.log_it image_magick.strip_tiff_profiles(sparse_path) if tiffinfo[:icc]
+    # compress_jp2(sparse, new_image, tiffinfo)
+    # copy_jp2_metadata(image_file.path, new_image, document_name, tiffinfo)
+    # copy_jp2_alphaless_metadata(sparse, new_image) if tiffinfo[:alpha]
   end
 
   def sparse_path

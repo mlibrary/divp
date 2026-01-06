@@ -1,4 +1,3 @@
-
 class Log
   include Enumerable
 
@@ -27,7 +26,7 @@ class Log
   end
 
   def log_it(data)
-    case(data.level)
+    case data.level
     when :info
       log(data.command, data.time)
     when :warning
