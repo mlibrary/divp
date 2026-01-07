@@ -1,5 +1,30 @@
 require "tiff"
 require "ostruct"
+
+module Kakadu
+  def self.compress(source, destination, tiffinfo)
+    clevels = jp2_clevels(tiffinfo)
+    cmd = "kdu_compress -quiet -i #{source} -o #{destination}" \
+          " 'Clevels=#{clevels}'" \
+          " 'Clayers=#{JP2_LAYERS}'" \
+          " 'Corder=#{JP2_ORDER}'" \
+          " 'Cuse_sop=#{JP2_USE_SOP}'" \
+          " 'Cuse_eph=#{JP2_USE_EPH}'" \
+          " Cmodes=#{JP2_MODES}" \
+          " -no_weights -slope '#{JP2_SLOPE}'"
+    status = Command.new(cmd).run
+    LogEntry.info(command: cmd, time: status[:time])
+  end
+
+  def self.jp2_clevels(tiffinfo)
+    # Get the width and height, figure out which is larger.
+    size = [tiffinfo[:width], tiffinfo[:height]].max
+    # Calculate appropriate Clevels.
+    clevels = (Math.log(size.to_i / 100.0) / Math.log(2)).to_i
+    (clevels < JP2_LEVEL_MIN) ? JP2_LEVEL_MIN : clevels
+  end
+end
+
 module ExifTool
   def self.remove_tiff_metadata(source:, destination:)
     cmd = "exiftool -XMP:All= -MakerNotes:All= #{source} -o #{destination}"
@@ -41,18 +66,22 @@ class Compressor
     @log = log
   end
 
-  def run(image_magick = ImageMagick)
+  def run(compression_tool = Kakadu)
     # We don't want any XMP metadata to be copied over on its own. If
     # it's been a while since we last ran exiftool, this might take a sec.
     @log.log_it ExifTool.remove_tiff_metadata(source: @image_file.path, destination: sparse_path)
-    @log.log_it image_magick.remove_tiff_alpha(sparse_path) if tiffinfo[:alpha]
-    @log.log_it image_magick.strip_tiff_profiles(sparse_path) if tiffinfo[:icc]
-    # compress_jp2(sparse, new_image, tiffinfo)
+    @log.log_it ImageMagick.remove_tiff_alpha(sparse_path) if tiffinfo[:alpha]
+    @log.log_it ImageMagick.strip_tiff_profiles(sparse_path) if tiffinfo[:icc]
+    @log.log_it compression_tool.compress(sparse_path, new_path, tiffinfo)
     # copy_jp2_metadata(image_file.path, new_image, document_name, tiffinfo)
     # copy_jp2_alphaless_metadata(sparse, new_image) if tiffinfo[:alpha]
   end
 
   def sparse_path
     @sparse_path ||= File.join(tmpdir, "sparse.tif")
+  end
+
+  def new_path
+    @new_path ||= File.join(tmpdir, "new.jp2")
   end
 end

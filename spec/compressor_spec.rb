@@ -3,6 +3,7 @@ describe Compressor do
 
   context "#run" do
     let(:log) { Log.new }
+    let(:compression_tool) { class_double(Kakadu, compress: LogEntry.info(command: nil, time: nil)) }
     let(:compressor) do
       image_file = double("image_file", path: @path)
       Compressor.new(image_file: image_file, tmpdir: Pathname(temp_dir), log: log)
@@ -14,24 +15,29 @@ describe Compressor do
 
     it "removes alpha when it exists" do
       @path = "spec/fixtures/10_10_8_400_alpha.tif"
-      compressor.run
+      compressor.run(compression_tool)
       expect(log.entries).to include(match("-alpha off"))
     end
 
     it "ignores alpha when it doesn't exist" do
-      compressor.run
+      compressor.run(compression_tool)
       expect(log.entries).not_to include(match("-alpha off"))
     end
 
     it "strips tiff profile data when it exists" do
       @path = "spec/fixtures/10_10_8_400_icc.tif"
-      compressor.run
+      compressor.run(compression_tool)
       expect(log.entries).to include(match("-strip"))
     end
 
     it "ignores tiff profile when it doesn't exist" do
-      compressor.run
+      compressor.run(compression_tool)
       expect(log.entries).not_to include(match("-strip"))
+    end
+
+    it "runs the compression tool" do
+      compressor.run
+      expect(log.entries).to include(match("kdu_compress"))
     end
   end
 end

@@ -61,7 +61,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     tmpdir = compressor.tmpdir
     sparse = compressor.sparse_path
     # sparse = File.join(tmpdir, "sparse.tif")
-    new_image = File.join(tmpdir, "new.jp2")
+    new_image = compressor.new_path
     final_image_name = File.basename(image_file.path, ".*") + ".jp2"
     final_image = File.join(File.dirname(image_file.path), final_image_name)
     document_name = File.join(shipment.objid_to_path(image_file.objid),
