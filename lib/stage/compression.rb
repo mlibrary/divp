@@ -71,9 +71,9 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
 
     compressor.run
     # need a test that looks for this
-    remove_tiff_alpha(sparse) if tiffinfo[:alpha]
+    # remove_tiff_alpha(sparse) if tiffinfo[:alpha]
 
-    strip_tiff_profiles(sparse) if tiffinfo[:icc]
+    # strip_tiff_profiles(sparse) if tiffinfo[:icc]
 
     # FIXME: process-tiffs.sh defines this variable but does not
     # use it. Check the original on tang.
@@ -87,7 +87,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     # This will always take a second. Other than the initial loading
     # of exiftool libraries, this is the only JP2 step that takes
     # noticeable time.
-    compress_jp2(sparse, new_image, tiffinfo)
+    # compress_jp2(sparse, new_image, tiffinfo)
     # We have our JP2; we can remove the middle TIFF. Then we try
     # to grab metadata from the original TIFF. This should be very
     # quick since we just used exiftool a few lines back.
