@@ -4,7 +4,7 @@ module ExifTool
   def self.remove_tiff_metadata(source:, destination:)
     cmd = "exiftool -XMP:All= -MakerNotes:All= #{source} -o #{destination}"
     status = Command.new(cmd).run
-    OpenStruct.new(command: cmd, time: status[:time], level: :info)
+    LogEntry.info(command: cmd, time: status[:time])
   end
 end
 
@@ -14,7 +14,7 @@ module ImageMagick
     cmd = "convert #{path} -alpha off #{tmp}"
     status = Command.new(cmd).run
     FileUtils.mv(tmp, path)
-    OpenStruct.new(command: cmd, time: status[:time], level: :info)
+    LogEntry.info(command: cmd, time: status[:time])
   end
 
   def self.strip_tiff_profiles(path)
@@ -24,10 +24,10 @@ module ImageMagick
       status = Command.new(cmd).run
     rescue => e
       warning = "couldn't remove ICC profile (#{cmd}) (#{e.message})"
-      OpenStruct.new(error: Error.new(warning, objid_from_path(path), path), level: :warning)
+      LogEntry.warning(error: Error.new(warning, nil, path))
     else
       FileUtils.mv(tmp, path)
-      OpenStruct.new(command: cmd, time: status[:time], level: :info)
+      LogEntry.info(command: cmd, time: status[:time])
     end
   end
 end

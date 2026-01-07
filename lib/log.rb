@@ -108,3 +108,22 @@ class Warnings < Exceptions
     @bar.warning = true
   end
 end
+
+class LogEntry
+  def self.info(command:, time:)
+    new(level: :info, command: command, time: time)
+  end
+
+  def self.warning(error:)
+    new(level: :warning, error: error)
+  end
+
+  attr_reader :level, :command, :time, :error
+
+  def initialize(level:, command: nil, time: nil, error: nil)
+    @level = level
+    @command = command
+    @time = time
+    @error = error
+  end
+end

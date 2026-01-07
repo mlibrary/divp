@@ -33,14 +33,6 @@ describe Compressor do
       compressor.run
       expect(log.entries).not_to include(match("-strip"))
     end
-
-    it "handles warnings" do
-      @path = "spec/fixtures/10_10_8_400_icc.tif"
-      error = instance_double(Error, objid: nil)
-      image_magick = class_double(ImageMagick, remove_tiff_alpha: nil, strip_tiff_profiles: OpenStruct.new(error: error, level: :warning))
-      compressor.run(image_magick)
-      expect(log.warnings.first).to eq(error)
-    end
   end
 end
 
@@ -63,6 +55,12 @@ describe ImageMagick do
       expect(TIFF.new(tiff_path).info[:icc]).to eq(true)
       ImageMagick.strip_tiff_profiles(tiff_path)
       expect(TIFF.new(tiff_path).info[:icc]).to eq(false)
+    end
+
+    it "handles warnings" do
+      tiff_path = "spec/fixtures/10_10_8_400_fake.tif"
+      log_entry = ImageMagick.strip_tiff_profiles(tiff_path)
+      expect(log_entry.level).to eq(:warning)
     end
   end
 end
