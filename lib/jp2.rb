@@ -10,7 +10,7 @@ class JP2
   end
 
   # Run tiffinfo command and return output text block
-  def info # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def info
     cmd = "exiftool #{@path}"
     status = Command.new(cmd).run
     jp2info = extract_fields(status[:stdout])

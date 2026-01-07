@@ -27,7 +27,7 @@ class PaginationCheckTest < Minitest::Test
     generate_tests "run", test_proc
   end
 
-  def self.gen_missing # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_missing
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       spec = "BC T bitonal 1-2 T bitonal 4-5"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -43,7 +43,7 @@ class PaginationCheckTest < Minitest::Test
     generate_tests "missing", test_proc
   end
 
-  def self.gen_missing_range # rubocop:disable Metrics/AbcSize
+  def self.gen_missing_range
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       spec = "BC T bitonal 1 T bitonal 5"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -56,7 +56,7 @@ class PaginationCheckTest < Minitest::Test
     generate_tests "missing_range", test_proc
   end
 
-  def self.gen_duplicate # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_duplicate
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       spec = "BC T bitonal 1 J contone 1"
       test_shipment = test_shipment_class.new(dir, spec)

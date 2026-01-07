@@ -7,7 +7,7 @@ require "minitest/autorun"
 require "processor"
 require "fixtures"
 
-class ProcessorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
+class ProcessorTest < Minitest::Test
   def setup
     @options = {config_dir: File.join(TEST_ROOT, "config")}
   end
@@ -16,7 +16,7 @@ class ProcessorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     TestShipment.remove_test_shipments
   end
 
-  def self.gen_new # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_new
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir)
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
@@ -53,7 +53,7 @@ class ProcessorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "stages", test_proc
   end
 
-  def self.gen_run # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_run
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC F .DS_Store")
       options = {no_progress: true}
@@ -86,7 +86,7 @@ class ProcessorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   # Don't pass TestShipment to anything we want to serialize --
   # the initializer isn't JSON-aware
-  def self.gen_reload_status_file # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_reload_status_file
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bad_16bps 1")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
@@ -104,7 +104,7 @@ class ProcessorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   # Don't pass TestShipment to anything we want to serialize --
   # the initializer isn't JSON-aware
-  def self.gen_move_status_file # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_move_status_file
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
@@ -120,7 +120,7 @@ class ProcessorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "move_status_file", test_proc
   end
 
-  def self.gen_restore_from_source_directory # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_restore_from_source_directory
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
@@ -141,7 +141,7 @@ class ProcessorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "restore_from_source_directory", test_proc
   end
 
-  def self.gen_finalize # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_finalize
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
@@ -159,7 +159,7 @@ class ProcessorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "finalize", test_proc
   end
 
-  def self.gen_finalize_does_nothing # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_finalize_does_nothing
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bad_16bps 1")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
@@ -177,7 +177,7 @@ class ProcessorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "finalize_does_nothing", test_proc
   end
 
-  def self.gen_restart_finalized # rubocop:disable Metrics/MethodLength
+  def self.gen_restart_finalized
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
@@ -208,7 +208,7 @@ class ProcessorErrorCorrectionTest < Minitest::Test
 
   # Initial run detects bogus file, replacement allows second run to pass,
   # and fixity is updated with the new file.
-  def self.gen_error_correction # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_error_correction
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       spec = "BC T contone 1 BC T bad_16bps 1"
       test_shipment = test_shipment_class.new(dir, spec)

@@ -41,13 +41,15 @@ $ docker-compose build
 ### 3. Running tests
 
 ```
-$ docker-compose run --rm test
-$ docker-compose run --rm test bundle exec rubocop
+$ docker-compose run --rm app bundle exec rake test
+$ docker-compose run --rm app bundle exec rspec
+$ docker-compose run --rm app bundle exec standardrb
 ```
 
 or
 
 ```
 $ bundle exec rake test
-$ bundle exec rubocop
+$ bundle exec rspec
+$ bundle exec standardrb
 ```

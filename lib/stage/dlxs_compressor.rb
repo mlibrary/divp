@@ -5,8 +5,8 @@ require "command"
 require "stage"
 
 # JP2-to-TIFF conversion stage for DLXS
-class DLXSCompressor < Stage # rubocop:disable Metrics/ClassLength
-  def run(agenda) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+class DLXSCompressor < Stage
+  def run(agenda)
     return unless agenda.any?
 
     files = image_files("jp2").select { |file| agenda.include? file.objid }
@@ -23,7 +23,7 @@ class DLXSCompressor < Stage # rubocop:disable Metrics/ClassLength
 
   private
 
-  def handle_conversion(image_file) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def handle_conversion(image_file)
     basename = File.basename(image_file.path, ".*")
     tmpdir = create_tempdir basename
     source = File.join(tmpdir, "source.tif")
@@ -42,7 +42,7 @@ class DLXSCompressor < Stage # rubocop:disable Metrics/ClassLength
     delete_on_success image_file.path
   end
 
-  def copy_metadata(source, destination, source_image) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def copy_metadata(source, destination, source_image)
     cmd = <<~CMD.tr("\n", " ")
       exiftool -tagsFromFile #{source}
       '-IFD0:DocumentName=#{source_image}'
@@ -87,7 +87,7 @@ class DLXSCompressor < Stage # rubocop:disable Metrics/ClassLength
   end
 
   # Converts 'source.tif' to 'source.pgm' in temporary directory
-  def tiff_to_pgm(dir) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def tiff_to_pgm(dir)
     source = File.join(dir, "source.tif")
     pnm = File.join(dir, "source.pnm")
     pgm = File.join(dir, "source.pgm")

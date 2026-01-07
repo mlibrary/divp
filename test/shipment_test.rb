@@ -4,7 +4,7 @@
 require "minitest/autorun"
 require "shipment"
 
-class ShipmentTest < Minitest::Test # rubocop:disable Metrics/ClassLength
+class ShipmentTest < Minitest::Test
   def teardown
     TestShipment.remove_test_shipments
   end
@@ -31,7 +31,7 @@ class ShipmentTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "directory", test_proc
   end
 
-  def self.gen_path_components_from_objid # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_path_components_from_objid
     test_proc = proc { |shipment_class, test_shipment_class, dir, _opts|
       test_shipment = test_shipment_class.new(dir, "BC")
       shipment = shipment_class.new(test_shipment.directory)
@@ -48,7 +48,7 @@ class ShipmentTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "objid_to_path", test_proc
   end
 
-  def self.gen_source_directory # rubocop:disable Metrics/MethodLength
+  def self.gen_source_directory
     test_proc = proc { |shipment_class, test_shipment_class, dir, _opts|
       test_shipment = test_shipment_class.new(dir)
       shipment = shipment_class.new(test_shipment.directory)
@@ -62,7 +62,7 @@ class ShipmentTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "source_directory", test_proc
   end
 
-  def self.gen_tmp_directory # rubocop:disable Metrics/MethodLength
+  def self.gen_tmp_directory
     test_proc = proc { |shipment_class, test_shipment_class, dir, _opts|
       test_shipment = test_shipment_class.new(dir)
       shipment = shipment_class.new(test_shipment.directory)
@@ -88,7 +88,7 @@ class ShipmentTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "source_objids", test_proc
   end
 
-  def self.gen_image_files # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_image_files
     test_proc = proc { |shipment_class, test_shipment_class, dir, _opts|
       spec = "BC T contone 1 T contone 2 BC T contone 1 BC"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -102,7 +102,7 @@ class ShipmentTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "image_files", test_proc
   end
 
-  def self.gen_setup_source_directory # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_setup_source_directory
     test_proc = proc { |shipment_class, test_shipment_class, dir, _opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -118,7 +118,7 @@ class ShipmentTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "setup_source_directory", test_proc
   end
 
-  def self.gen_restore_from_source_directory # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_restore_from_source_directory
     test_proc = proc { |shipment_class, test_shipment_class, dir, _opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -136,7 +136,7 @@ class ShipmentTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "restore_from_source_directory", test_proc
   end
 
-  def self.gen_partial_restore_from_source_directory # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_partial_restore_from_source_directory
     test_proc = proc { |shipment_class, test_shipment_class, dir, _opts|
       spec = "BC T contone 1 BC T contone 1"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -171,8 +171,8 @@ class ShipmentTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "restore_from_nonexistent_source_directory", test_proc
   end
 
-  def self.gen_fixity_check # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-    test_proc = proc { |shipment_class, test_shipment_class, dir, _opts| # rubocop:disable Metrics/BlockLength
+  def self.gen_fixity_check
+    test_proc = proc { |shipment_class, test_shipment_class, dir, _opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 2-3")
       shipment = shipment_class.new(test_shipment.directory)
       shipment.setup_source_directory
@@ -211,7 +211,7 @@ class ShipmentTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "fixity_check", test_proc
   end
 
-  def self.gen_finalize # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_finalize
     test_proc = proc { |shipment_class, test_shipment_class, dir|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       shipment = shipment_class.new(test_shipment.directory)

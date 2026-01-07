@@ -25,7 +25,7 @@ class Tagger < Stage
 
   private
 
-  def calculate_tags # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+  def calculate_tags
     artist = config[:tagger_artist] || "dcu"
     @artist_tag ||= if TagData::ARTIST[artist].nil?
       add_warning Error.new("using custom artist '#{artist}'")
@@ -58,7 +58,7 @@ class Tagger < Stage
     end
   end
 
-  def tag(image_file) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def tag(image_file)
     tagged_name = image_file.path.split(File::SEPARATOR)[-1] + ".tagged"
     tagged_path = File.join(tempdir_for_file(image_file), tagged_name)
     tagged = ImageFile.new(image_file.objid, tagged_path,
@@ -101,7 +101,7 @@ class Tagger < Stage
     @objid_to_tempdir[image_file.objid] = create_tempdir
   end
 
-  def run_tiffset(image_file, tag, value) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def run_tiffset(image_file, tag, value)
     begin
       info = TIFF.new(image_file.path).set(tag, value)
     rescue => e

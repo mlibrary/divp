@@ -4,7 +4,7 @@
 require "minitest/autorun"
 require "preflight"
 
-class PreflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
+class PreflightTest < Minitest::Test
   def setup
     @config = Config.new({no_progress: true})
   end
@@ -23,7 +23,7 @@ class PreflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "new", test_proc
   end
 
-  def self.gen_run # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_run
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       spec = "BC T bitonal 1 BC T bitonal 1"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -52,7 +52,7 @@ class PreflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "validate_objid", test_proc
   end
 
-  def self.gen_remove_ds_store # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_remove_ds_store
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -70,7 +70,7 @@ class PreflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "remove_ds_store", test_proc
   end
 
-  def self.gen_remove_thumbs_db # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_remove_thumbs_db
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -88,7 +88,7 @@ class PreflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "remove_thumbs_db", test_proc
   end
 
-  def self.gen_remove_toplevel_ds_store # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_remove_toplevel_ds_store
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -104,7 +104,7 @@ class PreflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "remove_toplevel_ds_store", test_proc
   end
 
-  def self.gen_remove_toplevel_thumbs_db # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_remove_toplevel_thumbs_db
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -122,7 +122,7 @@ class PreflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "remove_toplevel_thumbs_db", test_proc
   end
 
-  def self.gen_objid_directory_errors_and_warnings # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_objid_directory_errors_and_warnings
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC F spurious_file")
       shipment = shipment_class.new(test_shipment.directory)
@@ -146,7 +146,7 @@ class PreflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "objid_directory_errors_and_warnings", test_proc
   end
 
-  def self.gen_shipment_directory_errors # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_shipment_directory_errors
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "F spurious_file")
       shipment = shipment_class.new(test_shipment.directory)

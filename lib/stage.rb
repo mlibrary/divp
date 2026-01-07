@@ -12,7 +12,7 @@ require "symbolize"
 require "log"
 
 # Base class for conversion stages
-class Stage # rubocop:disable Metrics/ClassLength
+class Stage
   attr_reader :errors, :warnings, :start, :end
   attr_accessor :name, :config, :shipment
 
@@ -39,7 +39,7 @@ class Stage # rubocop:disable Metrics/ClassLength
 
   # Can be created without a shipment, but that field needs to be set
   # before the #run method can be called.
-  def initialize(shipment, **args) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+  def initialize(shipment, **args)
     unless shipment.nil? || shipment.is_a?(Shipment)
       raise StandardError, "unknown shipment class #{shipment.class}"
     end

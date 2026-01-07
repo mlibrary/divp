@@ -4,7 +4,7 @@
 require "minitest/autorun"
 require "image_validator"
 
-class ImageValidatorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
+class ImageValidatorTest < Minitest::Test
   def setup
     @config = Config.new({no_progress: true})
   end
@@ -45,7 +45,7 @@ class ImageValidatorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "16bps_fails", test_proc
   end
 
-  def self.gen_pixelspercentimeter_fails # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_pixelspercentimeter_fails
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -61,7 +61,7 @@ class ImageValidatorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "pixelspercentimeter_fails", test_proc
   end
 
-  def self.gen_bitonal_3spp_fails # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_bitonal_3spp_fails
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -77,7 +77,7 @@ class ImageValidatorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "bitonal_3spp_fails", test_proc
   end
 
-  def self.gen_bitonal_resolution_fails # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_bitonal_resolution_fails
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -93,7 +93,7 @@ class ImageValidatorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "bitonal_resolution_fails", test_proc
   end
 
-  def self.gen_contone_2spp_fails # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_contone_2spp_fails
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -109,7 +109,7 @@ class ImageValidatorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "contone_2spp_fails", test_proc
   end
 
-  def self.gen_contone_resolution_fails # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_contone_resolution_fails
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -125,7 +125,7 @@ class ImageValidatorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "contone_resolution_fails", test_proc
   end
 
-  def self.gen_garbage_tiff_fails # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_garbage_tiff_fails
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       shipment = shipment_class.new(test_shipment.directory)

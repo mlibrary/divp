@@ -11,7 +11,7 @@ class TIFFTest < Minitest::Test
     refute_nil tiff, "TIFF is not nil"
   end
 
-  def test_info # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_info
     shipment = TestShipment.new(test_name, "BC T contone 1")
     tiff = TIFF.new(shipment.image_files.first.path)
     info = tiff.info

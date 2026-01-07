@@ -5,7 +5,7 @@ require "minitest/autorun"
 require "stringio"
 require "query_tool"
 
-class QueryToolTest < Minitest::Test # rubocop:disable Metrics/ClassLength
+class QueryToolTest < Minitest::Test
   def setup
     @options = {config_dir: File.join(TEST_ROOT, "config"),
                 no_progress: true}
@@ -25,7 +25,7 @@ class QueryToolTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "new", test_proc
   end
 
-  def self.gen_agenda_cmd # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_agenda_cmd
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
@@ -42,7 +42,7 @@ class QueryToolTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "agenda_cmd", test_proc
   end
 
-  def self.gen_agenda_cmd_no_agenda # rubocop:disable Metrics/MethodLength
+  def self.gen_agenda_cmd_no_agenda
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
@@ -71,7 +71,7 @@ class QueryToolTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "objids_cmd", test_proc
   end
 
-  def self.gen_objids_cmd_with_errors # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_objids_cmd_with_errors
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bad_16bps 1")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
@@ -88,7 +88,7 @@ class QueryToolTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "objids_cmd_with_errors", test_proc
   end
 
-  def self.gen_errors_cmd # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_errors_cmd
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       spec = "BC T contone 1 BC T contone 1"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -116,7 +116,7 @@ class QueryToolTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "errors_cmd", test_proc
   end
 
-  def self.gen_warnings_cmd # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_warnings_cmd
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       spec = "BC T contone 1 BC T contone 1"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -167,7 +167,7 @@ class QueryToolTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "status_cmd_err", test_proc
   end
 
-  def self.gen_fixity_cmd # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_fixity_cmd
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 2-3")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
@@ -199,7 +199,7 @@ class QueryToolTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "fixity_cmd", test_proc
   end
 
-  def self.gen_fixity_cmd_not_yet_populated # rubocop:disable Metrics/MethodLength
+  def self.gen_fixity_cmd_not_yet_populated
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))

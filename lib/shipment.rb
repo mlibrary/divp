@@ -12,7 +12,7 @@ end
 ImageFile = Struct.new(:objid, :path, :objid_file, :file)
 
 # Shipment directory class
-class Shipment # rubocop:disable Metrics/ClassLength
+class Shipment
   PATH_COMPONENTS = 1
   OBJID_SEPARATOR = "/"
   attr_reader :metadata
@@ -121,7 +121,7 @@ class Shipment # rubocop:disable Metrics/ClassLength
     Luhn.valid?(objid) ? nil : "Luhn checksum failed"
   end
 
-  def image_files(type = "tif", dir = @dir) # rubocop:disable Metrics/MethodLength
+  def image_files(type = "tif", dir = @dir)
     files = []
     find_objids(dir).each do |objid|
       objid_path = objid_to_path objid
@@ -147,7 +147,7 @@ class Shipment # rubocop:disable Metrics/ClassLength
   # every other directory in @dir into it.
   # We will potentially remove and re-copy directories from source/
   # but that depends on the options passed to the processor.
-  def setup_source_directory # rubocop:disable Metrics/AbcSize
+  def setup_source_directory
     raise FinalizedShipmentError if finalized?
     return if File.exist? source_directory
 
@@ -164,7 +164,7 @@ class Shipment # rubocop:disable Metrics/ClassLength
 
   # Copy clean or remediated objid directories from source.
   # Called with nil to replaces all objids, or an Array of objids.
-  def restore_from_source_directory(objid_array = nil) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def restore_from_source_directory(objid_array = nil)
     raise FinalizedShipmentError if finalized?
     unless File.directory? source_directory
       raise Errno::ENOENT, "source directory #{source_directory} not found"
@@ -213,7 +213,7 @@ class Shipment # rubocop:disable Metrics/ClassLength
   end
 
   # Returns Hash with keys {added, changed, removed} -> Array of ImageFile
-  def fixity_check # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+  def fixity_check
     fixity = {added: [], removed: [], changed: []}
     return fixity if metadata[:checksums].nil?
 
@@ -250,7 +250,7 @@ class Shipment # rubocop:disable Metrics/ClassLength
     bars.sort
   end
 
-  def find_objids_with_components(dir, components) # rubocop:disable Metrics/MethodLength
+  def find_objids_with_components(dir, components)
     bars = []
     if components.count < self.class::PATH_COMPONENTS
       subdir = File.join(dir, components)

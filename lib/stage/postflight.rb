@@ -29,7 +29,7 @@ class Postflight < Stage
       shipment.checksums.keys.count
   end
 
-  def check_objid_lists # rubocop:disable Metrics/AbcSize
+  def check_objid_lists
     s1 = Set.new shipment.metadata[:initial_barcodes]
     s2 = Set.new shipment.objids
     if (s1 - s2).any?
@@ -40,7 +40,7 @@ class Postflight < Stage
     add_error Error.new("objids added: #{(s2 - s1).to_a.join(", ")}")
   end
 
-  def verify_source_checksums # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def verify_source_checksums
     fixity = shipment.fixity_check do |image_file|
       @bar.next! image_file.objid_file
     end

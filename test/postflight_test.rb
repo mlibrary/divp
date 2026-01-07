@@ -4,7 +4,7 @@
 require "minitest/autorun"
 require "postflight"
 
-class PostflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
+class PostflightTest < Minitest::Test
   def setup
     opts = {no_progress: true,
             feed_validate_script: "test/bin/fake_feed_validate.pl"}
@@ -25,7 +25,7 @@ class PostflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "new", test_proc
   end
 
-  def self.gen_run # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_run
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       spec = "BC T bitonal 1 T contone 2"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -39,7 +39,7 @@ class PostflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "run", test_proc
   end
 
-  def self.gen_metadata_mismatch_removed # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_metadata_mismatch_removed
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       spec = "BC T bitonal 1 BC T bitonal 1"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -57,7 +57,7 @@ class PostflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "metadata_mismatch_removed", test_proc
   end
 
-  def self.gen_metadata_mismatch_added # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_metadata_mismatch_added
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       spec = "BC T bitonal 1 BC T bitonal 1"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -75,7 +75,7 @@ class PostflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "metadata_mismatch_added", test_proc
   end
 
-  def self.gen_feed_validate_error # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_feed_validate_error
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1 T contone 2")
       shipment = shipment_class.new(test_shipment.directory)
@@ -100,7 +100,7 @@ class PostflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "feed_validate_error", test_proc
   end
 
-  def self.gen_feed_validate_crash # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_feed_validate_crash
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       ENV["FAKE_FEED_VALIDATE_CRASH"] = "1"
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1 T contone 2")
@@ -116,7 +116,7 @@ class PostflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "feed_validate_crash", test_proc
   end
 
-  def self.gen_checksum_mismatch # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_checksum_mismatch
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1 T contone 2")
       shipment = shipment_class.new(test_shipment.directory)
@@ -134,7 +134,7 @@ class PostflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "checksum_mismatch", test_proc
   end
 
-  def self.gen_file_missing # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_file_missing
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1 T contone 2")
       shipment = shipment_class.new(test_shipment.directory)
@@ -152,7 +152,7 @@ class PostflightTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "file_missing", test_proc
   end
 
-  def self.gen_file_added # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_file_added
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1 T contone 2")
       shipment = shipment_class.new(test_shipment.directory)

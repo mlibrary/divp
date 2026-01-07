@@ -55,7 +55,7 @@ if ARGV.count.zero?
   exit 1
 end
 
-ARGV.each do |arg| # rubocop:disable Metrics/BlockLength
+ARGV.each do |arg|
   dir = Pathname.new(arg).realpath.to_s
   unless File.exist?(dir) && File.directory?(dir)
     puts "Shipment directory #{dir.bold} does not exist, skipping".red

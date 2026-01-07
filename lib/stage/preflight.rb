@@ -31,7 +31,7 @@ class Preflight < Stage
     IGNORABLE_FILES
   end
 
-  def run(agenda) # rubocop:disable Metrics/AbcSize
+  def run(agenda)
     shipment.metadata[:initial_barcodes] = shipment.objids
     if shipment.metadata[:initial_barcodes].none?
       add_error Error.new("no objids in #{shipment_directory}")
@@ -63,7 +63,7 @@ class Preflight < Stage
 
   # A shipment directory is valid if it contains only objid directories,
   # a source directory, and status.json
-  def validate_shipment_directory # rubocop:disable Metrics/MethodLength
+  def validate_shipment_directory
     Dir.entries(shipment_directory).sort.each do |entry|
       next if %w[. .. source tmp status.json].include? entry
 
@@ -82,7 +82,7 @@ class Preflight < Stage
   # objid directory must include one or more TIFF files,
   # and a few other exceptions grandfathered by just_do_everything.sh
   # No directories are allowed
-  def validate_objid_directory(objid) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+  def validate_objid_directory(objid)
     have_image = false
     objid_directory = shipment.objid_directory(objid)
     Dir.entries(objid_directory).sort.each do |entry|

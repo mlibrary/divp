@@ -32,7 +32,7 @@ class AgendaTest < Minitest::Test
     generate_tests "for_stage", test_proc
   end
 
-  def self.gen_update # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_update
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       spec = "BC T contone 1 BC T contone 1"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -49,7 +49,7 @@ class AgendaTest < Minitest::Test
     generate_tests "update", test_proc
   end
 
-  def self.gen_update_fatal_error # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_update_fatal_error
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
       spec = "BC T contone 1 BC T contone 1"
       test_shipment = test_shipment_class.new(dir, spec)

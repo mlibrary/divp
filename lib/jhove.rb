@@ -8,7 +8,7 @@ require "error"
 require "symbolize"
 
 # Wrapper for feed validate Perl script which invokes JHOVE
-class JHOVE # rubocop:disable Metrics/ClassLength
+class JHOVE
   attr_reader :errors, :raw_output
 
   UNUSED_FIELDS = %i[description file namespace objid

@@ -18,7 +18,7 @@ Dir[File.join(__dir__, "stage", "*.rb")].sort.each { |file| require file }
 Dir[File.join(__dir__, "shipment", "*.rb")].sort.each { |file| require file }
 
 # Processor
-class Processor # rubocop:disable Metrics/ClassLength
+class Processor
   attr_reader :dir, :config, :shipment
 
   # Can take a Shipment instead of a directory.
@@ -36,7 +36,7 @@ class Processor # rubocop:disable Metrics/ClassLength
     Object.const_get(@config[:shipment_class] || "Shipment")
   end
 
-  def run # rubocop:disable Metrics/MethodLength
+  def run
     raise FinalizedShipmentError if shipment.finalized?
 
     if config[:restart_all]
@@ -174,7 +174,7 @@ class Processor # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def run_stage(stage) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def run_stage(stage)
     stage_agenda = agenda.for_stage stage
     return if stage_agenda.none?
 
@@ -194,14 +194,12 @@ class Processor # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def init_status_file # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+  def init_status_file
     return false unless File.exist? status_file
 
     # In order to reconstitute Error objects we need to use JSON.load
     # instead of JSON.parse. So we explicitly symbolize the output.
-    # rubocop:disable Security/JSONLoad
     status = Symbolize.symbolize JSON.unsafe_load File.new(status_file)
-    # rubocop:enable Security/JSONLoad
     raise JSON::ParserError, "unable to parse #{status_file}" if status.nil?
 
     unless status.key?(:shipment) && status[:shipment].is_a?(Shipment)

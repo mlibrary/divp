@@ -16,8 +16,8 @@ JP2_SLOPE = 42_988
 TIFF_DATE_FORMAT = "%Y:%m:%d %H:%M:%S"
 
 # TIFF to JP2/TIFF compression stage
-class Compression < Stage # rubocop:disable Metrics/ClassLength
-  def run(agenda) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
+class Compression < Stage
+  def run(agenda)
     return unless agenda.any?
     files = image_files.select { |file| agenda.include? file.objid }
     @bar.steps = files.count
@@ -55,7 +55,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
 
   private
 
-  def handle_8_bps_conversion(compressor) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def handle_8_bps_conversion(compressor)
     image_file = compressor.image_file
     tiffinfo = compressor.tiffinfo
     tmpdir = compressor.tmpdir
@@ -124,7 +124,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     FileUtils.mv(tmp, path)
   end
 
-  def strip_tiff_profiles(path) # rubocop:disable Metrics/MethodLength
+  def strip_tiff_profiles(path)
     tmp = path + ".stripped"
     cmd = "convert #{path} -strip #{tmp}"
     begin
@@ -138,7 +138,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def compress_jp2(source, destination, tiffinfo) # rubocop:disable Metrics/MethodLength
+  def compress_jp2(source, destination, tiffinfo)
     clevels = jp2_clevels(tiffinfo)
     cmd = "kdu_compress -quiet -i #{source} -o #{destination}" \
           " 'Clevels=#{clevels}'" \
@@ -152,7 +152,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     log cmd, status[:time]
   end
 
-  def copy_jp2_metadata(source, destination, document_name, tiffinfo) # rubocop:disable Metrics/MethodLength
+  def copy_jp2_metadata(source, destination, document_name, tiffinfo)
     # If the original image has a date, we want it. If not, we
     # want to add the current date.
     # date "%Y-%m-%dT%H:%M:%S"
@@ -195,7 +195,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     log cmd, status[:time]
   end
 
-  def handle_1_bps_conversion(compressor) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def handle_1_bps_conversion(compressor)
     image_file = compressor.image_file
     tiffinfo = compressor.tiffinfo
     tmpdir = compressor.tmpdir
@@ -226,7 +226,7 @@ class Compression < Stage # rubocop:disable Metrics/ClassLength
     log cmd, status[:time]
   end
 
-  def copy_tiff_metadata(path, destination) # rubocop:disable Metrics/MethodLength
+  def copy_tiff_metadata(path, destination)
     cmd = "exiftool -tagsFromFile #{path}" \
           " '-IFD0:DocumentName'" \
           " '-IFD0:ImageDescription='" \

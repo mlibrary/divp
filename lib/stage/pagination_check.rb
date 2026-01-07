@@ -41,7 +41,7 @@ class PaginationCheck < Stage
 
   # Given sorted pages array of integers from 1 to n inclusive,
   # returns array of integer and integer range strings missing from list
-  def missing_pages(pages) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+  def missing_pages(pages)
     missing = (1..pages.max).to_a - pages
     ranges = []
     missing.each do |m|
