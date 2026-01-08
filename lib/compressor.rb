@@ -156,15 +156,21 @@ class Compressor
   def bps
     @tiffinfo[:bps]
   end
+
+  private
+
+  def log_it(log_entry)
+    @log.log_it log_entry
+  end
 end
 
 class Compressor::Color < Compressor
   def run(compression_tool = Kakadu)
     # We don't want any XMP metadata to be copied over on its own. If
     # it's been a while since we last ran exiftool, this might take a sec.
-    @log.log_it ExifTool.remove_tiff_metadata(source: image_file.path, destination: sparse_path)
-    @log.log_it ImageMagick.remove_tiff_alpha(sparse_path) if tiffinfo[:alpha]
-    @log.log_it ImageMagick.strip_tiff_profiles(sparse_path) if tiffinfo[:icc]
+    log_it ExifTool.remove_tiff_metadata(source: image_file.path, destination: sparse_path)
+    log_it ImageMagick.remove_tiff_alpha(sparse_path) if tiffinfo[:alpha]
+    log_it ImageMagick.strip_tiff_profiles(sparse_path) if tiffinfo[:icc]
 
     # mrio: copying this note over from Compression.rb. Not sure what it means
     # or implies yet.
@@ -181,17 +187,17 @@ class Compressor::Color < Compressor
     # This will always take a second. Other than the initial loading
     # of exiftool libraries, this is the only JP2 step that takes
     # noticeable time.
-    @log.log_it compression_tool.compress(sparse_path, new_path, tiffinfo)
+    log_it compression_tool.compress(sparse_path, new_path, tiffinfo)
 
     # We have our JP2; we can remove the middle TIFF. Then we try
     # to grab metadata from the original TIFF. This should be very
     # quick since we just used exiftool a few lines back.
-    @log.log_it ExifTool.copy_jp2_metadata(image_file.path, new_path, document_name, tiffinfo)
+    log_it ExifTool.copy_jp2_metadata(image_file.path, new_path, document_name, tiffinfo)
 
     # If our image had an alpha channel, it'll be gone now, and
     # the XMP data needs to reflect that (previously, we were
     # taking that info from the original image).
-    @log.log_it ExifTool.copy_jp2_alphaless_metadata(sparse_path, new_path) if tiffinfo[:alpha]
+    log_it ExifTool.copy_jp2_alphaless_metadata(sparse_path, new_path) if tiffinfo[:alpha]
   end
 
   def final_image_path
@@ -221,9 +227,9 @@ class Compressor::Bitonal < Compressor
   def run
     # Try to compress the image. This is the only part of this step
     # that should take any time. It should take a second or so.
-    @log.log_it TiffToPnm.compress(image_file.path, compressed_path)
+    log_it TiffToPnm.compress(image_file.path, compressed_path)
 
-    @log.log_it ExifTool.copy_tiff_metadata(image_file.path, compressed_path)
+    log_it ExifTool.copy_tiff_metadata(image_file.path, compressed_path)
   end
 
   def compressed_path
