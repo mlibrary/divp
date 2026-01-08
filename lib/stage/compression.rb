@@ -57,47 +57,16 @@ class Compression < Stage
 
   def handle_8_bps_conversion(compressor)
     image_file = compressor.image_file
-    tiffinfo = compressor.tiffinfo
     tmpdir = compressor.tmpdir
-    sparse = compressor.sparse_path
-    new_image = compressor.new_path
-    final_image_name = File.basename(image_file.path, ".*") + ".jp2"
-    final_image = File.join(File.dirname(image_file.path), final_image_name)
-    document_name = File.join(shipment.objid_to_path(image_file.objid),
-      final_image_name)
-    on_disk_temp_image = final_image.sub(shipment.directory, shipment.tmp_directory)
+
+    on_disk_temp_image = compressor.final_image_path.sub(shipment.directory, shipment.tmp_directory)
     system("mkdir -p #{File.dirname(on_disk_temp_image)}")
 
     compressor.run
-    # need a test that looks for this
-    # remove_tiff_alpha(sparse) if tiffinfo[:alpha]
 
-    # strip_tiff_profiles(sparse) if tiffinfo[:icc]
-
-    # FIXME: process-tiffs.sh defines this variable but does not
-    # use it. Check the original on tang.
-    # if /Samples\/Pixel:\s3/.match? metadata
-    #  jp2_space = 'sRGB'
-    # else
-    #  jp2_space = 'sLUM'
-    # end
-
-    # We have a TIFF with no XMP now. We try to convert it to JP2.
-    # This will always take a second. Other than the initial loading
-    # of exiftool libraries, this is the only JP2 step that takes
-    # noticeable time.
-    # compress_jp2(sparse, new_image, tiffinfo)
-    # We have our JP2; we can remove the middle TIFF. Then we try
-    # to grab metadata from the original TIFF. This should be very
-    # quick since we just used exiftool a few lines back.
-    copy_jp2_metadata(image_file.path, new_image, document_name, tiffinfo)
-    # If our image had an alpha channel, it'll be gone now, and
-    # the XMP data needs to reflect that (previously, we were
-    # taking that info from the original image).
-    copy_jp2_alphaless_metadata(sparse, new_image) if tiffinfo[:alpha]
-    system("cp #{new_image} #{on_disk_temp_image}")
+    system("cp #{compressor.new_path} #{on_disk_temp_image}")
     system("rm -r #{tmpdir}/*")
-    copy_on_success on_disk_temp_image, final_image, image_file.objid
+    copy_on_success on_disk_temp_image, compressor.final_image_path, image_file.objid
     delete_on_success image_file.path, image_file.objid
   end
 

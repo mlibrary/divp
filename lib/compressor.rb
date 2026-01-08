@@ -115,14 +115,45 @@ class Compressor
     @log.log_it ExifTool.remove_tiff_metadata(source: image_file.path, destination: sparse_path)
     @log.log_it ImageMagick.remove_tiff_alpha(sparse_path) if tiffinfo[:alpha]
     @log.log_it ImageMagick.strip_tiff_profiles(sparse_path) if tiffinfo[:icc]
+
+    # mrio: copying this note over from Compression.rb. Not sure what it means
+    # or implies yet.
+    #
+    # FIXME: process-tiffs.sh defines this variable but does not
+    # use it. Check the original on tang.
+    # if /Samples\/Pixel:\s3/.match? metadata
+    #  jp2_space = 'sRGB'
+    # else
+    #  jp2_space = 'sLUM'
+    # end
+
+    # We have a TIFF with no XMP now. We try to convert it to JP2.
+    # This will always take a second. Other than the initial loading
+    # of exiftool libraries, this is the only JP2 step that takes
+    # noticeable time.
     @log.log_it compression_tool.compress(sparse_path, new_path, tiffinfo)
+
+    # We have our JP2; we can remove the middle TIFF. Then we try
+    # to grab metadata from the original TIFF. This should be very
+    # quick since we just used exiftool a few lines back.
     @log.log_it ExifTool.copy_jp2_metadata(image_file.path, new_path, document_name, tiffinfo)
+
+    # If our image had an alpha channel, it'll be gone now, and
+    # the XMP data needs to reflect that (previously, we were
+    # taking that info from the original image).
     @log.log_it ExifTool.copy_jp2_alphaless_metadata(sparse_path, new_path) if tiffinfo[:alpha]
+  end
+
+  def final_image_name
+    File.basename(image_file.file, ".*") + ".jp2"
+  end
+
+  def final_image_path
+    File.join(File.dirname(image_file.path), final_image_name)
   end
 
   def document_name
     objid_file_parts = image_file.objid_file.split("/")
-    final_image_name = File.basename(objid_file_parts.last, ".*") + ".jp2"
     objid_file_parts[-1] = final_image_name
     File.join(objid_file_parts)
   end
