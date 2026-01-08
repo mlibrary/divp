@@ -70,112 +70,24 @@ class Compression < Stage
     delete_on_success image_file.path, image_file.objid
   end
 
-  def jp2_clevels(tiffinfo)
-    # Get the width and height, figure out which is larger.
-    size = [tiffinfo[:width], tiffinfo[:height]].max
-    # Calculate appropriate Clevels.
-    clevels = (Math.log(size.to_i / 100.0) / Math.log(2)).to_i
-    (clevels < JP2_LEVEL_MIN) ? JP2_LEVEL_MIN : clevels
-  end
-
-  def remove_tiff_metadata(path, destination)
-    cmd = "exiftool -XMP:All= -MakerNotes:All= #{path} -o #{destination}"
-    status = Command.new(cmd).run
-    log cmd, status[:time]
-  end
-
-  def remove_tiff_alpha(path)
-    tmp = path + ".alphaoff"
-    cmd = "convert #{path} -alpha off #{tmp}"
-    status = Command.new(cmd).run
-    log cmd, status[:time]
-    FileUtils.mv(tmp, path)
-  end
-
-  def strip_tiff_profiles(path)
-    tmp = path + ".stripped"
-    cmd = "convert #{path} -strip #{tmp}"
-    begin
-      status = Command.new(cmd).run
-    rescue => e
-      warning = "couldn't remove ICC profile (#{cmd}) (#{e.message})"
-      add_warning Error.new(warning, objid_from_path(path), path)
-    else
-      log cmd, status[:time]
-      FileUtils.mv(tmp, path)
-    end
-  end
-
-  def compress_jp2(source, destination, tiffinfo)
-    clevels = jp2_clevels(tiffinfo)
-    cmd = "kdu_compress -quiet -i #{source} -o #{destination}" \
-          " 'Clevels=#{clevels}'" \
-          " 'Clayers=#{JP2_LAYERS}'" \
-          " 'Corder=#{JP2_ORDER}'" \
-          " 'Cuse_sop=#{JP2_USE_SOP}'" \
-          " 'Cuse_eph=#{JP2_USE_EPH}'" \
-          " Cmodes=#{JP2_MODES}" \
-          " -no_weights -slope '#{JP2_SLOPE}'"
-    status = Command.new(cmd).run
-    log cmd, status[:time]
-  end
-
-  def copy_jp2_metadata(source, destination, document_name, tiffinfo)
-    # If the original image has a date, we want it. If not, we
-    # want to add the current date.
-    # date "%Y-%m-%dT%H:%M:%S"
-    datetime = if tiffinfo[:date_time]
-      "-IFD0:ModifyDate>XMP-tiff:DateTime"
-    else
-      "-XMP-tiff:DateTime=#{Time.now.strftime("%FT%T")}"
-    end
-    cmd = "exiftool -tagsFromFile #{source}" \
-          " '-XMP-dc:source=#{document_name}'" \
-          " '-XMP-tiff:Compression=JPEG 2000'" \
-          " '-IFD0:ImageWidth>XMP-tiff:ImageWidth'" \
-          " '-IFD0:ImageHeight>XMP-tiff:ImageHeight'" \
-          " '-IFD0:BitsPerSample>XMP-tiff:BitsPerSample'" \
-          " '-IFD0:PhotometricInterpretation>XMP-tiff:" \
-          "PhotometricInterpretation'" \
-          " '-IFD0:Orientation>XMP-tiff:Orientation'" \
-          " '-IFD0:SamplesPerPixel>XMP-tiff:SamplesPerPixel'" \
-          " '-IFD0:XResolution>XMP-tiff:XResolution'" \
-          " '-IFD0:YResolution>XMP-tiff:YResolution'" \
-          " '-IFD0:ResolutionUnit>XMP-tiff:ResolutionUnit'" \
-          " '-IFD0:Artist>XMP-tiff:Artist'" \
-          " '-IFD0:Make>XMP-tiff:Make'" \
-          " '-IFD0:Model>XMP-tiff:Model'" \
-          " '-IFD0:Software>XMP-tiff:Software'" \
-          " '#{datetime}'" \
-          " -overwrite_original #{destination}"
-    status = Command.new(cmd).run
-    log cmd, status[:time]
-  end
-
-  def copy_jp2_alphaless_metadata(source, destination)
-    cmd = "exiftool -tagsFromFile #{source}" \
-            " '-IFD0:BitsPerSample>XMP-tiff:BitsPerSample'" \
-            " '-IFD0:SamplesPerPixel>XMP-tiff:SamplesPerPixel'" \
-            " '-IFD0:PhotometricInterpretation>XMP-tiff:" \
-            "PhotometricInterpretation'" \
-            " -overwrite_original '#{destination}'"
-    status = Command.new(cmd).run
-    log cmd, status[:time]
-  end
-
   def handle_1_bps_conversion(compressor)
     image_file = compressor.image_file
     tiffinfo = compressor.tiffinfo
     tmpdir = compressor.tmpdir
+
     compressed = File.join(tmpdir,
       "#{File.basename(image_file.path)}-compressed")
+
     page1 = File.join(tmpdir, "#{File.basename(image_file.path)}-page1")
+
     compress_tiff(image_file.path, compressed)
     copy_tiff_metadata(image_file.path, compressed)
     copy_tiff_page1(compressed, page1)
     FileUtils.rm(compressed)
+
     write_tiff_date_time page1 unless tiffinfo[:date_time]
     write_tiff_document_name(image_file, page1)
+
     if tiffinfo[:software]
       write_tiff_software(page1, tiffinfo[:software])
     else
