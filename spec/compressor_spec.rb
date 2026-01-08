@@ -7,31 +7,32 @@ end
 
 describe Compressor do
   include_context "uses temp dir"
+  let(:log) { Log.new }
+  let(:compression_tool) { FakeCompressionTool }
+  # image file has path, objid, objid_file, file
+  # objid="omzhx8s5.0074.149"
+  # path="/usr/src/app/test/shipments/DLXSCompressorTest_test_run_DLXS/omzhx8s5/0074/149/00000001.tif"
+  # objid_file="omzhx8s5/0074/149/00000001.tif"
+  # file="00000001.tif"
+  let(:path) { File.join("spec/fixtures", @image_file) }
+  let(:objid) { "some_barcode" }
+  let(:objid_file) { File.join(objid, @image_file) }
+  let(:image_file) { double("image_file", path: path, objid: objid, objid_file: objid_file, file: @image_file) }
+  let(:compressor) do
+    Compressor.for(image_file: image_file, tmpdir: Pathname(temp_dir), log: log)
+  end
+  before(:each) do
+    @image_file = "10_10_8_400.tif"
+  end
+  it "generates final document name" do
+    expect(compressor.document_name).to eq("some_barcode/10_10_8_400.jp2")
+  end
+
+  it "is a Color compressor when initialized with an 8bps image" do
+    expect(compressor.class.to_s).to eq("Compressor::Color")
+  end
 
   context "#run" do
-    let(:log) { Log.new }
-    let(:compression_tool) { FakeCompressionTool }
-    # image file has path, objid, objid_file, file
-    # objid="omzhx8s5.0074.149"
-    # path="/usr/src/app/test/shipments/DLXSCompressorTest_test_run_DLXS/omzhx8s5/0074/149/00000001.tif"
-    # objid_file="omzhx8s5/0074/149/00000001.tif"
-    # file="00000001.tif"
-    let(:path) { File.join("spec/fixtures", @image_file) }
-    let(:objid) { "some_barcode" }
-    let(:objid_file) { File.join(objid, @image_file) }
-    let(:image_file) { double("image_file", path: path, objid: objid, objid_file: objid_file, file: @image_file) }
-    let(:compressor) do
-      Compressor.new(image_file: image_file, tmpdir: Pathname(temp_dir), log: log)
-    end
-
-    before(:each) do
-      @image_file = "10_10_8_400.tif"
-    end
-
-    it "generates final document name" do
-      expect(compressor.document_name).to eq("some_barcode/10_10_8_400.jp2")
-    end
-
     it "removes alpha when it exists" do
       @image_file = "10_10_8_400_alpha.tif"
       compressor.run(compression_tool)

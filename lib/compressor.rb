@@ -1,5 +1,4 @@
 require "tiff"
-require "ostruct"
 
 module Kakadu
   def self.compress(source, destination, tiffinfo)
@@ -102,6 +101,20 @@ end
 
 class Compressor
   attr_reader :tiffinfo, :image_file, :tmpdir
+
+  def self.for(image_file:, tmpdir:, log: "whatever")
+    tiffinfo = TIFF.new(image_file.path).info
+    klass = case tiffinfo[:bps]
+    when 8
+      Compressor::Color
+    when 1
+      Compressor::Bitonal
+    else
+      Compressor
+    end
+    klass.new(image_file:, tmpdir:, log: log)
+  end
+
   def initialize(image_file:, tmpdir:, log: "whatever")
     @image_file = image_file
     @tiffinfo = TIFF.new(image_file.path).info
@@ -109,6 +122,16 @@ class Compressor
     @log = log
   end
 
+  def run
+    raise NotImplementedError
+  end
+
+  def bps
+    @tiffinfo[:bps]
+  end
+end
+
+class Compressor::Color < Compressor
   def run(compression_tool = Kakadu)
     # We don't want any XMP metadata to be copied over on its own. If
     # it's been a while since we last ran exiftool, this might take a sec.
@@ -144,10 +167,6 @@ class Compressor
     @log.log_it ExifTool.copy_jp2_alphaless_metadata(sparse_path, new_path) if tiffinfo[:alpha]
   end
 
-  def final_image_name
-    File.basename(image_file.file, ".*") + ".jp2"
-  end
-
   def final_image_path
     File.join(File.dirname(image_file.path), final_image_name)
   end
@@ -158,6 +177,10 @@ class Compressor
     File.join(objid_file_parts)
   end
 
+  def final_image_name
+    File.basename(image_file.file, ".*") + ".jp2"
+  end
+
   def sparse_path
     @sparse_path ||= File.join(tmpdir, "sparse.tif")
   end
@@ -165,4 +188,7 @@ class Compressor
   def new_path
     @new_path ||= File.join(tmpdir, "new.jp2")
   end
+end
+
+class Compressor::Bitonal < Compressor
 end

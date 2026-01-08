@@ -23,7 +23,7 @@ class Compression < Stage
     @bar.steps = files.count
     files.each_with_index do |image_file, i|
       begin
-        compressor = Compressor.new(image_file: image_file, tmpdir: create_tempdir, log: log_collection)
+        compressor = Compressor.for(image_file: image_file, tmpdir: create_tempdir, log: log_collection)
         tiffinfo = compressor.tiffinfo
       rescue => e
         add_error Error.new(e.message, image_file.objid, image_file.file)
@@ -83,6 +83,7 @@ class Compression < Stage
     compress_tiff(image_file.path, compressed)
     copy_tiff_metadata(image_file.path, compressed)
     copy_tiff_page1(compressed, page1)
+
     FileUtils.rm(compressed)
 
     write_tiff_date_time page1 unless tiffinfo[:date_time]
