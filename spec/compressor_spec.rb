@@ -1,10 +1,16 @@
+class FakeCompressionTool
+  def self.compress(sparse_path, new_path, tiffinfo)
+    FileUtils.cp(File.join("spec/fixtures/10_10_8_400.jp2"), new_path)
+    LogEntry.info(command: nil, time: nil)
+  end
+end
+
 describe Compressor do
   include_context "uses temp dir"
 
   context "#run" do
     let(:log) { Log.new }
-    # let(:compression_tool) { class_double(Kakadu, compress: LogEntry.info(command: nil, time: nil)) }
-    let(:compression_tool) { Kakadu }
+    let(:compression_tool) { FakeCompressionTool }
     # image file has path, objid, objid_file, file
     # objid="omzhx8s5.0074.149"
     # path="/usr/src/app/test/shipments/DLXSCompressorTest_test_run_DLXS/omzhx8s5/0074/149/00000001.tif"
@@ -55,7 +61,16 @@ describe Compressor do
 
     it "copies original metadata to the jpeg2000" do
       compressor.run
-      expect(log.entries).to include(match("exiftool -tagsFromFile"))
+      expect(log.entries).to include(match("tiff:Compression=JPEG 2000"))
+    end
+
+    xit "copies original image datetime when present" do
+    end
+
+    it "copies alphaless metadata to the jp2 when tiff has alpha" do
+      @image_file = "10_10_8_400_alpha.tif"
+      compressor.run(compression_tool)
+      expect(log.entries).to include(match("PhotometricInterpretation>XMP-tiff")).twice
     end
   end
 end

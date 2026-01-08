@@ -63,6 +63,17 @@ module ExifTool
     status = Command.new(cmd).run
     LogEntry.info(command: cmd, time: status[:time])
   end
+
+  def self.copy_jp2_alphaless_metadata(source, destination)
+    cmd = "exiftool -tagsFromFile #{source}" \
+            " '-IFD0:BitsPerSample>XMP-tiff:BitsPerSample'" \
+            " '-IFD0:SamplesPerPixel>XMP-tiff:SamplesPerPixel'" \
+            " '-IFD0:PhotometricInterpretation>XMP-tiff:" \
+            "PhotometricInterpretation'" \
+            " -overwrite_original '#{destination}'"
+    status = Command.new(cmd).run
+    LogEntry.info(command: cmd, time: status[:time])
+  end
 end
 
 module ImageMagick
@@ -106,8 +117,7 @@ class Compressor
     @log.log_it ImageMagick.strip_tiff_profiles(sparse_path) if tiffinfo[:icc]
     @log.log_it compression_tool.compress(sparse_path, new_path, tiffinfo)
     @log.log_it ExifTool.copy_jp2_metadata(image_file.path, new_path, document_name, tiffinfo)
-
-    # copy_jp2_alphaless_metadata(sparse, new_image) if tiffinfo[:alpha]
+    @log.log_it ExifTool.copy_jp2_alphaless_metadata(sparse_path, new_path) if tiffinfo[:alpha]
   end
 
   def document_name
