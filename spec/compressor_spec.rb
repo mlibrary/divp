@@ -3,18 +3,31 @@ describe Compressor do
 
   context "#run" do
     let(:log) { Log.new }
-    let(:compression_tool) { class_double(Kakadu, compress: LogEntry.info(command: nil, time: nil)) }
+    # let(:compression_tool) { class_double(Kakadu, compress: LogEntry.info(command: nil, time: nil)) }
+    let(:compression_tool) { Kakadu }
+    # image file has path, objid, objid_file, file
+    # objid="omzhx8s5.0074.149"
+    # path="/usr/src/app/test/shipments/DLXSCompressorTest_test_run_DLXS/omzhx8s5/0074/149/00000001.tif"
+    # objid_file="omzhx8s5/0074/149/00000001.tif"
+    # file="00000001.tif"
+    let(:path) { File.join("spec/fixtures", @image_file) }
+    let(:objid) { "some_barcode" }
+    let(:objid_file) { File.join(objid, @image_file) }
+    let(:image_file) { double("image_file", path: path, objid: objid, objid_file: objid_file, file: @image_file) }
     let(:compressor) do
-      image_file = double("image_file", path: @path)
       Compressor.new(image_file: image_file, tmpdir: Pathname(temp_dir), log: log)
     end
 
     before(:each) do
-      @path = "spec/fixtures/10_10_8_400.tif"
+      @image_file = "10_10_8_400.tif"
+    end
+
+    it "generates final document name" do
+      expect(compressor.document_name).to eq("some_barcode/10_10_8_400.jp2")
     end
 
     it "removes alpha when it exists" do
-      @path = "spec/fixtures/10_10_8_400_alpha.tif"
+      @image_file = "10_10_8_400_alpha.tif"
       compressor.run(compression_tool)
       expect(log.entries).to include(match("-alpha off"))
     end
@@ -25,7 +38,7 @@ describe Compressor do
     end
 
     it "strips tiff profile data when it exists" do
-      @path = "spec/fixtures/10_10_8_400_icc.tif"
+      @image_file = "10_10_8_400_icc.tif"
       compressor.run(compression_tool)
       expect(log.entries).to include(match("-strip"))
     end
@@ -38,6 +51,11 @@ describe Compressor do
     it "runs the compression tool" do
       compressor.run
       expect(log.entries).to include(match("kdu_compress"))
+    end
+
+    it "copies original metadata to the jpeg2000" do
+      compressor.run
+      expect(log.entries).to include(match("exiftool -tagsFromFile"))
     end
   end
 end

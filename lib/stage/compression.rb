@@ -60,7 +60,6 @@ class Compression < Stage
     tiffinfo = compressor.tiffinfo
     tmpdir = compressor.tmpdir
     sparse = compressor.sparse_path
-    # sparse = File.join(tmpdir, "sparse.tif")
     new_image = compressor.new_path
     final_image_name = File.basename(image_file.path, ".*") + ".jp2"
     final_image = File.join(File.dirname(image_file.path), final_image_name)

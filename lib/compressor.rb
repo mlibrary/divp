@@ -31,6 +31,38 @@ module ExifTool
     status = Command.new(cmd).run
     LogEntry.info(command: cmd, time: status[:time])
   end
+
+  def self.copy_jp2_metadata(source, destination, document_name, tiffinfo)
+    # If the original image has a date, we want it. If not, we
+    # want to add the current date.
+    # date "%Y-%m-%dT%H:%M:%S"
+    datetime = if tiffinfo[:date_time]
+      "-IFD0:ModifyDate>XMP-tiff:DateTime"
+    else
+      "-XMP-tiff:DateTime=#{Time.now.strftime("%FT%T")}"
+    end
+    cmd = "exiftool -tagsFromFile #{source}" \
+          " '-XMP-dc:source=#{document_name}'" \
+          " '-XMP-tiff:Compression=JPEG 2000'" \
+          " '-IFD0:ImageWidth>XMP-tiff:ImageWidth'" \
+          " '-IFD0:ImageHeight>XMP-tiff:ImageHeight'" \
+          " '-IFD0:BitsPerSample>XMP-tiff:BitsPerSample'" \
+          " '-IFD0:PhotometricInterpretation>XMP-tiff:" \
+          "PhotometricInterpretation'" \
+          " '-IFD0:Orientation>XMP-tiff:Orientation'" \
+          " '-IFD0:SamplesPerPixel>XMP-tiff:SamplesPerPixel'" \
+          " '-IFD0:XResolution>XMP-tiff:XResolution'" \
+          " '-IFD0:YResolution>XMP-tiff:YResolution'" \
+          " '-IFD0:ResolutionUnit>XMP-tiff:ResolutionUnit'" \
+          " '-IFD0:Artist>XMP-tiff:Artist'" \
+          " '-IFD0:Make>XMP-tiff:Make'" \
+          " '-IFD0:Model>XMP-tiff:Model'" \
+          " '-IFD0:Software>XMP-tiff:Software'" \
+          " '#{datetime}'" \
+          " -overwrite_original #{destination}"
+    status = Command.new(cmd).run
+    LogEntry.info(command: cmd, time: status[:time])
+  end
 end
 
 module ImageMagick
@@ -69,12 +101,20 @@ class Compressor
   def run(compression_tool = Kakadu)
     # We don't want any XMP metadata to be copied over on its own. If
     # it's been a while since we last ran exiftool, this might take a sec.
-    @log.log_it ExifTool.remove_tiff_metadata(source: @image_file.path, destination: sparse_path)
+    @log.log_it ExifTool.remove_tiff_metadata(source: image_file.path, destination: sparse_path)
     @log.log_it ImageMagick.remove_tiff_alpha(sparse_path) if tiffinfo[:alpha]
     @log.log_it ImageMagick.strip_tiff_profiles(sparse_path) if tiffinfo[:icc]
     @log.log_it compression_tool.compress(sparse_path, new_path, tiffinfo)
-    # copy_jp2_metadata(image_file.path, new_image, document_name, tiffinfo)
+    @log.log_it ExifTool.copy_jp2_metadata(image_file.path, new_path, document_name, tiffinfo)
+
     # copy_jp2_alphaless_metadata(sparse, new_image) if tiffinfo[:alpha]
+  end
+
+  def document_name
+    objid_file_parts = image_file.objid_file.split("/")
+    final_image_name = File.basename(objid_file_parts.last, ".*") + ".jp2"
+    objid_file_parts[-1] = final_image_name
+    File.join(objid_file_parts)
   end
 
   def sparse_path
