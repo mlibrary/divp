@@ -21,57 +21,77 @@ describe Compressor do
   let(:compressor) do
     Compressor.for(image_file: image_file, tmpdir: Pathname(temp_dir), log: log)
   end
-  before(:each) do
-    @image_file = "10_10_8_400.tif"
+  context "color tif" do
+    before(:each) do
+      @image_file = "10_10_8_400.tif"
+    end
+    it "generates final document name" do
+      expect(compressor.document_name).to eq("some_barcode/10_10_8_400.jp2")
+    end
+
+    it "is a Color compressor when initialized with an 8bps image" do
+      expect(compressor.class.to_s).to eq("Compressor::Color")
+    end
+
+    context "#run" do
+      it "removes alpha when it exists" do
+        @image_file = "10_10_8_400_alpha.tif"
+        compressor.run(compression_tool)
+        expect(log.entries).to include(match("-alpha off"))
+      end
+
+      it "ignores alpha when it doesn't exist" do
+        compressor.run(compression_tool)
+        expect(log.entries).not_to include(match("-alpha off"))
+      end
+
+      it "strips tiff profile data when it exists" do
+        @image_file = "10_10_8_400_icc.tif"
+        compressor.run(compression_tool)
+        expect(log.entries).to include(match("-strip"))
+      end
+
+      it "ignores tiff profile when it doesn't exist" do
+        compressor.run(compression_tool)
+        expect(log.entries).not_to include(match("-strip"))
+      end
+
+      it "runs the compression tool" do
+        compressor.run
+        expect(log.entries).to include(match("kdu_compress"))
+      end
+
+      it "copies original metadata to the jpeg2000" do
+        compressor.run
+        expect(log.entries).to include(match("tiff:Compression=JPEG 2000"))
+      end
+
+      xit "copies original image datetime when present" do
+      end
+
+      it "copies alphaless metadata to the jp2 when tiff has alpha" do
+        @image_file = "10_10_8_400_alpha.tif"
+        compressor.run(compression_tool)
+        expect(log.entries).to include(match("PhotometricInterpretation>XMP-tiff")).twice
+      end
+    end
   end
-  it "generates final document name" do
-    expect(compressor.document_name).to eq("some_barcode/10_10_8_400.jp2")
-  end
-
-  it "is a Color compressor when initialized with an 8bps image" do
-    expect(compressor.class.to_s).to eq("Compressor::Color")
-  end
-
-  context "#run" do
-    it "removes alpha when it exists" do
-      @image_file = "10_10_8_400_alpha.tif"
-      compressor.run(compression_tool)
-      expect(log.entries).to include(match("-alpha off"))
+  context "bitonal tif" do
+    before(:each) do
+      @image_file = "10_10_1_600.tif"
     end
-
-    it "ignores alpha when it doesn't exist" do
-      compressor.run(compression_tool)
-      expect(log.entries).not_to include(match("-alpha off"))
+    it "is a Bitonal compressor when initialized with a 1bps image" do
+      expect(compressor.class.to_s).to eq("Compressor::Bitonal")
     end
-
-    it "strips tiff profile data when it exists" do
-      @image_file = "10_10_8_400_icc.tif"
-      compressor.run(compression_tool)
-      expect(log.entries).to include(match("-strip"))
-    end
-
-    it "ignores tiff profile when it doesn't exist" do
-      compressor.run(compression_tool)
-      expect(log.entries).not_to include(match("-strip"))
-    end
-
-    it "runs the compression tool" do
-      compressor.run
-      expect(log.entries).to include(match("kdu_compress"))
-    end
-
-    it "copies original metadata to the jpeg2000" do
-      compressor.run
-      expect(log.entries).to include(match("tiff:Compression=JPEG 2000"))
-    end
-
-    xit "copies original image datetime when present" do
-    end
-
-    it "copies alphaless metadata to the jp2 when tiff has alpha" do
-      @image_file = "10_10_8_400_alpha.tif"
-      compressor.run(compression_tool)
-      expect(log.entries).to include(match("PhotometricInterpretation>XMP-tiff")).twice
+    context "#run" do
+      it "runs the compression tool" do
+        compressor.run
+        expect(log.entries).to include(match("tifftopnm"))
+      end
+      it "runs copies the metadata from the original tiff to the compressed one" do
+        compressor.run
+        expect(log.entries).to include(match("exiftool -tagsFromFile #{compressor.image_file.path}"))
+      end
     end
   end
 end

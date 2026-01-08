@@ -73,6 +73,24 @@ module ExifTool
     status = Command.new(cmd).run
     LogEntry.info(command: cmd, time: status[:time])
   end
+
+  def self.copy_tiff_metadata(source, destination)
+    cmd = "exiftool -tagsFromFile #{source}" \
+          " '-IFD0:DocumentName'" \
+          " '-IFD0:ImageDescription='" \
+          " '-IFD0:Orientation'" \
+          " '-IFD0:XResolution'" \
+          " '-IFD0:YResolution'" \
+          " '-IFD0:ResolutionUnit'" \
+          " '-IFD0:ModifyDate'" \
+          " '-IFD0:Artist'" \
+          " '-IFD0:Make'" \
+          " '-IFD0:Model'" \
+          " '-IFD0:Software'" \
+          " -overwrite_original '#{destination}'"
+    status = Command.new(cmd).run
+    LogEntry.info(command: cmd, time: status[:time])
+  end
 end
 
 module ImageMagick
@@ -96,6 +114,15 @@ module ImageMagick
       FileUtils.mv(tmp, path)
       LogEntry.info(command: cmd, time: status[:time])
     end
+  end
+end
+
+module TiffToPnm
+  def self.compress(source, destination)
+    cmd = "tifftopnm #{source} | pnmtotiff -g4 -rowsperstrip" \
+          " 196136698 > #{destination}"
+    status = Command.new(cmd).run
+    LogEntry.info(command: cmd, time: status[:time])
   end
 end
 
@@ -191,4 +218,19 @@ class Compressor::Color < Compressor
 end
 
 class Compressor::Bitonal < Compressor
+  def run
+    # Try to compress the image. This is the only part of this step
+    # that should take any time. It should take a second or so.
+    @log.log_it TiffToPnm.compress(image_file.path, compressed_path)
+
+    @log.log_it ExifTool.copy_tiff_metadata(image_file.path, compressed_path)
+  end
+
+  def compressed_path
+    @compressed_path ||= File.join(tmpdir, "#{File.basename(image_file.path)}-compressed")
+  end
+
+  def page1_path
+    @page1_path ||= File.join(tmpdir, "#{File.basename(image_file.path)}-page1")
+  end
 end

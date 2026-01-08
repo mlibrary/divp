@@ -75,13 +75,11 @@ class Compression < Stage
     tiffinfo = compressor.tiffinfo
     tmpdir = compressor.tmpdir
 
-    compressed = File.join(tmpdir,
-      "#{File.basename(image_file.path)}-compressed")
+    compressed = compressor.compressed_path
+    page1 = compressor.page1_path
 
-    page1 = File.join(tmpdir, "#{File.basename(image_file.path)}-page1")
+    compressor.run
 
-    compress_tiff(image_file.path, compressed)
-    copy_tiff_metadata(image_file.path, compressed)
     copy_tiff_page1(compressed, page1)
 
     FileUtils.rm(compressed)
@@ -96,33 +94,6 @@ class Compression < Stage
         image_file.path)
     end
     copy_on_success page1, image_file.path, image_file.objid
-  end
-
-  # Try to compress the image. This is the only part of this step
-  # that should take any time. It should take a second or so.
-  def compress_tiff(path, destination)
-    cmd = "tifftopnm #{path} | pnmtotiff -g4 -rowsperstrip" \
-          " 196136698 > #{destination}"
-    status = Command.new(cmd).run
-    log cmd, status[:time]
-  end
-
-  def copy_tiff_metadata(path, destination)
-    cmd = "exiftool -tagsFromFile #{path}" \
-          " '-IFD0:DocumentName'" \
-          " '-IFD0:ImageDescription='" \
-          " '-IFD0:Orientation'" \
-          " '-IFD0:XResolution'" \
-          " '-IFD0:YResolution'" \
-          " '-IFD0:ResolutionUnit'" \
-          " '-IFD0:ModifyDate'" \
-          " '-IFD0:Artist'" \
-          " '-IFD0:Make'" \
-          " '-IFD0:Model'" \
-          " '-IFD0:Software'" \
-          " -overwrite_original '#{destination}'"
-    status = Command.new(cmd).run
-    log cmd, status[:time]
   end
 
   def copy_tiff_page1(path, destination)
