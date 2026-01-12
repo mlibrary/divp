@@ -92,6 +92,15 @@ describe Compressor do
         compressor.run
         expect(log.entries).to include(match("exiftool -tagsFromFile #{compressor.image_file.path}"))
       end
+      it "copies the first page of the tiff" do
+        @image_file = "10_10_1_600_2pg.tif"
+        starting_image_info = `tiffinfo #{path}`
+        expect(starting_image_info).to include("directory 1")
+        compressor.run
+        page1_info = `tiffinfo #{compressor.page1_path}`
+        expect(page1_info).not_to include("directory 1")
+        expect(log.entries).to include(match("tiffcp"))
+      end
     end
   end
 end

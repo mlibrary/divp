@@ -117,10 +117,16 @@ module ImageMagick
   end
 end
 
-module TiffToPnm
+module TiffTools
   def self.compress(source, destination)
     cmd = "tifftopnm #{source} | pnmtotiff -g4 -rowsperstrip" \
           " 196136698 > #{destination}"
+    status = Command.new(cmd).run
+    LogEntry.info(command: cmd, time: status[:time])
+  end
+
+  def self.copy_page_1(source, destination)
+    cmd = "tiffcp #{source},0 #{destination}"
     status = Command.new(cmd).run
     LogEntry.info(command: cmd, time: status[:time])
   end
@@ -227,9 +233,11 @@ class Compressor::Bitonal < Compressor
   def run
     # Try to compress the image. This is the only part of this step
     # that should take any time. It should take a second or so.
-    log_it TiffToPnm.compress(image_file.path, compressed_path)
+    log_it TiffTools.compress(image_file.path, compressed_path)
 
     log_it ExifTool.copy_tiff_metadata(image_file.path, compressed_path)
+
+    log_it TiffTools.copy_page_1(compressed_path, page1_path)
   end
 
   def compressed_path
