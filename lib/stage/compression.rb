@@ -91,32 +91,12 @@ class Compression < Stage
     copy_on_success page1, image_file.path, image_file.objid
   end
 
-  def copy_tiff_page1(path, destination)
-    cmd = "tiffcp #{path},0 #{destination}"
-    status = Command.new(cmd).run
-    log cmd, status[:time]
-  end
-
-  # Set the document name with objid/image.tif
-  def write_tiff_document_name(image_file, destination)
-    tiff = TIFF.new(destination)
-    tiffset = tiff.set(TIFF::TIFFTAG_DOCUMENTNAME, image_file.objid_file)
-    log tiffset[:cmd], tiffset[:time]
-  end
-
   # Remove ImageMagick software tag (if it exists) and replace with original
   def write_tiff_software(path, software)
     cmd = "exiftool -IFD0:Software= -overwrite_original #{path}"
     status = Command.new(cmd).run
     log cmd, status[:time]
     cmd = "tiffset -s 305 '#{software}' #{path}"
-    status = Command.new(cmd).run
-    log cmd, status[:time]
-  end
-
-  def write_tiff_date_time(path)
-    date = Time.now.strftime(TIFF_DATE_FORMAT)
-    cmd = "tiffset -s 306 '#{date}' #{path}"
     status = Command.new(cmd).run
     log cmd, status[:time]
   end

@@ -255,7 +255,8 @@ class Compressor::Bitonal < Compressor
 
     log_it TiffTools.copy_page_1(compressed_path, page1_path)
     log_it TiffTools.set_tag(path: page1_path, tag: :date_time, value: TiffTools.date_time_format(@now)) unless tiffinfo[:date_time]
-    # set the document name to the original name
+
+    # Set the document name with objid/image.tif
     log_it TiffTools.set_tag(path: page1_path, tag: :document_name, value: image_file.objid_file)
   end
 

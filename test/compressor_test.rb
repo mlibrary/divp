@@ -43,22 +43,6 @@ class CompressionTest < Minitest::Test
     generate_tests "run", test_proc
   end
 
-  def self.gen_set_tiff_date_time
-    test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
-      test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
-      shipment = shipment_class.new(test_shipment.directory)
-      tiff = File.join(shipment.directory,
-        shipment.objid_to_path(shipment.objids[0]),
-        "00000001.tif")
-      stage = Compression.new(shipment, config: opts.merge(@config))
-      stage.send(:write_tiff_date_time, tiff)
-      tiffinfo = `tiffinfo #{tiff}`
-      assert_match(/DateTime:\s\d{4}:\d{2}:\d{2}\s\d{2}:\d{2}:\d{2}/, tiffinfo,
-        "TIFF DateTime in %Y:%m:%d %H:%M:%S format")
-    }
-    generate_tests "set_tiff_date_time", test_proc
-  end
-
   def self.gen_set_jp2_date_time
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
