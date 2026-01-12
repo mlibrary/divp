@@ -118,6 +118,15 @@ module ImageMagick
 end
 
 module TiffTools
+  TIFFTAGS = {
+    document_name: 269,
+    date_time: 306
+  }
+
+  def self.date_time_format(datetime)
+    datetime.strftime("%Y:%m:%d %H:%M:%S")
+  end
+
   def self.compress(source, destination)
     cmd = "tifftopnm #{source} | pnmtotiff -g4 -rowsperstrip" \
           " 196136698 > #{destination}"
@@ -130,12 +139,18 @@ module TiffTools
     status = Command.new(cmd).run
     LogEntry.info(command: cmd, time: status[:time])
   end
+
+  def self.set_tag(path:, tag:, value:)
+    cmd = "tiffset -s #{TIFFTAGS[tag]}, '#{value}' #{path}"
+    status = Command.new(cmd).run
+    LogEntry.info(command: cmd, time: status[:time])
+  end
 end
 
 class Compressor
   attr_reader :tiffinfo, :image_file, :tmpdir
 
-  def self.for(image_file:, tmpdir:, log: "whatever")
+  def self.for(image_file:, tmpdir:, log: "whatever", now: Time.now)
     tiffinfo = TIFF.new(image_file.path).info
     klass = case tiffinfo[:bps]
     when 8
@@ -145,14 +160,15 @@ class Compressor
     else
       Compressor
     end
-    klass.new(image_file:, tmpdir:, log: log)
+    klass.new(image_file:, tmpdir:, log: log, now: now)
   end
 
-  def initialize(image_file:, tmpdir:, log: "whatever")
+  def initialize(image_file:, tmpdir:, log:, now:)
     @image_file = image_file
     @tiffinfo = TIFF.new(image_file.path).info
     @tmpdir = tmpdir
     @log = log
+    @now = now
   end
 
   def run
@@ -238,6 +254,9 @@ class Compressor::Bitonal < Compressor
     log_it ExifTool.copy_tiff_metadata(image_file.path, compressed_path)
 
     log_it TiffTools.copy_page_1(compressed_path, page1_path)
+    log_it TiffTools.set_tag(path: page1_path, tag: :date_time, value: TiffTools.date_time_format(@now)) unless tiffinfo[:date_time]
+    # set the document name to the original name
+    log_it TiffTools.set_tag(path: page1_path, tag: :document_name, value: image_file.objid_file)
   end
 
   def compressed_path

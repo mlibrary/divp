@@ -80,12 +80,7 @@ class Compression < Stage
 
     compressor.run
 
-    copy_tiff_page1(compressed, page1)
-
     FileUtils.rm(compressed)
-
-    write_tiff_date_time page1 unless tiffinfo[:date_time]
-    write_tiff_document_name(image_file, page1)
 
     if tiffinfo[:software]
       write_tiff_software(page1, tiffinfo[:software])

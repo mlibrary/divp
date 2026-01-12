@@ -7,6 +7,9 @@ end
 
 describe Compressor do
   include_context "uses temp dir"
+  def tiffinfo(path)
+    `tiffinfo #{path}`
+  end
   let(:log) { Log.new }
   let(:compression_tool) { FakeCompressionTool }
   # image file has path, objid, objid_file, file
@@ -18,8 +21,9 @@ describe Compressor do
   let(:objid) { "some_barcode" }
   let(:objid_file) { File.join(objid, @image_file) }
   let(:image_file) { double("image_file", path: path, objid: objid, objid_file: objid_file, file: @image_file) }
+  let(:now) { Time.now }
   let(:compressor) do
-    Compressor.for(image_file: image_file, tmpdir: Pathname(temp_dir), log: log)
+    Compressor.for(image_file: image_file, tmpdir: Pathname(temp_dir), log: log, now: now)
   end
   context "color tif" do
     before(:each) do
@@ -97,9 +101,33 @@ describe Compressor do
         starting_image_info = `tiffinfo #{path}`
         expect(starting_image_info).to include("directory 1")
         compressor.run
-        page1_info = `tiffinfo #{compressor.page1_path}`
-        expect(page1_info).not_to include("directory 1")
+        result_info = tiffinfo(compressor.page1_path)
+        expect(result_info).not_to include("directory 1")
         expect(log.entries).to include(match("tiffcp"))
+      end
+
+      it "keeps the original datetime when the original image has one" do
+        tmpdir_image_path = File.join(Pathname(temp_dir), @image_file)
+        FileUtils.cp(path, tmpdir_image_path)
+        one_hour_ago = Time.now - 3600
+        allow(image_file).to receive(:path).and_return(tmpdir_image_path)
+        TiffTools.set_tag(path: tmpdir_image_path, tag: :date_time, value: TiffTools.date_time_format(one_hour_ago))
+
+        compressor.run
+        result_info = tiffinfo(compressor.page1_path)
+        expect(result_info).to include("DateTime: #{TiffTools.date_time_format(one_hour_ago)}")
+      end
+
+      it "has now as the datetime when original tiff does not have a datetime" do
+        compressor.run
+        result_info = tiffinfo(compressor.page1_path)
+        expect(result_info).to include("DateTime: #{now.strftime("%Y:%m:%d %H:%M:%S")}")
+      end
+
+      it "has a document name of the original file" do
+        compressor.run
+        result_info = tiffinfo(compressor.page1_path)
+        expect(result_info).to include("DocumentName: #{objid_file}")
       end
     end
   end
