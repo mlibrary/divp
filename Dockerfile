@@ -1,7 +1,7 @@
 ################################################################################
 # BASE
 ################################################################################
-FROM ruby:3.4-bullseye AS base
+FROM ruby:3.4-bookworm AS base
 ARG KAKADU_FILE=KDU841_Demo_Apps_for_Linux-x86-64_231117.zip
 ARG FEED_VERSION=feed_v1.14.1
 
