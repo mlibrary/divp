@@ -5,16 +5,6 @@ require "stage"
 require "tiff"
 require "compressor"
 
-JP2_LEVEL_MIN = 5
-JP2_LAYERS = 8
-JP2_ORDER = "RLCP"
-JP2_USE_SOP = "yes"
-JP2_USE_EPH = "yes"
-JP2_MODES = '"RESET|RESTART|CAUSAL|ERTERM|SEGMARK"'
-JP2_SLOPE = 42_988
-
-TIFF_DATE_FORMAT = "%Y:%m:%d %H:%M:%S"
-
 # TIFF to JP2/TIFF compression stage
 class Compression < Stage
   def run(agenda)

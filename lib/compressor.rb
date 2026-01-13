@@ -1,6 +1,13 @@
 require "tiff"
 
 module Kakadu
+  JP2_LEVEL_MIN = 5
+  JP2_LAYERS = 8
+  JP2_ORDER = "RLCP"
+  JP2_USE_SOP = "yes"
+  JP2_USE_EPH = "yes"
+  JP2_MODES = '"RESET|RESTART|CAUSAL|ERTERM|SEGMARK"'
+  JP2_SLOPE = 42_988
   def self.compress(source, destination, tiffinfo)
     clevels = jp2_clevels(tiffinfo)
     cmd = "kdu_compress -quiet -i #{source} -o #{destination}" \
