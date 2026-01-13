@@ -46,27 +46,25 @@ class Compression < Stage
   private
 
   def handle_8_bps_conversion(compressor)
-    image_file = compressor.image_file
-    tmpdir = compressor.tmpdir
-
-    on_disk_temp_image = compressor.final_image_path.sub(shipment.directory, shipment.tmp_directory)
-    system("mkdir -p #{File.dirname(on_disk_temp_image)}")
+    on_disk_temp_image_path = compressor.final_image_path.sub(shipment.directory, shipment.tmp_directory)
+    system("mkdir -p #{File.dirname(on_disk_temp_image_path)}")
 
     compressor.run
 
-    system("cp #{compressor.output_path} #{on_disk_temp_image}")
-    system("rm -r #{tmpdir}/*")
-    copy_on_success on_disk_temp_image, compressor.final_image_path, image_file.objid
-    delete_on_success image_file.path, image_file.objid
+    system("cp #{compressor.output_path} #{on_disk_temp_image_path}")
+    system("rm -r #{compressor.tmpdir}/*")
+    copy_on_success on_disk_temp_image_path, compressor.final_image_path, compressor.image_file.objid
+    delete_on_success compressor.image_file.path, compressor.image_file.objid
   end
 
   def handle_1_bps_conversion(compressor)
-    image_file = compressor.image_file
+    on_disk_temp_image_path = compressor.final_image_path.sub(shipment.directory, shipment.tmp_directory)
+    system("mkdir -p #{File.dirname(on_disk_temp_image_path)}")
 
     compressor.run
 
-    FileUtils.rm(compressor.compressed_path)
-
-    copy_on_success compressor.output_path, compressor.final_image_path, image_file.objid
+    system("cp #{compressor.output_path} #{on_disk_temp_image_path}")
+    system("rm -r #{compressor.tmpdir}/*")
+    copy_on_success on_disk_temp_image_path, compressor.final_image_path, compressor.image_file.objid
   end
 end

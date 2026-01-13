@@ -193,6 +193,10 @@ class Compressor
     @tiffinfo[:bps]
   end
 
+  def final_image_path
+    raise NotImplementedError
+  end
+
   private
 
   def log_it(log_entry)
