@@ -134,7 +134,6 @@ describe Compressor do
       it "copies software from the original tiff to the output file" do
         tmpdir_image_path = File.join(Pathname(temp_dir), @image_file)
         FileUtils.cp(path, tmpdir_image_path)
-        one_hour_ago = Time.now - 3600
         allow(image_file).to receive(:path).and_return(tmpdir_image_path)
         TiffTools.set_tag(path: tmpdir_image_path, tag: :software, value: "My Software")
         compressor.run
