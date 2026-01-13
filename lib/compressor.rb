@@ -223,17 +223,17 @@ class Compressor::Color < Compressor
     # This will always take a second. Other than the initial loading
     # of exiftool libraries, this is the only JP2 step that takes
     # noticeable time.
-    log_it compression_tool.compress(sparse_path, new_path, tiffinfo)
+    log_it compression_tool.compress(sparse_path, output_path, tiffinfo)
 
     # We have our JP2; we can remove the middle TIFF. Then we try
     # to grab metadata from the original TIFF. This should be very
     # quick since we just used exiftool a few lines back.
-    log_it ExifTool.copy_jp2_metadata(image_file.path, new_path, document_name, tiffinfo)
+    log_it ExifTool.copy_jp2_metadata(image_file.path, output_path, document_name, tiffinfo)
 
     # If our image had an alpha channel, it'll be gone now, and
     # the XMP data needs to reflect that (previously, we were
     # taking that info from the original image).
-    log_it ExifTool.copy_jp2_alphaless_metadata(sparse_path, new_path) if tiffinfo[:alpha]
+    log_it ExifTool.copy_jp2_alphaless_metadata(sparse_path, output_path) if tiffinfo[:alpha]
   end
 
   def final_image_path
@@ -254,8 +254,8 @@ class Compressor::Color < Compressor
     @sparse_path ||= File.join(tmpdir, "sparse.tif")
   end
 
-  def new_path
-    @new_path ||= File.join(tmpdir, "new.jp2")
+  def output_path
+    @output_path ||= File.join(tmpdir, "output.jp2")
   end
 end
 
@@ -267,14 +267,14 @@ class Compressor::Bitonal < Compressor
 
     log_it ExifTool.copy_tiff_metadata(image_file.path, compressed_path)
 
-    log_it TiffTools.copy_page_1(compressed_path, page1_path)
-    log_it TiffTools.set_tag(path: page1_path, tag: :date_time, value: TiffTools.date_time_format(@now)) unless tiffinfo[:date_time]
+    log_it TiffTools.copy_page_1(compressed_path, output_path)
+    log_it TiffTools.set_tag(path: output_path, tag: :date_time, value: TiffTools.date_time_format(@now)) unless tiffinfo[:date_time]
 
     # Set the document name with objid/image.tif
-    log_it TiffTools.set_tag(path: page1_path, tag: :document_name, value: image_file.objid_file)
+    log_it TiffTools.set_tag(path: output_path, tag: :document_name, value: image_file.objid_file)
     if tiffinfo[:software]
-      log_it ExifTool.clear_software_tag(page1_path)
-      log_it TiffTools.set_tag(path: page1_path, tag: :software, value: tiffinfo[:software])
+      log_it ExifTool.clear_software_tag(output_path)
+      log_it TiffTools.set_tag(path: output_path, tag: :software, value: tiffinfo[:software])
     else
       log_it LogEntry.warning(error: Error.new("could not extract software", image_file.objid, image_file.path))
     end
@@ -284,7 +284,11 @@ class Compressor::Bitonal < Compressor
     @compressed_path ||= File.join(tmpdir, "#{File.basename(image_file.path)}-compressed")
   end
 
-  def page1_path
-    @page1_path ||= File.join(tmpdir, "#{File.basename(image_file.path)}-page1")
+  def final_image_path
+    image_file.path
+  end
+
+  def output_path
+    @output_path ||= File.join(tmpdir, "output.tif")
   end
 end

@@ -54,7 +54,7 @@ class Compression < Stage
 
     compressor.run
 
-    system("cp #{compressor.new_path} #{on_disk_temp_image}")
+    system("cp #{compressor.output_path} #{on_disk_temp_image}")
     system("rm -r #{tmpdir}/*")
     copy_on_success on_disk_temp_image, compressor.final_image_path, image_file.objid
     delete_on_success image_file.path, image_file.objid
@@ -62,16 +62,11 @@ class Compression < Stage
 
   def handle_1_bps_conversion(compressor)
     image_file = compressor.image_file
-    tiffinfo = compressor.tiffinfo
-    tmpdir = compressor.tmpdir
-
-    compressed = compressor.compressed_path
-    page1 = compressor.page1_path
 
     compressor.run
 
-    FileUtils.rm(compressed)
+    FileUtils.rm(compressor.compressed_path)
 
-    copy_on_success page1, image_file.path, image_file.objid
+    copy_on_success compressor.output_path, compressor.final_image_path, image_file.objid
   end
 end

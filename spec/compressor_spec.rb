@@ -102,7 +102,7 @@ describe Compressor do
         starting_image_info = `tiffinfo #{path}`
         expect(starting_image_info).to include("directory 1")
         compressor.run
-        result_info = tiffinfo(compressor.page1_path)
+        result_info = tiffinfo(compressor.output_path)
         expect(result_info).not_to include("directory 1")
         expect(log.entries).to include(match("tiffcp"))
       end
@@ -115,19 +115,19 @@ describe Compressor do
         TiffTools.set_tag(path: tmpdir_image_path, tag: :date_time, value: TiffTools.date_time_format(one_hour_ago))
 
         compressor.run
-        result_info = tiffinfo(compressor.page1_path)
+        result_info = tiffinfo(compressor.output_path)
         expect(result_info).to include("DateTime: #{TiffTools.date_time_format(one_hour_ago)}")
       end
 
       it "has now as the datetime when original tiff does not have a datetime" do
         compressor.run
-        result_info = tiffinfo(compressor.page1_path)
+        result_info = tiffinfo(compressor.output_path)
         expect(result_info).to include("DateTime: #{now.strftime("%Y:%m:%d %H:%M:%S")}")
       end
 
       it "has a document name of the original file" do
         compressor.run
-        result_info = tiffinfo(compressor.page1_path)
+        result_info = tiffinfo(compressor.output_path)
         expect(result_info).to include("DocumentName: #{objid_file}")
       end
 
@@ -138,13 +138,13 @@ describe Compressor do
         allow(image_file).to receive(:path).and_return(tmpdir_image_path)
         TiffTools.set_tag(path: tmpdir_image_path, tag: :software, value: "My Software")
         compressor.run
-        result_software = TIFF.new(compressor.page1_path).info[:software]
+        result_software = TIFF.new(compressor.output_path).info[:software]
         expect(result_software).to eq("My Software")
         expect(log.entries).to include(match("exiftool -IFD0:Software="))
       end
       it "logs a warning if there is no software in the original" do
         compressor.run
-        result_software = TIFF.new(compressor.page1_path).info[:software]
+        result_software = TIFF.new(compressor.output_path).info[:software]
         expect(result_software).to be_nil
         expect(log.warnings).to_json include(match("could not extract software"))
       end
