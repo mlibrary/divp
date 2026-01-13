@@ -34,8 +34,8 @@ describe Compressor do
       expect(compressor.document_name).to eq("some_barcode/10_10_8_400.jp2")
     end
 
-    it "is a Color compressor when initialized with an 8bps image" do
-      expect(compressor.class.to_s).to eq("Compressor::Color")
+    it "is a Cotone compressor when initialized with an 8bps image" do
+      expect(compressor.class.to_s).to eq("Compressor::Contone")
     end
 
     context "#run" do

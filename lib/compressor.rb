@@ -168,11 +168,11 @@ class Compressor
     tiffinfo = TIFF.new(image_file.path).info
     klass = case tiffinfo[:bps]
     when 8
-      Compressor::Color
+      Compressor::Contone
     when 1
       Compressor::Bitonal
     else
-      Compressor
+      raise "invalid source TIFF BPS #{tiffinfo[:bps]}"
     end
     klass.new(image_file:, tmpdir:, log: log, now: now)
   end
@@ -186,6 +186,10 @@ class Compressor
   end
 
   def run
+    raise NotImplementedError
+  end
+
+  def compression_type
     raise NotImplementedError
   end
 
@@ -204,7 +208,11 @@ class Compressor
   end
 end
 
-class Compressor::Color < Compressor
+class Compressor::Contone < Compressor
+  def compression_type
+    "JP2"
+  end
+
   def run(compression_tool = Kakadu)
     # We don't want any XMP metadata to be copied over on its own. If
     # it's been a while since we last ran exiftool, this might take a sec.
@@ -264,6 +272,10 @@ class Compressor::Color < Compressor
 end
 
 class Compressor::Bitonal < Compressor
+  def compression_type
+    "G4"
+  end
+
   def run
     # Try to compress the image. This is the only part of this step
     # that should take any time. It should take a second or so.
