@@ -72,22 +72,6 @@ class Compression < Stage
 
     FileUtils.rm(compressed)
 
-    if tiffinfo[:software]
-      write_tiff_software(page1, tiffinfo[:software])
-    else
-      add_warning Error.new("could not extract software", image_file.objid,
-        image_file.path)
-    end
     copy_on_success page1, image_file.path, image_file.objid
-  end
-
-  # Remove ImageMagick software tag (if it exists) and replace with original
-  def write_tiff_software(path, software)
-    cmd = "exiftool -IFD0:Software= -overwrite_original #{path}"
-    status = Command.new(cmd).run
-    log cmd, status[:time]
-    cmd = "tiffset -s 305 '#{software}' #{path}"
-    status = Command.new(cmd).run
-    log cmd, status[:time]
   end
 end

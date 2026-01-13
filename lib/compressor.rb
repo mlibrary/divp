@@ -98,6 +98,12 @@ module ExifTool
     status = Command.new(cmd).run
     LogEntry.info(command: cmd, time: status[:time])
   end
+
+  def self.clear_software_tag(path)
+    cmd = "exiftool -IFD0:Software= -overwrite_original #{path}"
+    status = Command.new(cmd).run
+    LogEntry.info(command: cmd, time: status[:time])
+  end
 end
 
 module ImageMagick
@@ -127,7 +133,8 @@ end
 module TiffTools
   TIFFTAGS = {
     document_name: 269,
-    date_time: 306
+    date_time: 306,
+    software: 305
   }
 
   def self.date_time_format(datetime)
@@ -265,6 +272,12 @@ class Compressor::Bitonal < Compressor
 
     # Set the document name with objid/image.tif
     log_it TiffTools.set_tag(path: page1_path, tag: :document_name, value: image_file.objid_file)
+    if tiffinfo[:software]
+      log_it ExifTool.clear_software_tag(page1_path)
+      log_it TiffTools.set_tag(path: page1_path, tag: :software, value: tiffinfo[:software])
+    else
+      log_it LogEntry.warning(error: Error.new("could not extract software", image_file.objid, image_file.path))
+    end
   end
 
   def compressed_path

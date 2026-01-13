@@ -10,7 +10,7 @@ describe Compressor do
   def tiffinfo(path)
     `tiffinfo #{path}`
   end
-  let(:log) { Log.new }
+  let(:log) { Log.new(objids: [objid]) }
   let(:compression_tool) { FakeCompressionTool }
   # image file has path, objid, objid_file, file
   # objid="omzhx8s5.0074.149"
@@ -28,6 +28,7 @@ describe Compressor do
   context "color tif" do
     before(:each) do
       @image_file = "10_10_8_400.tif"
+      @log = Log.new
     end
     it "generates final document name" do
       expect(compressor.document_name).to eq("some_barcode/10_10_8_400.jp2")
@@ -128,6 +129,24 @@ describe Compressor do
         compressor.run
         result_info = tiffinfo(compressor.page1_path)
         expect(result_info).to include("DocumentName: #{objid_file}")
+      end
+
+      it "copies software from the original tiff to the output file" do
+        tmpdir_image_path = File.join(Pathname(temp_dir), @image_file)
+        FileUtils.cp(path, tmpdir_image_path)
+        one_hour_ago = Time.now - 3600
+        allow(image_file).to receive(:path).and_return(tmpdir_image_path)
+        TiffTools.set_tag(path: tmpdir_image_path, tag: :software, value: "My Software")
+        compressor.run
+        result_software = TIFF.new(compressor.page1_path).info[:software]
+        expect(result_software).to eq("My Software")
+        expect(log.entries).to include(match("exiftool -IFD0:Software="))
+      end
+      it "logs a warning if there is no software in the original" do
+        compressor.run
+        result_software = TIFF.new(compressor.page1_path).info[:software]
+        expect(result_software).to be_nil
+        expect(log.warnings).to_json include(match("could not extract software"))
       end
     end
   end

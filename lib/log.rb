@@ -1,7 +1,7 @@
 class Log
   include Enumerable
 
-  def initialize(log: nil, warnings: Warnings.new)
+  def initialize(log: nil, objids: [], warnings: Warnings.new(objids: objids))
     @log = log || []
     @warnings = warnings
   end
