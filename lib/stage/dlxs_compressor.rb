@@ -126,7 +126,7 @@ class DLXSCompressor < Stage
 
   # Expand existing jp2 into tif in temp directory
   def expand_jp2(src, dest)
-    cmd = "kdu_expand -quiet -i '#{src}' -o '#{dest}'"
+    cmd = "grk_decompress  -i '#{src}' -o '#{dest}'"
     status = Command.new(cmd).run
     log cmd, status[:time]
   end

@@ -8,17 +8,16 @@ ARG FEED_VERSION=feed_v1.14.1
 RUN gem install bundler
 
 WORKDIR /tmp
-RUN wget https://kakadusoftware.com/wp-content/uploads/$KAKADU_FILE
-RUN unzip -j -d kakadu $KAKADU_FILE
-RUN mv /tmp/kakadu/*.so /usr/local/lib
-RUN mv /tmp/kakadu/kdu* /usr/local/bin
-RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/kakadu.conf
-RUN ldconfig
+
+RUN curl https://apt.lib.umich.edu/mlibrary-archive-keyring.gpg -o /etc/apt/keyrings/mlibrary-archive-keyring.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/mlibrary-archive-keyring.gpg] https://apt.lib.umich.edu bookworm main" > /etc/apt/sources.list.d/mlibrary.list
 
 RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
     libtiff-tools\ 
     exiftool \
-    netpbm
+    netpbm\
+    grokj2k
+
 
 ENV APP_PATH=/usr/src/app
 RUN mkdir -p $APP_PATH

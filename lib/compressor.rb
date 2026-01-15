@@ -1,23 +1,15 @@
 require "tiff"
 
-module Kakadu
+module Grok
   JP2_LEVEL_MIN = 5
-  JP2_LAYERS = 8
-  JP2_ORDER = "RLCP"
-  JP2_USE_SOP = "yes"
-  JP2_USE_EPH = "yes"
-  JP2_MODES = '"RESET|RESTART|CAUSAL|ERTERM|SEGMARK"'
-  JP2_SLOPE = 42_988
+
+  # Settings for grk_compress recommended from Roger Espinosa. "-slope"
+  # is a VBR compression mode; the value of 42988 corresponds to pre-6.4
+  # slope of 51180, the current (as of 5/6/2011) recommended setting for
+  # Google digifeeds.
   def self.compress(source, destination, tiffinfo)
     clevels = jp2_clevels(tiffinfo)
-    cmd = "kdu_compress -quiet -i #{source} -o #{destination}" \
-          " 'Clevels=#{clevels}'" \
-          " 'Clayers=#{JP2_LAYERS}'" \
-          " 'Corder=#{JP2_ORDER}'" \
-          " 'Cuse_sop=#{JP2_USE_SOP}'" \
-          " 'Cuse_eph=#{JP2_USE_EPH}'" \
-          " Cmodes=#{JP2_MODES}" \
-          " -no_weights -slope '#{JP2_SLOPE}'"
+    cmd = "grk_compress -i \"#{source}\" -o \"#{destination}\" -p RLCP -n #{clevels} -S -E -M 62 -I -q 32"
     status = Command.new(cmd).run
     LogEntry.info(command: cmd, time: status[:time])
   end
@@ -213,7 +205,7 @@ class Compressor::Contone < Compressor
     "JP2"
   end
 
-  def run(compression_tool = Kakadu)
+  def run(compression_tool = Grok)
     # We don't want any XMP metadata to be copied over on its own. If
     # it's been a while since we last ran exiftool, this might take a sec.
     log_it ExifTool.remove_tiff_metadata(source: image_file.path, destination: sparse_path)

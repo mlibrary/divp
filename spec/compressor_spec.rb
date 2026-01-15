@@ -63,7 +63,7 @@ describe Compressor do
 
       it "runs the compression tool" do
         compressor.run
-        expect(log.entries).to include(match("kdu_compress"))
+        expect(log.entries).to include(match("grk_compress"))
       end
 
       it "copies original metadata to the jpeg2000" do
