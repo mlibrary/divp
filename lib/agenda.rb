@@ -15,7 +15,7 @@ class Agenda
   end
 
   # Propagate stage errors onto subsequent stages.
-  def update(source_stage) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def update(source_stage)
     @stages.each do |stage|
       next if @stage_to_index[stage.name.to_sym] <=
         @stage_to_index[source_stage.name.to_sym]

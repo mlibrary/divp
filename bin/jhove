@@ -53,7 +53,7 @@ statuses = {}
 err_file = ['jhove', Time.now.strftime('%Y%m%d_%H%M%S'), 'errors.txt'].join '_'
 outfile = File.open err_file, 'w'
 
-args.each do |arg| # rubocop:disable Metrics/BlockLength
+args.each do |arg|
   dir = Pathname.new(arg).cleanpath.to_s
   unless File.exist? dir
     statuses[arg] = 'No such directory'.red

@@ -9,9 +9,10 @@ require "config"
 require "error"
 require "progress_bar"
 require "symbolize"
+require "log"
 
 # Base class for conversion stages
-class Stage # rubocop:disable Metrics/ClassLength
+class Stage
   attr_reader :errors, :warnings, :start, :end
   attr_accessor :name, :config, :shipment
 
@@ -38,7 +39,7 @@ class Stage # rubocop:disable Metrics/ClassLength
 
   # Can be created without a shipment, but that field needs to be set
   # before the #run method can be called.
-  def initialize(shipment, **args) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+  def initialize(shipment, **args)
     unless shipment.nil? || shipment.is_a?(Shipment)
       raise StandardError, "unknown shipment class #{shipment.class}"
     end
@@ -46,9 +47,18 @@ class Stage # rubocop:disable Metrics/ClassLength
     @shipment = shipment
     @name = args[:name] || self.class.to_s
     @config = args[:config] || {} # Top-level Config object
-    @errors = args[:errors] || [] # Fatal conditions, Array of Error
-    @warnings = args[:warnings] || [] # Nonfatal conditions, Array of Error
-    @data = args[:data] || {} # Misc data structure including log
+    @bar = if config[:no_progress]
+      SilentProgressBar.new(self.class)
+    else
+      ProgressBar.new(self.class)
+    end
+    @errors = Errors.new(bar: @bar, objids: objids, list: args[:errors])
+    @warnings = Warnings.new(bar: @bar, objids: objids, list: args[:errors])
+
+    @data = args[:data] || {log: Log.new(warnings: @warnings)} # Misc data structure including log
+    if @data[:log].instance_of?(::Array) || @data[:log].nil?
+      @data[:log] = Log.new(log: @data[:log], warnings: @warnings)
+    end
     # Time the stage was last run
     @start = if args[:start].to_s == ""
       nil
@@ -62,17 +72,12 @@ class Stage # rubocop:disable Metrics/ClassLength
     else
       Time.parse args[:end]
     end
-    @bar = if config[:no_progress]
-      SilentProgressBar.new(self.class)
-    else
-      ProgressBar.new(self.class)
-    end
   end
 
   # Get rid of errors, warnings, and anything that may have been memoized
   def reinitialize!
-    @errors = []
-    @warnings = []
+    @errors = Errors.new(bar: @bar, objids: objids)
+    @warnings = Warnings.new(bar: @bar, objids: objids)
     @bar.done = nil
   end
 
@@ -92,23 +97,24 @@ class Stage # rubocop:disable Metrics/ClassLength
   end
 
   def add_error(err)
-    raise "#{err.class} passed to add_error" unless err.is_a? Error
-    unless err.objid.nil? || objids.member?(err.objid)
-      raise "unknown error objid #{err.objid}"
-    end
+    @errors.add(err)
+    # raise "#{err.class} passed to add_error" unless err.is_a? Error
+    # unless err.objid.nil? || objids.member?(err.objid)
+    # raise "unknown error objid #{err.objid}"
+    # end
 
-    @bar.error = true
-    @errors << err
+    # @bar.error = true
+    # @errors << err
   end
 
   def add_warning(err)
-    raise "#{err.class} passed to add_warning" unless err.is_a? Error
-    unless err.objid.nil? || objids.member?(err.objid)
-      raise "unknown warning objid #{err.objid}"
-    end
+    @warnings.add(err)
+    # unless err.objid.nil? || objids.member?(err.objid)
+    # raise "unknown warning objid #{err.objid}"
+    # end
 
-    @bar.warning = true
-    @warnings << err
+    # @bar.warning = true
+    # @warnings << err
   end
 
   # Map of objids + nil -> [Errors]
@@ -134,14 +140,6 @@ class Stage # rubocop:disable Metrics/ClassLength
   # Any error with objid == nil is fatal.
   def fatal_error?
     errors_by_objid.key? nil
-  end
-
-  def delete_errors_for_objid(objid)
-    @errors.delete_if { |err| err.objid == objid }
-  end
-
-  def delete_warnings_for_objid(objid)
-    @warnings.delete_if { |err| err.objid == objid }
   end
 
   # OK to make destructive changes to the shipment for this objid?
@@ -219,12 +217,15 @@ class Stage # rubocop:disable Metrics/ClassLength
   end
 
   def objids
-    @objids ||= shipment.objids
+    @objids ||= shipment&.objids || []
+  end
+
+  def log_collection
+    @data[:log]
   end
 
   def log(entry, time = nil)
-    entry += format(" (%.3f sec)", time) unless time.nil?
-    (@data[:log] ||= []) << entry
+    log_collection.log(entry, time)
   end
 
   def shipment_directory

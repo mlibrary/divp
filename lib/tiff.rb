@@ -17,7 +17,7 @@ class TIFF
   end
 
   # Run tiffinfo command and return output text block
-  def info # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def info
     cmd = "tiffinfo #{@path}"
     status = Command.new(cmd).run
     tiffinfo = extract_fields(status[:stdout])
@@ -35,7 +35,7 @@ class TIFF
     tiffinfo
   end
 
-  def set(tag, value) # rubocop:disable Metrics/MethodLength
+  def set(tag, value)
     cmd = "tiffset -s #{tag} '#{value}' #{@path}"
     status = Command.new(cmd).run
     tiffset = {cmd: cmd,
@@ -54,7 +54,7 @@ class TIFF
 
   private
 
-  def extract_fields(info) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def extract_fields(info)
     h = {}
     m = info.match(/Resolution:\s(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)\s+(.*)/)
     unless m.nil?

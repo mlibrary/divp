@@ -11,7 +11,7 @@ class ImageValidator < Stage
   BITONAL_RES = 600
   CONTONE_RES = 400
 
-  def run(agenda) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
+  def run(agenda)
     return unless agenda.any?
 
     tiff_files = image_files.select { |file| agenda.include? file.objid }
@@ -36,7 +36,7 @@ class ImageValidator < Stage
   private
 
   # Run tiffinfo command and return output text block
-  def run_tiffinfo(image_file) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def run_tiffinfo(image_file)
     begin
       info = TIFF.new(image_file.path).info
     rescue => e
@@ -58,7 +58,7 @@ class ImageValidator < Stage
   # 'Samples/Pixel' line -> spp
   # bps of 1 requires spp=1 and xres=BITONAL_RES and yres=BITONAL_RES
   # bps of 8 requires spp in [1,3,4] and xres=CONTONE_RES and yres=CONTONE_RES
-  def evaluate_tiff(image_file, info) # rubocop:disable Metrics/MethodLength
+  def evaluate_tiff(image_file, info)
     if info[:res_unit] != "pixels/inch"
       image_error image_file, "must have pixels/inch, not #{info[:res_unit]}"
     end
@@ -91,7 +91,7 @@ class ImageValidator < Stage
     end
   end
 
-  def run_jp2info(image_file) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def run_jp2info(image_file)
     begin
       info = JP2.new(image_file.path).info
     rescue => e

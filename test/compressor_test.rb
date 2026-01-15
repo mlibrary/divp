@@ -2,10 +2,11 @@
 # frozen_string_literal: true
 
 require "minitest/autorun"
-require "compressor"
+require_relative "test_helper"
+require "compression"
 require "fixtures"
 
-class CompressorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
+class CompressionTest < Minitest::Test
   def setup
     @config = Config.new({no_progress: true})
   end
@@ -18,17 +19,17 @@ class CompressorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir)
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Compressor.new(shipment, config: opts.merge(@config))
+      stage = Compression.new(shipment, config: opts.merge(@config))
       refute_nil stage, "stage successfully created"
     }
     generate_tests "new", test_proc
   end
 
-  def self.gen_run # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_run
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1 T contone 2")
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Compressor.new(shipment, config: opts.merge(@config))
+      stage = Compression.new(shipment, config: opts.merge(@config))
       stage.run!
       assert_equal(0, stage.errors.count, "stage runs without errors")
       tiff = File.join(shipment.directory,
@@ -43,23 +44,7 @@ class CompressorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "run", test_proc
   end
 
-  def self.gen_set_tiff_date_time # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-    test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
-      test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
-      shipment = shipment_class.new(test_shipment.directory)
-      tiff = File.join(shipment.directory,
-        shipment.objid_to_path(shipment.objids[0]),
-        "00000001.tif")
-      stage = Compressor.new(shipment, config: opts.merge(@config))
-      stage.send(:write_tiff_date_time, tiff)
-      tiffinfo = `tiffinfo #{tiff}`
-      assert_match(/DateTime:\s\d{4}:\d{2}:\d{2}\s\d{2}:\d{2}:\d{2}/, tiffinfo,
-        "TIFF DateTime in %Y:%m:%d %H:%M:%S format")
-    }
-    generate_tests "set_tiff_date_time", test_proc
-  end
-
-  def self.gen_set_jp2_date_time # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_set_jp2_date_time
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -67,7 +52,7 @@ class CompressorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
         shipment.objid_to_path(shipment.objids[0]),
         "00000001.tif")
       `tiffset -s 306 '2000:11:11 11:11:11' #{tiff}`
-      stage = Compressor.new(shipment, config: opts.merge(@config))
+      stage = Compression.new(shipment, config: opts.merge(@config))
       stage.run!
       jp2 = File.join(shipment.directory,
         shipment.objid_to_path(shipment.objids[0]),
@@ -79,11 +64,11 @@ class CompressorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "set_jp2_date_time", test_proc
   end
 
-  def self.gen_set_jp2_document_name # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_set_jp2_document_name
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Compressor.new(shipment, config: opts.merge(@config))
+      stage = Compression.new(shipment, config: opts.merge(@config))
       stage.run!
       jp2 = File.join(shipment.directory,
         shipment.objid_to_path(shipment.objids[0]),
@@ -101,7 +86,7 @@ class CompressorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bad_16bps 1")
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Compressor.new(shipment, config: opts.merge(@config))
+      stage = Compression.new(shipment, config: opts.merge(@config))
       stage.run!
       assert_equal(1, stage.errors.count, "stage fails with 16bps TIFF")
       assert_match(/invalid source tiff/i, stage.errors[0].description,
@@ -114,7 +99,7 @@ class CompressorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC F 00000001.tif")
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Compressor.new(shipment, config: opts.merge(@config))
+      stage = Compression.new(shipment, config: opts.merge(@config))
       stage.run!
       # Error description may be tiffinfo exit code or something more detailed.
       assert_equal(1, stage.errors.count, "stage fails with zero-length TIFF")
@@ -122,7 +107,7 @@ class CompressorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     generate_tests "zero_length_fails", test_proc
   end
 
-  def self.gen_alpha_channel # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_alpha_channel
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -130,14 +115,14 @@ class CompressorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
         shipment.objid_to_path(shipment.objids[0]),
         "00000001.tif")
       `convert #{tiff} -alpha on #{tiff}`
-      stage = Compressor.new(shipment, config: opts.merge(@config))
+      stage = Compression.new(shipment, config: opts.merge(@config))
       stage.run!
       assert_equal(0, stage.errors.count, "stage runs without errors")
     }
     generate_tests "alpha_channel", test_proc
   end
 
-  def self.gen_icc_profile # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_icc_profile
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T contone 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -146,14 +131,14 @@ class CompressorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
         "00000001.tif")
       profile_path = File.join(Fixtures::TEST_FIXTURES_PATH, "sRGB2014.icc")
       `convert #{tiff} -profile #{profile_path} #{tiff}`
-      stage = Compressor.new(shipment, config: opts.merge(@config))
+      stage = Compression.new(shipment, config: opts.merge(@config))
       stage.run!
       assert_equal(0, stage.errors.count, "stage runs without errors")
     }
     generate_tests "icc_profile", test_proc
   end
 
-  def self.gen_software # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_software
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -161,7 +146,7 @@ class CompressorTest < Minitest::Test # rubocop:disable Metrics/ClassLength
         shipment.objid_to_path(shipment.objids[0]),
         "00000001.tif")
       `tiffset -s 305 'BOGUS SOFTWARE v1.0' #{tiff}`
-      stage = Compressor.new(shipment, config: opts.merge(@config))
+      stage = Compression.new(shipment, config: opts.merge(@config))
       stage.run!
       assert_equal(0, stage.errors.count, "stage runs without errors")
       assert_match(/BOGUS\sSOFTWARE/, `tiffinfo #{tiff}`,

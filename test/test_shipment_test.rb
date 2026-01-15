@@ -23,7 +23,7 @@ class TestShipmentTest < Minitest::Test
     end
   end
 
-  def test_generate_test_shipment_objid # rubocop:disable Metrics/AbcSize
+  def test_generate_test_shipment_objid
     shipment = TestShipment.new(test_name, "BC")
     assert_equal 1, shipment.objids.count, "correct number of objids"
     assert File.directory?(shipment.directory), "#{test_name} is directory"
@@ -34,7 +34,7 @@ class TestShipmentTest < Minitest::Test
       "objid #{shipment.objids[0]} valid"
   end
 
-  def test_generate_test_shipment_bogus_objid # rubocop:disable Metrics/AbcSize
+  def test_generate_test_shipment_bogus_objid
     shipment = TestShipment.new(test_name, "BBC")
     assert_equal 1, shipment.objids.count, "correct number of objids"
     assert File.directory?(shipment.directory), "#{test_name} is directory"
@@ -104,7 +104,7 @@ class TestShipmentTest < Minitest::Test
 end
 
 class DLXSTestShipmentTest < Minitest::Test
-  def test_generate_test_shipment_dlxs_objid # rubocop:disable Metrics/AbcSize
+  def test_generate_test_shipment_dlxs_objid
     shipment = DLXSTestShipment.new(test_name, "BC")
     assert_equal 1, shipment.ordered_objids.count,
       "correct number of ordered objids"

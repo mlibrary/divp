@@ -12,9 +12,9 @@ stages:
   - name: Tagger
     class: Tagger
     file: tagger
-  - name: Compressor
-    class: Compressor
-    file: compressor
+  - name: Compression
+    class: Compression
+    file: compression
   - name: DLXSCompressor
     class: DLXSCompressor
     file: dlxs_compressor

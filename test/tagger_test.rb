@@ -23,7 +23,7 @@ class TaggerTest < Minitest::Test
     generate_tests "new", test_proc
   end
 
-  def self.gen_default_tags # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_default_tags
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       spec = "BC T bitonal 1 BC T bitonal 1"
       test_shipment = test_shipment_class.new(dir, spec)
@@ -43,7 +43,7 @@ class TaggerTest < Minitest::Test
     generate_tests "default_tags", test_proc
   end
 
-  def self.gen_artist_tag # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_artist_tag
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -59,7 +59,7 @@ class TaggerTest < Minitest::Test
     generate_tests "artist_tag", test_proc
   end
 
-  def self.gen_scanner_tag # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_scanner_tag
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -78,7 +78,7 @@ class TaggerTest < Minitest::Test
     generate_tests "scanner_tag", test_proc
   end
 
-  def self.gen_software_tag # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_software_tag
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -106,7 +106,7 @@ class TaggerCustomTagTest < Minitest::Test
     TestShipment.remove_test_shipments
   end
 
-  def self.gen_custom_artist_tag # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_custom_artist_tag
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       artist = "University of Michigan: Secret Vaults"
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
@@ -126,7 +126,7 @@ class TaggerCustomTagTest < Minitest::Test
     generate_tests "custom_artist_tag", test_proc
   end
 
-  def self.gen_custom_scanner_tag # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_custom_scanner_tag
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -149,7 +149,7 @@ class TaggerCustomTagTest < Minitest::Test
     generate_tests "custom_scanner_tag", test_proc
   end
 
-  def self.gen_bogus_custom_scanner_tag # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_bogus_custom_scanner_tag
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")
       shipment = shipment_class.new(test_shipment.directory)
@@ -163,7 +163,7 @@ class TaggerCustomTagTest < Minitest::Test
     generate_tests "bogus_custom_scanner_tag", test_proc
   end
 
-  def self.gen_custom_software_tag # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_custom_software_tag
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       software = "WhizzySoft ScanR v33"
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1")

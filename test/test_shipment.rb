@@ -5,14 +5,14 @@ require "luhn"
 require "fixtures"
 require_relative "../lib/shipment"
 
-class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
+class TestShipment < Shipment
   attr_reader :ordered_objids
 
   PATH = File.join(__dir__, "shipments").freeze
 
   # Yes, we want this shared with subclasses
   def self.test_shipments
-    @@test_shipments ||= [] # rubocop:disable Style/ClassVars
+    @@test_shipments ||= []
   end
 
   def self.remove_test_shipments
@@ -56,7 +56,7 @@ class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
     process_spec spec
   end
 
-  def process_spec(spec) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
+  def process_spec(spec)
     @current_dir = @dir
     elements = spec.split(/\s+/)
     while elements.any?
@@ -95,7 +95,7 @@ class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
     @ordered_objids << objid
   end
 
-  def handle_tiff_op(name, dest) # rubocop:disable Metrics/MethodLength
+  def handle_tiff_op(name, dest)
     fixture = Fixtures.tiff_fixture(name)
     case dest
     when /^\d+$/
@@ -113,7 +113,7 @@ class TestShipment < Shipment # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def handle_jp2_op(name, dest) # rubocop:disable Metrics/MethodLength
+  def handle_jp2_op(name, dest)
     fixture = Fixtures.jp2_fixture(name)
     case dest
     when /^\d+$/

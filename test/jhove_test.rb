@@ -43,7 +43,7 @@ class JHOVETest < Minitest::Test
     generate_tests "run", test_proc
   end
 
-  def self.gen_error # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_error
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       setup_test(shipment_class, test_shipment_class, dir, opts)
       tiff = File.join(@shipment.objid_to_path(@shipment.objids[0]),
@@ -64,7 +64,7 @@ class JHOVETest < Minitest::Test
     generate_tests "error", test_proc
   end
 
-  def self.gen_error_fields # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_error_fields
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       setup_test(shipment_class, test_shipment_class, dir, opts)
       ENV["FAKE_FEED_VALIDATE_LONG"] = "1"

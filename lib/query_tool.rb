@@ -8,14 +8,14 @@ require "string_color"
 require "processor"
 
 # Facility for running command-line processor/shipment queries and commands
-class QueryTool # rubocop:disable Metrics/ClassLength
+class QueryTool
   attr_reader :processor
 
   def initialize(processor)
     @processor = processor
   end
 
-  def agenda_cmd(*_args) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def agenda_cmd(*_args)
     if processor.agenda.any?
       processor.stages.each do |stage|
         puts stage.name.bold
@@ -43,7 +43,7 @@ class QueryTool # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def errors_cmd(*args) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
+  def errors_cmd(*args)
     errs = processor.errors_by_objid_by_stage
     errs.each_key do |objid|
       next if args.count.positive? && !args.include?(objid)
@@ -63,7 +63,7 @@ class QueryTool # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def warnings_cmd(*args) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
+  def warnings_cmd(*args)
     warnings = processor.warnings_by_objid_by_stage
     warnings.each_key do |objid|
       next if args.count.positive? && !args.include?(objid)
@@ -91,7 +91,7 @@ class QueryTool # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def fixity_cmd # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def fixity_cmd
     unless File.directory? processor.shipment.source_directory
       puts "Source directory not yet populated"
     end
@@ -141,7 +141,7 @@ class QueryTool # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def status_detail(stage) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def status_detail(stage)
     statuses = []
     bad = stage.error_objids.count
     total = stage.objids.count

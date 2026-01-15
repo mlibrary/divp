@@ -3,7 +3,7 @@
 
 # Based on https://gist.github.com/Integralist/9503099
 module Symbolize
-  def self.symbolize(obj) # rubocop:disable Metrics/MethodLength
+  def self.symbolize(obj)
     case obj
     when Hash
       return obj.each_with_object({}) do |(k, v), memo|

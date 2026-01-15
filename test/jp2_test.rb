@@ -11,7 +11,7 @@ class TIFFTest < Minitest::Test
     refute_nil jp2, "JP2 is not nil"
   end
 
-  def test_info # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_info
     shipment = TestShipment.new(test_name, "BC J contone 1")
     jp2 = JP2.new(shipment.image_files.first.path)
     info = jp2.info

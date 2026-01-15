@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "dotenv"
+require "byebug"
 
 Dotenv.load
 
@@ -49,7 +50,7 @@ module Minitest
     # for the Minitest::Test class invoking it.
     # Each test case in the Minitest::Test creates test pairs using this
     # routine and then invokes them with this at the end of the file:
-    def self.generate_tests(name, block) # rubocop:disable Metrics/MethodLength
+    def self.generate_tests(name, block)
       add_test name
       ["", "DLXS"].each do |type|
         method_name = "test_#{name}"

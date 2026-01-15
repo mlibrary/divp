@@ -46,7 +46,7 @@ class StageTest < Minitest::Test
     generate_tests "cleanup_tempdirs", test_proc
   end
 
-  def self.gen_cleanup_delete_on_success # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def self.gen_cleanup_delete_on_success
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC")
       shipment = shipment_class.new(test_shipment.directory)
