@@ -1,11 +1,6 @@
 name: Run CI
 
-on:
-  push:
-    branches:
-      - $default-branch
-
-  pull_request:
+on: push
 
 jobs:
   # Run tests
@@ -34,5 +29,8 @@ jobs:
       - name: Run standard
         run: docker compose run --rm test bundle exec standardrb
 
-      - name: Run tests
+      - name: Run minitest tests
         run: docker compose run --rm test
+
+      - name: Run rspec tests
+        run: docker compose run --rm test bundle exec rspec
