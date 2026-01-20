@@ -4,8 +4,10 @@
 require "stage"
 
 module ChecksumFileGenerator
-  def self.write
-    true
+  def self.write(path)
+    FileUtils.cd(path) do
+      `md5sum * > checksum.md5`
+    end
   end
 end
 
