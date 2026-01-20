@@ -66,4 +66,13 @@ class PaginationCheck < Stage
     dups.delete_if { |_k, v| v.size == 1 }
     dups.keys.map(&:to_s)
   end
+
+  def setup_source_directory
+    shipment.setup_source_directory do |objid|
+      @bar.next! "setup source/#{objid}"
+    end
+    shipment.checksum_source_directory do |objid|
+      @bar.next! "checksum source/#{objid}"
+    end
+  end
 end

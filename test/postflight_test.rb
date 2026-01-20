@@ -2,6 +2,9 @@
 # frozen_string_literal: true
 
 require "minitest/autorun"
+require_relative "test_helper"
+require "create_source_directory"
+require "preflight"
 require "postflight"
 
 class PostflightTest < Minitest::Test
@@ -32,6 +35,8 @@ class PostflightTest < Minitest::Test
       shipment = shipment_class.new(test_shipment.directory)
       stage = Preflight.new(shipment, config: opts.merge(@config))
       stage.run!
+      stage = CreateSourceDirectory.new(shipment, config: opts.merge(@config))
+      stage.run!
       stage = Postflight.new(shipment, config: opts.merge(@config))
       stage.run!
       assert_equal 0, stage.errors.count, "stage runs without errors"
@@ -45,6 +50,8 @@ class PostflightTest < Minitest::Test
       test_shipment = test_shipment_class.new(dir, spec)
       shipment = shipment_class.new(test_shipment.directory)
       stage = Preflight.new(shipment, config: opts.merge(@config))
+      stage.run!
+      stage = CreateSourceDirectory.new(shipment, config: opts.merge(@config))
       stage.run!
       FileUtils.rm_r(File.join(shipment.directory,
         shipment.objid_to_path(shipment.objids[0])),
@@ -62,7 +69,7 @@ class PostflightTest < Minitest::Test
       spec = "BC T bitonal 1 BC T bitonal 1"
       test_shipment = test_shipment_class.new(dir, spec)
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Preflight.new(shipment, config: opts.merge(@config))
+      stage = CreateSourceDirectory.new(shipment, config: opts.merge(@config))
       stage.run!
       new_objid = test_shipment_class.generate_objid
       FileUtils.mkdir_p File.join(shipment.directory,
@@ -79,7 +86,7 @@ class PostflightTest < Minitest::Test
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1 T contone 2")
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Preflight.new(shipment, config: opts.merge(@config))
+      stage = CreateSourceDirectory.new(shipment, config: opts.merge(@config))
       stage.run!
       tiff = File.join(shipment.objid_to_path(shipment.objids[0]),
         "00000001.tif")
@@ -105,7 +112,7 @@ class PostflightTest < Minitest::Test
       ENV["FAKE_FEED_VALIDATE_CRASH"] = "1"
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1 T contone 2")
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Preflight.new(shipment, config: opts.merge(@config))
+      stage = CreateSourceDirectory.new(shipment, config: opts.merge(@config))
       stage.run!
       stage = Postflight.new(shipment, config: opts.merge(@config))
       stage.run!
@@ -120,7 +127,7 @@ class PostflightTest < Minitest::Test
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1 T contone 2")
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Preflight.new(shipment, config: opts.merge(@config))
+      stage = CreateSourceDirectory.new(shipment, config: opts.merge(@config))
       stage.run!
       tiff = File.join(shipment.source_directory,
         shipment.objid_to_path(shipment.objids[0]),
@@ -138,7 +145,7 @@ class PostflightTest < Minitest::Test
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1 T contone 2")
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Preflight.new(shipment, config: opts.merge(@config))
+      stage = CreateSourceDirectory.new(shipment, config: opts.merge(@config))
       stage.run!
       tiff = File.join(shipment.source_directory,
         shipment.objid_to_path(shipment.objids[0]),
@@ -156,7 +163,7 @@ class PostflightTest < Minitest::Test
     test_proc = proc { |shipment_class, test_shipment_class, dir, opts|
       test_shipment = test_shipment_class.new(dir, "BC T bitonal 1 T contone 2")
       shipment = shipment_class.new(test_shipment.directory)
-      stage = Preflight.new(shipment, config: opts.merge(@config))
+      stage = CreateSourceDirectory.new(shipment, config: opts.merge(@config))
       stage.run!
       tiff = File.join(shipment.source_directory,
         shipment.objid_to_path(shipment.objids[0]),

@@ -30,6 +30,8 @@ class PreflightTest < Minitest::Test
       shipment = shipment_class.new(test_shipment.directory)
       stage = Preflight.new(shipment, config: opts.merge(@config))
       stage.run!
+      stage = CreateSourceDirectory.new(shipment, config: opts.merge(@config))
+      stage.run!
       assert_equal 0, stage.errors.count, "stage runs without errors"
       assert_equal 2, shipment.metadata[:initial_barcodes].count,
         "correct number of initial objids in metadata"

@@ -40,9 +40,9 @@ class Preflight < Stage
     @bar.next! "validate #{File.split(shipment_directory)[-1]}"
     validate_shipment_directory
     validate_objects agenda
-    return if fatal_error?
+    nil if fatal_error?
 
-    setup_source_directory
+    #    setup_source_directory
   end
 
   private
