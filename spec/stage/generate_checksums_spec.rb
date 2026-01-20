@@ -11,8 +11,18 @@ describe ChecksumFileGenerator do
 end
 
 describe GenerateChecksums do
+  include_context "uses temp dir"
   it "does something" do
-    shipment = instance_double(Shipment, is_a?: true, objids: [])
-    described_class.new(shipment)
+    barcode = "39015002231713"
+    shipment_path = "#{temp_dir_path}/test_shipment"
+    item_path = "#{shipment_path}/#{barcode}"
+    FileUtils.mkdir_p(item_path)
+    FileUtils.cp("spec/fixtures/10_10_8_400.jp2", item_path)
+
+    shipment = Shipment.new(shipment_path)
+    stage = described_class.new(shipment)
+    stage.run!
+    checksum_contents = File.read(File.join(item_path, "checksum.md5"))
+    expect(checksum_contents).to include("  10_10_8_400.jp2")
   end
 end
