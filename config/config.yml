@@ -18,5 +18,8 @@ stages:
   - name: Postflight
     class: Postflight
     file: postflight
+  - name: GenerateChecksums
+    class: GenerateChecksums
+    file: generate_checksums
 
 
