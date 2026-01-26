@@ -1,4 +1,4 @@
-shipment_class: Shipment
+shipment_class: DLXSShipment
 stages:
   - name: Preflight
     class: Preflight
@@ -12,17 +12,19 @@ stages:
   - name: Create Source Directory
     class: CreateSourceDirectory
     file: create_source_directory
+  - name: Fails
+    class: Fails
+    file: fails
   - name: Tagger
     class: Tagger
     file: tagger
   - name: Compression
     class: Compression
     file: compression
+  - name: DLXSCompressor
+    class: DLXSCompressor
+    file: dlxs_compressor
   - name: Postflight
     class: Postflight
     file: postflight
-  - name: GenerateChecksums
-    class: GenerateChecksums
-    file: generate_checksums
-
 

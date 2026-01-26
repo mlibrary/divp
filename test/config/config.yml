@@ -9,6 +9,9 @@ stages:
   - name: Pagination Check
     class: PaginationCheck
     file: pagination_check
+  - name: Create Source Directory
+    class: CreateSourceDirectory
+    file: create_source_directory
   - name: Tagger
     class: Tagger
     file: tagger

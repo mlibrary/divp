@@ -4,8 +4,15 @@
 require "digest"
 
 require "minitest/autorun"
+require_relative "test_helper"
 require "processor"
 require "fixtures"
+
+class Fails < Stage
+  def run(agenda)
+    add_error Error.new("fails!")
+  end
+end
 
 class ProcessorTest < Minitest::Test
   def setup
@@ -161,7 +168,12 @@ class ProcessorTest < Minitest::Test
 
   def self.gen_finalize_does_nothing
     test_proc = proc { |_shipment_class, test_shipment_class, dir, opts|
-      test_shipment = test_shipment_class.new(dir, "BC T bad_16bps 1")
+      test_shipment = test_shipment_class.new(dir, "BC T contone 1")
+      @options[:config_profile] = if test_shipment_class == DLXSTestShipment
+        "dlxsfails"
+      else
+        "fails"
+      end
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
       capture_io do
         processor.run
