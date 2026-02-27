@@ -162,6 +162,7 @@ GEM
       rubocop-performance (~> 1.25.0)
     standardrb (1.0.1)
       standard
+    thor (1.5.0)
     thread_safe (0.3.6)
     tty-which (0.5.0)
     unicode-display_width (3.2.0)
@@ -190,6 +191,7 @@ DEPENDENCIES
   rubycritic
   simplecov
   standardrb
+  thor
 
 CHECKSUMS
   addressable (2.8.8) sha256=7c13b8f9536cf6364c03b9d417c19986019e28f7c00ac8132da4eb0fe393b057
@@ -256,6 +258,7 @@ CHECKSUMS
   standard-custom (1.0.2) sha256=424adc84179a074f1a2a309bb9cf7cd6bfdb2b6541f20c6bf9436c0ba22a652b
   standard-performance (1.8.0) sha256=ed17b7d0e061b2a19a91dd434bef629439e2f32310f22f26acb451addc92b788
   standardrb (1.0.1) sha256=7a1328be429f4e97a97e357e2446f3509e80164a59ff00bc6a4daa78e3351f2c
+  thor (1.5.0) sha256=e3a9e55fe857e44859ce104a84675ab6e8cd59c650a49106a05f55f136425e73
   thread_safe (0.3.6) sha256=9ed7072821b51c57e8d6b7011a8e282e25aeea3a4065eab326e43f66f063b05a
   tty-which (0.5.0) sha256=5824055f0d6744c97e7c4426544f01d519c40d1806ef2ef47d9854477993f466
   unicode-display_width (3.2.0) sha256=0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42
