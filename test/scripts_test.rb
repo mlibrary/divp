@@ -4,7 +4,7 @@
 require "minitest/autorun"
 
 class ScriptsTest < Minitest::Test
-  SCRIPTS = %w[jhove process query shipments].freeze
+  SCRIPTS = %w[jhove divp query shipments].freeze
 
   def test_scripts
     ScriptsTest::SCRIPTS.each do |script|
