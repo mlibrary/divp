@@ -93,5 +93,7 @@ FROM hathifeed AS development
 ################################################################################
 FROM base AS test
 
+ENV BUNDLE_PATH="/gems"
+
 COPY --chown=${UID}:${GID} Gemfile* /app/
 RUN bundle install
