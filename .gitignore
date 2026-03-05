@@ -41,5 +41,6 @@
 /coverage
 /config/*.local.yml
 /vendor
+/input
 
 /test/shipments/*
