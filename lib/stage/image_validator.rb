@@ -8,7 +8,6 @@ require "tiff"
 
 # TIFF Validation Stage
 class ImageValidator < Stage
-
   def run(agenda)
     return unless agenda.any?
 
