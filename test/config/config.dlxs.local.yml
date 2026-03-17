@@ -1,2 +1,4 @@
 # Use this file for locally overridden settings
 blah: 'blah'
+bitonal_resolution: 600
+contone_resolution: 400
