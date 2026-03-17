@@ -14,6 +14,8 @@ module DIVP
     desc "process SHIPMENT_DIRECTORY", "process"
     option :config_profile, aliases: ["c"], desc: 'Configuration PROFILE (e.g., "dlxs" loads config.dlxs.yaml)'
     option :config_dir, aliases: ["d"], desc: "Configuration directory DIRECTORY"
+    option :bitonal_resolution, desc: "Valid bitonal image resolution (in ppi)", type: :numeric, default: 600
+    option :contone_resolution, desc: "Valid contone image resolution (in ppi)", type: :numeric, default: 400
     option :help, aliases: ["h"], desc: 'Try "divp help process"'
     option :restart_all, aliases: ["R"], desc: "Discard status.json and restart all stages", type: :boolean
     option :verbose, aliases: ["v"], desc: "Run verbosely"

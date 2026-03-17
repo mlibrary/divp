@@ -6,7 +6,7 @@ require "image_validator"
 
 class ImageValidatorTest < Minitest::Test
   def setup
-    @config = Config.new({no_progress: true})
+    @config = Config.new({no_progress: true, bitonal_resolution: 600, contone_resolution: 400})
   end
 
   def teardown

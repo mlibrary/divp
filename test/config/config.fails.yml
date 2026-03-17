@@ -23,4 +23,6 @@ stages:
   - name: Postflight
     class: Postflight
     file: postflight
+bitonal_resolution: 600
+contone_resolution: 400
 

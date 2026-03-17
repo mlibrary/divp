@@ -8,9 +8,6 @@ require "tiff"
 
 # TIFF Validation Stage
 class ImageValidator < Stage
-  BITONAL_RES = 600
-  CONTONE_RES = 400
-
   def run(agenda)
     return unless agenda.any?
 
@@ -34,6 +31,14 @@ class ImageValidator < Stage
   end
 
   private
+
+  def bitonal_res
+    config[:bitonal_resolution]
+  end
+
+  def contone_res
+    config[:contone_resolution]
+  end
 
   # Run tiffinfo command and return output text block
   def run_tiffinfo(image_file)
@@ -76,14 +81,14 @@ class ImageValidator < Stage
     if info[:spp] != 1
       image_error image_file, "invalid SPP #{info[:spp]} with 1 BPS"
     end
-    return unless info[:x_res] != BITONAL_RES || info[:y_res] != BITONAL_RES
+    return unless info[:x_res] != bitonal_res || info[:y_res] != bitonal_res
 
     image_error image_file, "#{info[:x_res]}x#{info[:y_res]} bitonal"
   end
 
   def evaluate_tiff_8_bps(image_file, info)
     if [1, 3, 4].include? info[:spp]
-      if info[:x_res] != CONTONE_RES || info[:y_res] != CONTONE_RES
+      if info[:x_res] != contone_res || info[:y_res] != contone_res
         image_error image_file, "#{info[:x_res]}x#{info[:y_res]} contone"
       end
     else
@@ -112,7 +117,7 @@ class ImageValidator < Stage
     unless info[:res_unit] == "inches"
       image_error(image_file, "resolution unit '#{info[:res_unit]}'")
     end
-    return if info[:x_res] == CONTONE_RES && info[:y_res] == CONTONE_RES
+    return if info[:x_res] == contone_res && info[:y_res] == contone_res
 
     image_error image_file, "#{info[:x_res]}x#{info[:y_res]} contone"
   end
