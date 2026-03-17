@@ -1,55 +1,44 @@
-# RSVP
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mlibrary/rsvp/Run%20CI)
-## Ruby SIP Validation and Processing
+# Digital Image Validation and Processing
 
 ## Overview
 
-At its core RSVP manages a workflow of discrete stages for validating and
-converting SIP shipments and their associated image files for
-University of Michigan DCU.
+DIVP is a commandline tool for turning folders of raw image scans into folders of image files suitable for other destinations such as HathiTrust. This processing can involve things like:
 
-## Installation
+* validating that all of the pages are there
+* correcting the image metadata
+* validating that source images have the appropriate resolution
+* compressing the images to meet the destination specifications
+* creating a checksum file of the compressed images
+* verifying that a given checksum file matches the other files in the folder
 
-### 1. Set up development
+The `divp process` command works with `shipments`. A `shipment` is a folder full of items, which each item is a folder full of the image files that make up the item.  
 
-The minimum Ruby version is 2.7.4.
+DIVP uses [grok](https://grokcompression.com/) for JPEG2000 compression.
 
-```
-mkdir -p vendor/bundle
-bundle config set --local path 'vendor/bundle'
-bundle install
-```
+## Developer setup
 
-For basic functionality when running outside Docker, the following packages
-should be installed via Homebrew if running on Mac OS:
-```
-exiftool
-libtiff
-netpbm
+Clone the repo
+
+```bash
+git clone git@github.com:mlibrary/divp.git
+cd divp
 ```
 
-RSVP uses Kakadu for JPEG2000 compression. For local use, the free version
-should suffice for development purposes.
+run the `init.sh` script.
 
-
-### 2. Set up Docker development
-
-```
-$ docker-compose build
+```bash
+./init.sh
 ```
 
-### 3. Running tests
+run tests
 
 ```
-$ docker-compose run --rm app bundle exec rake test
-$ docker-compose run --rm app bundle exec rspec
-$ docker-compose run --rm app bundle exec standardrb
+docker compose run --rm app bundle exec rspec
+docker compose run --rm app bundle exec rake test
 ```
 
-or
+run linting
 
 ```
-$ bundle exec rake test
-$ bundle exec rspec
-$ bundle exec standardrb
+docker compose run --rm app bundle exec standardrb --fix
 ```

@@ -2,7 +2,10 @@
 # BASE
 ################################################################################
 FROM ruby:3.4-bookworm AS base
-ARG KAKADU_FILE=KDU841_Demo_Apps_for_Linux-x86-64_231117.zip
+
+ARG UID=1000
+ARG GID=1000
+
 ARG FEED_VERSION=feed_v1.14.1
 
 RUN gem install bundler
@@ -13,31 +16,48 @@ RUN curl https://apt.lib.umich.edu/mlibrary-archive-keyring.gpg -o /etc/apt/keyr
 RUN echo "deb [signed-by=/etc/apt/keyrings/mlibrary-archive-keyring.gpg] https://apt.lib.umich.edu bookworm main" > /etc/apt/sources.list.d/mlibrary.list
 
 RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
-    libtiff-tools\ 
-    exiftool \
-    netpbm\
-    grokj2k
+  libtiff-tools\ 
+  exiftool \
+  netpbm\
+  grokj2k
 
 
-ENV APP_PATH=/usr/src/app
+RUN groupadd -g ${GID} -o app
+RUN useradd -m -d /app -u ${UID} -g ${GID} -o -s /bin/bash app
+
+ENV GEM_HOME=/gems
+ENV PATH="$PATH:/gems/bin"
+RUN mkdir -p /gems && chown ${UID}:${GID} /gems
+
+ENV APP_PATH=/app
 RUN mkdir -p $APP_PATH
+
+
+# set up bundler 
+USER app
+RUN gem install bundler
+
+ENV BUNDLE_PATH="/app/vendor/bundle"
+
+WORKDIR $APP_PATH
 
 ################################################################################
 # HATHIFEED                                                                    #
 ################################################################################
 FROM base AS hathifeed
 
+USER root
 WORKDIR /tmp
 RUN wget https://github.com/hathitrust/feed/archive/refs/tags/$FEED_VERSION.zip
 RUN unzip $FEED_VERSION.zip 
 RUN mv /tmp/feed-$FEED_VERSION /usr/local/feed
 
 RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
-    cpanminus \
-    libyaml-libyaml-perl \
-    liblog-log4perl-perl \
-    libdbd-mysql-perl \ 
-    openjdk-17-jre-headless
+  cpanminus \
+  libyaml-libyaml-perl \
+  liblog-log4perl-perl \
+  libdbd-mysql-perl \ 
+  openjdk-17-jre-headless
 
 # Install JHOVE
 COPY etc/jhove-auto-install.xml /tmp/jhove-auto-install.xml
@@ -57,6 +77,9 @@ ENV VERSION=feed-development
 ENV PERL5LIB="/extlib/lib/perl5:$FEED_HOME/lib"
 ENV FEED_VALIDATE_SCRIPT=/usr/local/feed/bin/validate_images.pl
 
+USER app
+WORKDIR $APP_PATH
+
 
 
 ################################################################################
@@ -64,16 +87,13 @@ ENV FEED_VALIDATE_SCRIPT=/usr/local/feed/bin/validate_images.pl
 ################################################################################
 FROM hathifeed AS development
 
-WORKDIR $APP_PATH
-
-ENV BUNDLE_PATH="/usr/src/app/vendor/bundle"
 
 ################################################################################
 # TEST                                                                         # 
 ################################################################################
 FROM base AS test
 
-WORKDIR $APP_PATH
+ENV BUNDLE_PATH="/gems"
 
-COPY Gemfile* /usr/src/app/
+COPY --chown=${UID}:${GID} Gemfile* /app/
 RUN bundle install

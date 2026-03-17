@@ -3,13 +3,19 @@ services:
     build:
       context: .
       target: development
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
     volumes:
-      - .:/usr/src/app
+      - .:/app
 
   test:
     build:
       context: .
       target: test
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
     volumes:
-      - .:/usr/src/app
+      - .:/app
     command: bundle exec rake test
