@@ -16,6 +16,8 @@ module DIVP
     option :config_dir, aliases: ["d"], desc: "Configuration directory DIRECTORY"
     option :bitonal_resolution, aliases: ["--br"], desc: "Valid bitonal image resolution (in ppi)", type: :numeric, default: 600
     option :contone_resolution, aliases: ["--cr"], desc: "Valid contone image resolution (in ppi)", type: :numeric, default: 400
+    option :bitonal_compression, aliases: ["--bc"], desc: "bitonal compression type", type: :string, enum: ["g4", "none"], default: "g4"
+    option :contone_compression, aliases: ["--cc"], desc: "contone compression type", type: :string, enum: ["jp2", "none"], default: "jp2"
     option :help, aliases: ["h"], desc: 'Try "divp help process"'
     option :restart_all, aliases: ["R"], desc: "Discard status.json and restart all stages", type: :boolean
     option :verbose, aliases: ["v"], desc: "Run verbosely"
