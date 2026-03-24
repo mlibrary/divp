@@ -34,8 +34,8 @@ describe Compressor do
       expect(compressor.document_name).to eq("some_barcode/10_10_8_400.jp2")
     end
 
-    it "is a Contone compressor when initialized with an 8bps image" do
-      expect(compressor.class.to_s).to eq("Compressor::Contone")
+    it "is a JP2 compressor when initialized with an 8bps image" do
+      expect(compressor.class.to_s).to eq("Compressor::JP2")
     end
 
     context "#run" do
@@ -85,8 +85,8 @@ describe Compressor do
     before(:each) do
       @image_file = "10_10_1_600.tif"
     end
-    it "is a Bitonal compressor when initialized with a 1bps image" do
-      expect(compressor.class.to_s).to eq("Compressor::Bitonal")
+    it "is a G4 compressor when initialized with a 1bps image" do
+      expect(compressor.class.to_s).to eq("Compressor::G4")
     end
     context "#run" do
       it "runs the compression tool" do

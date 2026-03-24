@@ -160,9 +160,9 @@ class Compressor
     tiffinfo = TIFF.new(image_file.path).info
     klass = case tiffinfo[:bps]
     when 8
-      Compressor::Contone
+      Compressor::JP2
     when 1
-      Compressor::Bitonal
+      Compressor::G4
     else
       raise "invalid source TIFF BPS #{tiffinfo[:bps]}"
     end
@@ -200,7 +200,7 @@ class Compressor
   end
 end
 
-class Compressor::Contone < Compressor
+class Compressor::JP2 < Compressor
   def compression_type
     "JP2"
   end
@@ -263,7 +263,7 @@ class Compressor::Contone < Compressor
   end
 end
 
-class Compressor::Bitonal < Compressor
+class Compressor::G4 < Compressor
   def compression_type
     "G4"
   end
