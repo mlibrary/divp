@@ -12,7 +12,7 @@ class Compression < Stage
     files = image_files.select { |file| agenda.include? file.objid }
     @bar.steps = files.count
     files.each_with_index do |image_file, i|
-      compressor = Compressor.for(image_file: image_file, tmpdir: create_tempdir, log: log_collection)
+      compressor = Compressor.for(image_file: image_file, tmpdir: create_tempdir, log: log_collection, config: config)
 
       @bar.step! i, "#{image_file.objid_file} #{compressor.compression_type}"
 

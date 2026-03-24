@@ -156,13 +156,31 @@ end
 class Compressor
   attr_reader :tiffinfo, :image_file, :tmpdir
 
-  def self.for(image_file:, tmpdir:, log: "whatever", now: Time.now)
+  def self.contone_compressor(config)
+    case config[:contone_compression]
+    when "none"
+      nil
+    else
+      Compressor::JP2
+    end
+  end
+
+  def self.bitonal_compressor(config)
+    case config[:bitonal_compression]
+    when "none"
+      nil
+    else
+      Compressor::G4
+    end
+  end
+
+  def self.for(image_file:, tmpdir:, log: "whatever", now: Time.now, config: {})
     tiffinfo = TIFF.new(image_file.path).info
     klass = case tiffinfo[:bps]
     when 8
-      Compressor::JP2
+      contone_compressor(config)
     when 1
-      Compressor::G4
+      bitonal_compressor(config)
     else
       raise "invalid source TIFF BPS #{tiffinfo[:bps]}"
     end
