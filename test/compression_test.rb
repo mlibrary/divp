@@ -9,7 +9,7 @@ require "fixtures"
 class CompressionTest < Minitest::Test
   def setup
     @config = Config.new({
-      no_progress: true,
+      no_progress: true
     })
   end
 
