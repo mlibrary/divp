@@ -1,3 +1,5 @@
+contone_compression: jp2
+bitonal_compression: g4
 shipment_class: DLXSShipment
 stages:
   - name: Preflight

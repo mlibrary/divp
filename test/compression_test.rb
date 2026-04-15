@@ -10,8 +10,6 @@ class CompressionTest < Minitest::Test
   def setup
     @config = Config.new({
       no_progress: true,
-      bitonal_compression: "g4",
-      contone_compression: "jp2"
     })
   end
 

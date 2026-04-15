@@ -61,7 +61,7 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
 
 # Install JHOVE
 COPY etc/jhove-auto-install.xml /tmp/jhove-auto-install.xml
-RUN curl https://hathitrust.github.io/jhove/jhove-xplt-installer-latest.jar -o /tmp/jhove-installer.jar
+RUN curl -L https://software.openpreservation.org/releases/jhove/1.34/jhove-installer-1.34.0.jar -o /tmp/jhove-installer.jar
 RUN java -jar /tmp/jhove-installer.jar /tmp/jhove-auto-install.xml
 
 # Install image validator

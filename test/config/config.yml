@@ -1,3 +1,5 @@
+contone_compression: jp2
+bitonal_compression: g4
 feed_validate_script: '/l/local/feed/bin/validate_images.pl'
 stages:
   - name: Preflight
