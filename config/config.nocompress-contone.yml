@@ -1,4 +1,4 @@
-contone_compression: jp2
+contone_compression: none
 bitonal_compression: g4
 shipment_class: Shipment
 stages:
@@ -20,9 +20,6 @@ stages:
   - name: Compression
     class: Compression
     file: compression
-  - name: Postflight
-    class: Postflight
-    file: postflight
   - name: GenerateChecksums
     class: GenerateChecksums
     file: generate_checksums

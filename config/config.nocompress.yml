@@ -1,5 +1,5 @@
-contone_compression: jp2
-bitonal_compression: g4
+contone_compression: none
+bitonal_compression: none
 shipment_class: Shipment
 stages:
   - name: Preflight
@@ -11,18 +11,9 @@ stages:
   - name: Pagination Check
     class: PaginationCheck
     file: pagination_check
-  - name: Create Source Directory
-    class: CreateSourceDirectory
-    file: create_source_directory
   - name: Tagger
     class: Tagger
     file: tagger
-  - name: Compression
-    class: Compression
-    file: compression
-  - name: Postflight
-    class: Postflight
-    file: postflight
   - name: GenerateChecksums
     class: GenerateChecksums
     file: generate_checksums

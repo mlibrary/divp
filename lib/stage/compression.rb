@@ -12,9 +12,12 @@ class Compression < Stage
     files = image_files.select { |file| agenda.include? file.objid }
     @bar.steps = files.count
     files.each_with_index do |image_file, i|
-      compressor = Compressor.for(image_file: image_file, tmpdir: create_tempdir, log: log_collection)
+      compressor_klass = Compressor.klass_for(image_file: image_file, config: config)
 
-      @bar.step! i, "#{image_file.objid_file} #{compressor.compression_type}"
+      @bar.step! i, "#{image_file.objid_file} #{compressor_klass.compression_type}"
+      next if compressor_klass.compression_type == "None"
+
+      compressor = compressor_klass.new(image_file: image_file, tmpdir: create_tempdir, log: log_collection)
 
       compressor.run
 
@@ -23,7 +26,7 @@ class Compression < Stage
       system("cp #{compressor.output_path} #{on_disk_temp_image_path}")
 
       copy_on_success on_disk_temp_image_path, compressor.final_image_path, compressor.image_file.objid
-      delete_on_success compressor.image_file.path, compressor.image_file.objid if compressor.bps == 8
+      delete_on_success compressor.image_file.path, compressor.image_file.objid if compressor.compression_type == "JP2"
 
       system("rm -r #{compressor.tmpdir}/*")
     rescue => e

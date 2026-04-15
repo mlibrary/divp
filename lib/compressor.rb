@@ -156,20 +156,37 @@ end
 class Compressor
   attr_reader :tiffinfo, :image_file, :tmpdir
 
-  def self.for(image_file:, tmpdir:, log: "whatever", now: Time.now)
+  def self.contone_compressor(config)
+    case config[:contone_compression]
+    when "none"
+      Compressor::None
+    else
+      Compressor::JP2
+    end
+  end
+
+  def self.bitonal_compressor(config)
+    case config[:bitonal_compression]
+    when "none"
+      Compressor::None
+    else
+      Compressor::G4
+    end
+  end
+
+  def self.klass_for(image_file:, config:)
     tiffinfo = TIFF.new(image_file.path).info
-    klass = case tiffinfo[:bps]
+    case tiffinfo[:bps]
     when 8
-      Compressor::Contone
+      contone_compressor(config)
     when 1
-      Compressor::Bitonal
+      bitonal_compressor(config)
     else
       raise "invalid source TIFF BPS #{tiffinfo[:bps]}"
     end
-    klass.new(image_file:, tmpdir:, log: log, now: now)
   end
 
-  def initialize(image_file:, tmpdir:, log:, now:)
+  def initialize(image_file:, tmpdir:, log:, now: Time.now)
     @image_file = image_file
     @tiffinfo = TIFF.new(image_file.path).info
     @tmpdir = tmpdir
@@ -181,8 +198,12 @@ class Compressor
     raise NotImplementedError
   end
 
-  def compression_type
+  def self.compression_type
     raise NotImplementedError
+  end
+
+  def compression_type
+    self.class.compression_type
   end
 
   def bps
@@ -193,6 +214,10 @@ class Compressor
     raise NotImplementedError
   end
 
+  def output_path
+    raise NotImplementedError
+  end
+
   private
 
   def log_it(log_entry)
@@ -200,8 +225,24 @@ class Compressor
   end
 end
 
-class Compressor::Contone < Compressor
-  def compression_type
+class Compressor::None < Compressor
+  def self.compression_type
+    "None"
+  end
+
+  def run
+  end
+
+  def output_path
+  end
+
+  def final_image_path
+    @image_file.path
+  end
+end
+
+class Compressor::JP2 < Compressor
+  def self.compression_type
     "JP2"
   end
 
@@ -263,8 +304,8 @@ class Compressor::Contone < Compressor
   end
 end
 
-class Compressor::Bitonal < Compressor
-  def compression_type
+class Compressor::G4 < Compressor
+  def self.compression_type
     "G4"
   end
 

@@ -8,7 +8,9 @@ require "fixtures"
 
 class CompressionTest < Minitest::Test
   def setup
-    @config = Config.new({no_progress: true})
+    @config = Config.new({
+      no_progress: true
+    })
   end
 
   def teardown

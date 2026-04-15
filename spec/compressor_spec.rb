@@ -22,20 +22,32 @@ describe Compressor do
   let(:objid_file) { File.join(objid, @image_file) }
   let(:image_file) { double("image_file", path: path, objid: objid, objid_file: objid_file, file: @image_file) }
   let(:now) { Time.now }
+  let(:compressor_klass) {
+    Compressor.klass_for(image_file: image_file, config: @config)
+  }
   let(:compressor) do
-    Compressor.for(image_file: image_file, tmpdir: Pathname(temp_dir), log: log, now: now)
+    compressor_klass.new(image_file: image_file, tmpdir: Pathname(temp_dir), log: log, now: now)
   end
-  context "color tif" do
+  context "color tif with jp2" do
     before(:each) do
       @image_file = "10_10_8_400.tif"
-      @log = Log.new
+      @config = Config.new({
+        bitonal_compression: "g4",
+        contone_compression: "jp2"
+      })
     end
     it "generates final document name" do
       expect(compressor.document_name).to eq("some_barcode/10_10_8_400.jp2")
     end
 
-    it "is a Contone compressor when initialized with an 8bps image" do
-      expect(compressor.class.to_s).to eq("Compressor::Contone")
+    it "is a JP2 compressor when initialized with an 8bps image" do
+      expect(compressor.class.to_s).to eq("Compressor::JP2")
+    end
+
+    context ".compression_type" do
+      it "is JP2" do
+        expect(compressor.class.compression_type).to eq("JP2")
+      end
     end
 
     context "#run" do
@@ -81,12 +93,21 @@ describe Compressor do
       end
     end
   end
-  context "bitonal tif" do
+  context "bitonal tif with g4" do
     before(:each) do
       @image_file = "10_10_1_600.tif"
+      @config = Config.new({
+        bitonal_compression: "g4",
+        contone_compression: "jp2"
+      })
     end
-    it "is a Bitonal compressor when initialized with a 1bps image" do
-      expect(compressor.class.to_s).to eq("Compressor::Bitonal")
+    it "is a G4 compressor when initialized with a 1bps image" do
+      expect(compressor.class.to_s).to eq("Compressor::G4")
+    end
+    context ".compression_type" do
+      it "is G4" do
+        expect(compressor.class.compression_type).to eq("G4")
+      end
     end
     context "#run" do
       it "runs the compression tool" do
@@ -146,6 +167,34 @@ describe Compressor do
         result_software = TIFF.new(compressor.output_path).info[:software]
         expect(result_software).to be_nil
         expect(log.warnings).to_json include(match("could not extract software"))
+      end
+    end
+  end
+  context "color tif with no compression" do
+    before(:each) do
+      @image_file = "10_10_8_400.tif"
+      @config = Config.new({
+        bitonal_compression: "g4",
+        contone_compression: "none"
+      })
+    end
+    context ".klass_for" do
+      it "is returns Compressor::None" do
+        expect(compressor_klass.name).to eq("Compressor::None")
+      end
+    end
+    context "#compression_type" do
+      it "is None" do
+        expect(compressor.class.compression_type).to eq("None")
+      end
+    end
+    it "responds to the run and output_path with nil" do
+      expect(compressor.run).to eq(nil)
+      expect(compressor.output_path).to eq(nil)
+    end
+    context "final_image_path" do
+      it "is the original image path" do
+        expect(compressor.final_image_path).to eq(image_file.path)
       end
     end
   end
