@@ -13,7 +13,7 @@ require "log"
 
 # Base class for conversion stages
 class Stage
-  attr_reader :errors, :warnings, :start, :end
+  attr_reader :errors, :warnings, :start, :end, :objids
   attr_accessor :name, :config, :shipment
 
   def self.json_create(hash)
@@ -32,6 +32,7 @@ class Stage
                  errors: @errors,
                  warnings: @warnings,
                  data: @data,
+                 objids: @shipment.objids,
                  start: Stage.json_time(@start),
                  end: Stage.json_time(@end)}
     }.to_json(*args)
@@ -47,13 +48,14 @@ class Stage
     @shipment = shipment
     @name = args[:name] || self.class.to_s
     @config = args[:config] || {} # Top-level Config object
+    @objids ||= shipment&.objids || args[:objids] || []
     @bar = if config[:no_progress]
       SilentProgressBar.new(self.class)
     else
       ProgressBar.new(self.class)
     end
     @errors = Errors.new(bar: @bar, objids: objids, list: args[:errors])
-    @warnings = Warnings.new(bar: @bar, objids: objids, list: args[:errors])
+    @warnings = Warnings.new(bar: @bar, objids: objids, list: args[:warnings])
 
     @data = args[:data] || {log: Log.new(warnings: @warnings)} # Misc data structure including log
     if @data[:log].instance_of?(::Array) || @data[:log].nil?
@@ -214,10 +216,6 @@ class Stage
 
   def delete_on_success(path, objid = nil)
     (@delete_on_success ||= []) << {path: path, objid: objid}
-  end
-
-  def objids
-    @objids ||= shipment&.objids || []
   end
 
   def log_collection
