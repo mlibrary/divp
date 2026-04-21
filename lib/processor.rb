@@ -13,6 +13,7 @@ require "shipment"
 require "stage"
 require "string_color"
 require "symbolize"
+require "image_file"
 
 Dir[File.join(__dir__, "stage", "*.rb")].sort.each { |file| require file }
 Dir[File.join(__dir__, "shipment", "*.rb")].sort.each { |file| require file }

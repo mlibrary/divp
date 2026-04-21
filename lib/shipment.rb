@@ -9,8 +9,6 @@ require "luhn"
 class FinalizedShipmentError < StandardError
 end
 
-ImageFile = Struct.new(:objid, :path, :objid_file, :file)
-
 # Shipment directory class
 class Shipment
   PATH_COMPONENTS = 1
@@ -195,10 +193,6 @@ class Shipment
     metadata[:checksums] || {}
   end
 
-  def checksum(image_file)
-    Digest::SHA256.file(image_file.path).hexdigest
-  end
-
   # Add SHA256 entries to metadata for each source/objid/file.
   # If a block is passed, calls it one for each objid in the source directory.
   # Must be called after #setup_source_directory.
@@ -206,8 +200,8 @@ class Shipment
     metadata[:checksums] = {}
     last_objid = nil
     source_image_files.each do |image_file|
-      yield image_file.objid if block_given? && last_objid != image_file.objid
-      metadata[:checksums][image_file.objid_file] = checksum(image_file)
+      yield image_file.objid if block_given? && last_objid != image_file.objid # this is for providing an objid to the status bar
+      metadata[:checksums][image_file.objid_file] = image_file.checksum
       last_objid = image_file.objid
     end
   end
@@ -221,7 +215,7 @@ class Shipment
       yield image_file if block_given?
       if checksums[image_file.objid_file].nil?
         fixity[:added] << image_file
-      elsif checksums[image_file.objid_file] != checksum(image_file)
+      elsif checksums[image_file.objid_file] != image_file.checksum
         fixity[:changed] << image_file
       end
     end
