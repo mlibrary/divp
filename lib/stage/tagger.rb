@@ -61,7 +61,7 @@ class Tagger < Stage
   def tag(image_file)
     tagged_name = image_file.path.split(File::SEPARATOR)[-1] + ".tagged"
     tagged_path = File.join(tempdir_for_file(image_file), tagged_name)
-    tagged = ImageFile.new(image_file.objid, tagged_path,
+    tagged = shipment.image_file_class.new(image_file.objid, tagged_path,
       File.join(image_file.objid,
         image_file.path + ".tagged"),
       image_file.file)

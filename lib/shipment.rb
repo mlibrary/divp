@@ -13,6 +13,7 @@ end
 class Shipment
   PATH_COMPONENTS = 1
   OBJID_SEPARATOR = "/"
+
   attr_reader :metadata
 
   def self.json_create(hash)
@@ -46,6 +47,10 @@ class Shipment
     @dir = dir
     @metadata = metadata || {}
     @metadata.transform_keys!(&:to_sym)
+  end
+
+  def image_file_class
+    ImageFile
   end
 
   def to_json(*args)
@@ -127,7 +132,7 @@ class Shipment
       self.class.directory_entries(objid_dir).sort.each do |entry|
         next unless entry.end_with? type
 
-        files << ImageFile.new(objid, File.join(objid_dir, entry),
+        files << image_file_class.new(objid, File.join(objid_dir, entry),
           File.join(objid_path, entry), entry)
       end
     end
@@ -223,7 +228,7 @@ class Shipment
     checksums.keys.sort.each do |objid_file|
       components = objid_file.split(File::SEPARATOR)
       objid = path_to_objid(components[0..-2])
-      image_file = ImageFile.new(objid,
+      image_file = image_file_class.new(objid,
         File.join(source_directory, objid_file),
         objid_file, components[-1])
       yield image_file if block_given?
