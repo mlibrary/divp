@@ -286,7 +286,7 @@ class Compressor::JP2 < Compressor
   end
 
   def document_name
-    objid_file_parts = image_file.objid_file.split("/")
+    objid_file_parts = image_file.document_name.split("/")
     objid_file_parts[-1] = final_image_name
     File.join(objid_file_parts)
   end

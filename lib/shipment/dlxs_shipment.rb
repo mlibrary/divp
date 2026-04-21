@@ -5,8 +5,13 @@
 class DLXSShipment < Shipment
   PATH_COMPONENTS = 3
   OBJID_SEPARATOR = "."
-  def initialize(dir, metadata = nil)
-    super
+
+  def image_file_class
+    DLXSImageFile
+  end
+
+  def item_class
+    DLXSItem
   end
 
   # Returns an error message or nil

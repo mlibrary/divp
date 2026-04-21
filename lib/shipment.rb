@@ -53,6 +53,16 @@ class Shipment
     ImageFile
   end
 
+  def item_class
+    Item
+  end
+
+  def items
+    @items = objid_directories.map do |path|
+      item_class.new(path)
+    end
+  end
+
   def to_json(*args)
     {
       "json_class" => self.class.name,
@@ -78,21 +88,16 @@ class Shipment
     @source_directory ||= File.join @dir, "source"
   end
 
+  def top_level_directory_entries
+    self.class.top_level_directory_entries(@dir)
+  end
+
   def tmp_directory
     @tmp_directory ||= File.join @dir, "tmp"
   end
 
-  def path_to_objid(path_components)
-    if path_components.count != self.class::PATH_COMPONENTS
-      raise "WARNING: #{self.class} is not designed for path components" \
-            " other than #{self.class::PATH_COMPONENTS} (#{path_components})"
-    end
-
-    path_components.join self.class::OBJID_SEPARATOR
-  end
-
   def objid_to_path(objid)
-    objid.split self.class::OBJID_SEPARATOR
+    item_class.objid_to_path(objid)
   end
 
   def objid_directories
@@ -124,7 +129,16 @@ class Shipment
     Luhn.valid?(objid) ? nil : "Luhn checksum failed"
   end
 
-  def image_files(type = "tif", dir = @dir)
+  def image_files(type = "tif")
+    items.map do |item|
+      item.image_files_by_type(type)
+    end.flatten
+  end
+
+  def source_image_files(type = "tif")
+    return [] unless File.directory? source_directory
+    dir = source_directory
+
     files = []
     find_objids(dir).each do |objid|
       objid_path = objid_to_path objid
@@ -137,12 +151,6 @@ class Shipment
       end
     end
     files
-  end
-
-  def source_image_files(type = "tif")
-    return [] unless File.directory? source_directory
-
-    image_files(type, source_directory)
   end
 
   # This is the very first step of the whole workflow.
@@ -226,13 +234,9 @@ class Shipment
     end
 
     checksums.keys.sort.each do |objid_file|
-      components = objid_file.split(File::SEPARATOR)
-      objid = path_to_objid(components[0..-2])
-      image_file = image_file_class.new(objid,
-        File.join(source_directory, objid_file),
-        objid_file, components[-1])
+      image_file = image_file_class.source_for(objid_file: objid_file, source_path: source_directory)
       yield image_file if block_given?
-      fixity[:removed] << image_file unless File.exist? image_file.path
+      fixity[:removed] << image_file if !File.exist? image_file.path
     end
     fixity
   end
@@ -241,12 +245,13 @@ class Shipment
 
   # Traverse to a depth of PATH_COMPONENTS under shipment directory
   def find_objids(dir = @dir)
-    bars = []
-    dirs = self.class.top_level_directory_entries(dir)
-    dirs.each do |entry|
-      bars = (bars + find_objids_with_components(dir, [entry])).uniq
+    dirs = Dir.children(dir).reject do |entry|
+      ["source", "tmp"].include?(entry) ||
+        !File.directory?(File.join(dir, entry))
     end
-    bars.sort
+    dirs.map do |entry|
+      find_objids_with_components(dir, [entry])
+    end.flatten.uniq.sort
   end
 
   def find_objids_with_components(dir, components)
@@ -258,7 +263,7 @@ class Shipment
         bars = (bars + more_bars).uniq
       end
     elsif components.count == self.class::PATH_COMPONENTS
-      bars << path_to_objid(components)
+      bars << image_file_class.path_to_objid(components)
     end
     bars
   end
