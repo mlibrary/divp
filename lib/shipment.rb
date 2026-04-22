@@ -64,7 +64,7 @@ class Shipment
   end
 
   def source_items
-    return [] unless File.directory? source_directory
+    return [] unless source_directory_exists?
     source_objid_directories.map do |path|
       item_class.new(path)
     end
@@ -188,7 +188,7 @@ class Shipment
 
   def finalize
     metadata[:finalized] = true
-    return unless File.exist? source_directory
+    return unless source_directory_exists?
 
     FileUtils.rm_r(source_directory, force: true)
   end
@@ -238,6 +238,10 @@ class Shipment
   end
 
   private
+
+  def source_directory_exists?
+    File.directory? source_directory
+  end
 
   # Traverse to a depth of PATH_COMPONENTS under shipment directory
   def find_objids(dir = @dir)

@@ -72,7 +72,7 @@ class Processor
     return unless File.directory? shipment.source_directory
 
     bar = ProgressBar.new("(Restore)")
-    bar.steps = @shipment.source_objid_directories.count
+    bar.steps = @shipment.source_items.count
     @shipment.restore_from_source_directory(objids) do |objid|
       bar.next! "copying from source/#{objid}"
     end
