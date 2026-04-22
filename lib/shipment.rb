@@ -4,7 +4,6 @@
 require "digest"
 require "json"
 require "luhn"
-require "ostruct"
 
 # Errors arising from trying to destructively manipulate a finalized shipment.
 class FinalizedShipmentError < StandardError
@@ -18,7 +17,11 @@ class ObjidConfig
   end
 
   def objid_to_path(objid)
-    File.join(objid.split(separator))
+    File.join(objid_to_path_components(objid))
+  end
+
+  def objid_to_path_components(objid)
+    objid.split(separator)
   end
 
   def path_components_to_objid(path_components)
@@ -65,12 +68,49 @@ class Shipment
     self.class.objid_config
   end
 
+  def tmp_directory
+    @tmp_directory ||= File.join @dir, "tmp"
+  end
+
   def items
     @items ||= Items.new(path: @dir, objid_config: objid_config)
   end
 
+  def objids
+    items.objids
+  end
+
+  def image_files(type = "tif")
+    items.map do |item|
+      item.image_files_by_type(type)
+    end.flatten
+  end
+
+  def objid_directory(objid)
+    File.join(@dir, objid_to_path(objid))
+  end
+
+  def source_directory
+    @source_directory ||= File.join @dir, "source"
+  end
+
   def source_items
     @source_items ||= Items.new(path: source_directory, objid_config: objid_config)
+  end
+
+  def source_objids
+    source_items.objids
+  end
+
+  def source_image_files(type = "tif")
+    return [] unless File.directory? source_directory
+    source_items.map do |item|
+      item.image_files_by_type(type)
+    end.flatten
+  end
+
+  def source_objid_directory(objid)
+    File.join(source_directory, objid_to_path(objid))
   end
 
   def create_image_file(objid:, file_path:, objid_file:, file:)
@@ -100,50 +140,13 @@ class Shipment
     @tmp_directory = nil
   end
 
-  def source_directory
-    @source_directory ||= File.join @dir, "source"
-  end
-
-  def tmp_directory
-    @tmp_directory ||= File.join @dir, "tmp"
-  end
-
   def objid_to_path(objid)
-    objid.split(objid_config.separator)
-  end
-
-  def objids
-    items.objids
-  end
-
-  def objid_directory(objid)
-    File.join(@dir, objid_to_path(objid))
-  end
-
-  def source_objids
-    source_items.objids
-  end
-
-  def source_objid_directory(objid)
-    File.join(source_directory, objid_to_path(objid))
+    objid_config.objid_to_path_components(objid)
   end
 
   # Returns an error message or nil
   def validate_objid(objid)
     Luhn.valid?(objid) ? nil : "Luhn checksum failed"
-  end
-
-  def image_files(type = "tif")
-    items.map do |item|
-      item.image_files_by_type(type)
-    end.flatten
-  end
-
-  def source_image_files(type = "tif")
-    return [] unless File.directory? source_directory
-    source_items.map do |item|
-      item.image_files_by_type(type)
-    end.flatten
   end
 
   # This is the very first step of the whole workflow.
@@ -183,6 +186,7 @@ class Shipment
     end
   end
 
+  ### === METADATA METHODS === ###
   def finalize
     metadata[:finalized] = true
     return unless source_directory_exists?
@@ -194,7 +198,6 @@ class Shipment
     metadata[:finalized] ? true : false
   end
 
-  ### === METADATA METHODS === ###
   def checksums
     metadata[:checksums] || {}
   end
