@@ -17,15 +17,19 @@ class Item
 
   # assumes something valid. Check validity before going in here.
   def objid
+    objid_components.join(self.class::OBJID_SEPARATOR)
+  end
+
+  def objid_components
     starting_number = -1 * self.class::PATH_COMPONENTS
-    @path.split(File::SEPARATOR)[starting_number..].join(self.class::OBJID_SEPARATOR)
+    @path.split(File::SEPARATOR)[starting_number..]
   end
 
   def image_files
     @image_files = (Dir.children(@path) || []).filter_map do |child|
       if valid_file_types.include?(ImageFile.file_type(child))
         file_path = File.join(@path, child)
-        objid_file = File.join(objid, child)
+        objid_file = File.join(objid_components, child)
 
         image_file_class.new(
           objid, file_path, objid_file, child
