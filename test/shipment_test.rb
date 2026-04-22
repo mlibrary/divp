@@ -36,7 +36,7 @@ class ShipmentTest < Minitest::Test
       test_shipment = test_shipment_class.new(dir, "BC")
       shipment = shipment_class.new(test_shipment.directory)
       components = shipment.objid_to_path(shipment.objids[0])
-      assert_equal components.count, shipment_class::PATH_COMPONENTS,
+      assert_equal components.count, shipment_class.objid_config.path_components,
         "objid path component count = PATH_COMPONENTS"
       path = [shipment.directory]
       while (component = components.shift)

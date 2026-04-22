@@ -25,12 +25,17 @@ class ObjidConfig
 
     path_components_array.join separator
   end
+
+  def split_objid_file(objid_file)
+    components = objid_file.split(File::SEPARATOR)
+    objid = path_to_objid(components[0..-2])
+    file = components[-1] # beginning to second from end
+    [objid, file]
+  end
 end
 
 # Shipment directory class
 class Shipment
-  PATH_COMPONENTS = 1
-  OBJID_SEPARATOR = "/"
   OBJID_CONFIG = ObjidConfig.new(path_components: 1, separator: "/")
 
   attr_reader :metadata
@@ -76,29 +81,21 @@ class Shipment
     self.class.objid_config
   end
 
-  def image_file_class
-    ImageFile
-  end
-
-  def item_class
-    Item
-  end
-
   def items
     @items = objid_directories.map do |path|
-      item_class.new(path: path, objid_config: objid_config)
+      Item.new(path: path, objid_config: objid_config)
     end
   end
 
   def source_items
     return [] unless source_directory_exists?
     source_objid_directories.map do |path|
-      item_class.new(path: path, objid_config: objid_config)
+      Item.new(path: path, objid_config: objid_config)
     end
   end
 
   def create_image_file(objid:, file_path:, objid_file:, file:)
-    image_file_class.new(
+    ImageFile.new(
       objid, file_path, objid_file, file, @objid_config
     )
   end
@@ -263,7 +260,7 @@ class Shipment
     end
 
     checksums.keys.sort.each do |objid_file|
-      image_file = image_file_class.source_for(objid_file: objid_file, source_path: source_directory, objid_config: objid_config)
+      image_file = ImageFile.source_for(objid_file: objid_file, source_path: source_directory, objid_config: objid_config)
       yield image_file if block_given?
       fixity[:removed] << image_file if !File.exist? image_file.path
     end

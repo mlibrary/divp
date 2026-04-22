@@ -5,10 +5,6 @@ class Item
     @objid_config = objid_config
   end
 
-  def image_file_class
-    ImageFile
-  end
-
   # assumes something valid. Check validity before going in here.
   def objid
     objid_components.join(@objid_config.separator)
@@ -20,7 +16,7 @@ class Item
   end
 
   def create_image_file(objid:, file_path:, objid_file:, file:)
-    image_file_class.new(
+    ImageFile.new(
       objid, file_path, objid_file, file, @objid_config
     )
   end
@@ -50,7 +46,4 @@ class Item
 end
 
 class DLXSItem < Item
-  def image_file_class
-    DLXSImageFile
-  end
 end
