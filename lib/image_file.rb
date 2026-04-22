@@ -32,9 +32,9 @@ class ImageFile
   end
 
   def initialize(objid, path, objid_file, file)
-    @objid = objid # barcode ex: barcode
+    @objid = objid # barcode ex: barcode or adz05h3e.5454.380
     @path = path # full path to the file /maindir/shipment/source/barcode
-    @objid_file = objid_file # objid/filename ex: barcode/01.tif
+    @objid_file = objid_file # path within shipment to file. example barcode/01.tif or adz05h3e/5454/380/00000001.tif
     @file = file # filename ex 01.tif
   end
 

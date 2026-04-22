@@ -145,9 +145,11 @@ class Shipment
       objid_dir = File.join(dir, objid_path)
       self.class.directory_entries(objid_dir).sort.each do |entry|
         next unless entry.end_with? type
+        path = File.join(objid_dir, entry)
+        objid_file = File.join(objid_path, entry)
 
-        files << image_file_class.new(objid, File.join(objid_dir, entry),
-          File.join(objid_path, entry), entry)
+        files << image_file_class.new(objid, path,
+          objid_file, entry)
       end
     end
     files
