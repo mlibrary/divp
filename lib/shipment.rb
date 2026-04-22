@@ -63,6 +63,13 @@ class Shipment
     end
   end
 
+  def source_items
+    return [] unless File.directory? source_directory
+    source_objid_directories.map do |path|
+      item_class.new(path)
+    end
+  end
+
   def to_json(*args)
     {
       "json_class" => self.class.name,
@@ -137,22 +144,9 @@ class Shipment
 
   def source_image_files(type = "tif")
     return [] unless File.directory? source_directory
-    dir = source_directory
-
-    files = []
-    find_objids(dir).each do |objid|
-      objid_path = objid_to_path objid
-      objid_dir = File.join(dir, objid_path)
-      self.class.directory_entries(objid_dir).sort.each do |entry|
-        next unless entry.end_with? type
-        path = File.join(objid_dir, entry)
-        objid_file = File.join(objid_path, entry)
-
-        files << image_file_class.new(objid, path,
-          objid_file, entry)
-      end
-    end
-    files
+    source_items.map do |item|
+      item.image_files_by_type(type)
+    end.flatten
   end
 
   # This is the very first step of the whole workflow.
