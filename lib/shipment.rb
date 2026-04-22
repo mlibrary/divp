@@ -17,7 +17,11 @@ class ObjidConfig
     @separator = separator
   end
 
-  def path_to_objid(path_components)
+  def objid_to_path(objid)
+    File.join(objid.split(separator))
+  end
+
+  def path_components_to_objid(path_components)
     if path_components.count != path_components_count
       raise "WARNING: #{self} is not designed for path components" \
         " other than #{path_components_count} (#{path_components})"
@@ -28,7 +32,7 @@ class ObjidConfig
 
   def split_objid_file(objid_file)
     components = objid_file.split(File::SEPARATOR)
-    objid = path_to_objid(components[0..-2])
+    objid = path_components_to_objid(components[0..-2])
     file = components[-1] # beginning to second from end
     [objid, file]
   end
@@ -82,16 +86,11 @@ class Shipment
   end
 
   def items
-    @items = objid_directories.map do |path|
-      Item.new(path: path, objid_config: objid_config)
-    end
+    @items ||= Items.new(path: @dir, objid_config: objid_config)
   end
 
   def source_items
-    return [] unless source_directory_exists?
-    source_objid_directories.map do |path|
-      Item.new(path: path, objid_config: objid_config)
-    end
+    @source_items ||= Items.new(path: source_directory, objid_config: objid_config)
   end
 
   def create_image_file(objid:, file_path:, objid_file:, file:)
@@ -147,10 +146,6 @@ class Shipment
 
   def objid_directory(objid)
     File.join(@dir, objid_to_path(objid))
-  end
-
-  def source_objid_directories
-    source_objids.map { |objid| source_objid_directory objid }
   end
 
   def source_objids
@@ -293,7 +288,7 @@ class Shipment
         bars = (bars + more_bars).uniq
       end
     elsif components.count == objid_config.path_components_count
-      bars << objid_config.path_to_objid(components)
+      bars << objid_config.path_components_to_objid(components)
     end
     bars
   end
