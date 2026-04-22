@@ -11,7 +11,7 @@ class Item
   end
 
   def objid_components
-    starting_number = -1 * @objid_config.path_components
+    starting_number = -1 * @objid_config.path_components_count
     @path.split(File::SEPARATOR)[starting_number..]
   end
 

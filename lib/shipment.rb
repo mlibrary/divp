@@ -11,19 +11,19 @@ class FinalizedShipmentError < StandardError
 end
 
 class ObjidConfig
-  attr_reader :path_components, :separator
-  def initialize(path_components:, separator:)
-    @path_components = path_components
+  attr_reader :path_components_count, :separator
+  def initialize(path_components_count:, separator:)
+    @path_components_count = path_components_count
     @separator = separator
   end
 
-  def path_to_objid(path_components_array)
-    if path_components_array.count != path_components
+  def path_to_objid(path_components)
+    if path_components.count != path_components_count
       raise "WARNING: #{self} is not designed for path components" \
-        " other than #{path_components} (#{path_components_array})"
+        " other than #{path_components_count} (#{path_components})"
     end
 
-    path_components_array.join separator
+    path_components.join separator
   end
 
   def split_objid_file(objid_file)
@@ -36,7 +36,7 @@ end
 
 # Shipment directory class
 class Shipment
-  OBJID_CONFIG = ObjidConfig.new(path_components: 1, separator: "/")
+  OBJID_CONFIG = ObjidConfig.new(path_components_count: 1, separator: "/")
 
   attr_reader :metadata
 
@@ -286,13 +286,13 @@ class Shipment
 
   def find_objids_with_components(dir, components)
     bars = []
-    if components.count < objid_config.path_components
+    if components.count < objid_config.path_components_count
       subdir = File.join(dir, components)
       self.class.subdirectories(subdir).each do |entry|
         more_bars = find_objids_with_components(dir, components + [entry])
         bars = (bars + more_bars).uniq
       end
-    elsif components.count == objid_config.path_components
+    elsif components.count == objid_config.path_components_count
       bars << objid_config.path_to_objid(components)
     end
     bars
