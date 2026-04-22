@@ -13,11 +13,11 @@ end
 
 class GenerateChecksums < Stage
   def run(agenda)
-    @bar.steps = shipment.objid_directories.count
-    shipment.objid_directories.each_with_index do |dir, i|
-      @bar.step! i, dir
-      remove_existing_checksum_file(dir)
-      ChecksumFileGenerator.write(dir)
+    @bar.steps = shipment.items.count
+    shipment.items.each_with_index do |item, i|
+      @bar.step! i, item.path
+      remove_existing_checksum_file(item.path)
+      ChecksumFileGenerator.write(item.path)
     end
   end
 

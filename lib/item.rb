@@ -1,4 +1,5 @@
 class Item
+  attr_reader :path
   def initialize(path:, objid_config:)
     # path to deepest directory
     @path = path
