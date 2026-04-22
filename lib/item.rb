@@ -1,14 +1,8 @@
 class Item
-  PATH_COMPONENTS = 1
-  OBJID_SEPARATOR = "/"
-
-  def self.objid_to_path(objid)
-    objid.split(self::OBJID_SEPARATOR)
-  end
-
-  def initialize(path)
+  def initialize(path:, objid_config:)
     # path to deepest directory
     @path = path
+    @objid_config = objid_config
   end
 
   def image_file_class
@@ -17,12 +11,18 @@ class Item
 
   # assumes something valid. Check validity before going in here.
   def objid
-    objid_components.join(self.class::OBJID_SEPARATOR)
+    objid_components.join(@objid_config.separator)
   end
 
   def objid_components
-    starting_number = -1 * self.class::PATH_COMPONENTS
+    starting_number = -1 * @objid_config.path_components
     @path.split(File::SEPARATOR)[starting_number..]
+  end
+
+  def create_image_file(objid:, file_path:, objid_file:, file:)
+    image_file_class.new(
+      objid, file_path, objid_file, file, @objid_config
+    )
   end
 
   def image_files
@@ -31,8 +31,8 @@ class Item
         file_path = File.join(@path, child)
         objid_file = File.join(objid_components, child)
 
-        image_file_class.new(
-          objid, file_path, objid_file, child
+        create_image_file(
+          objid: objid, file_path: file_path, objid_file: objid_file, file: child
         )
       end
     end
@@ -50,9 +50,6 @@ class Item
 end
 
 class DLXSItem < Item
-  PATH_COMPONENTS = 3
-  OBJID_SEPARATOR = "."
-
   def image_file_class
     DLXSImageFile
   end
