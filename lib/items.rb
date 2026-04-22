@@ -26,11 +26,11 @@ class Items
     end.flatten.uniq.sort
   end
 
-  private
-
   def objid_directory(objid)
     File.join(@path, @objid_config.objid_to_path(objid))
   end
+
+  private
 
   def find_objids_with_components(dir, components)
     bars = []

@@ -44,6 +44,3 @@ class Item
     ["jp2", "tif"]
   end
 end
-
-class DLXSItem < Item
-end

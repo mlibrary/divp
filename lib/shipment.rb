@@ -87,7 +87,7 @@ class Shipment
   end
 
   def objid_directory(objid)
-    File.join(@dir, objid_to_path(objid))
+    items.objid_directory(objid)
   end
 
   def source_directory
@@ -110,7 +110,7 @@ class Shipment
   end
 
   def source_objid_directory(objid)
-    File.join(source_directory, objid_to_path(objid))
+    source_items.objid_directory(objid)
   end
 
   def create_image_file(objid:, file_path:, objid_file:, file:)
