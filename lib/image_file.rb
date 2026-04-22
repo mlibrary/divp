@@ -17,18 +17,9 @@ class ImageFile
 
   def self.path_to_parts(objid_file, objid_config)
     components = objid_file.split(File::SEPARATOR)
-    objid = path_to_objid(components[0..-2], objid_config)
+    objid = objid_config.path_to_objid(components[0..-2])
     file = components[-1] # beginning to second from end
     [objid, file]
-  end
-
-  def self.path_to_objid(path_components, objid_config = nil)
-    if path_components.count != objid_config.path_components
-      raise "WARNING: #{self} is not designed for path components" \
-        " other than #{objid_config.path_components} (#{path_components})"
-    end
-
-    path_components.join objid_config.separator
   end
 
   def initialize(objid, path, objid_file, file, config = nil)

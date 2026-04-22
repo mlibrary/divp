@@ -5,7 +5,7 @@
 class DLXSShipment < Shipment
   PATH_COMPONENTS = 3
   OBJID_SEPARATOR = "."
-  OBJID_CONFIG = OpenStruct.new(path_components: 3, separator: ".")
+  OBJID_CONFIG = ObjidConfig.new(path_components: 3, separator: ".")
 
   def image_file_class
     DLXSImageFile
