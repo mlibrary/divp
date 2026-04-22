@@ -52,26 +52,6 @@ class Shipment
     new hash["data"]["dir"], hash["data"]["metadata"]
   end
 
-  def self.top_level_directory_entries(dir)
-    Dir.entries(dir).reject do |entry|
-      %w[. .. source tmp].include?(entry) ||
-        !File.directory?(File.join(dir, entry))
-    end
-  end
-
-  def self.directory_entries(dir)
-    Dir.entries(dir).reject do |entry|
-      %w[. ..].include?(entry)
-    end
-  end
-
-  def self.subdirectories(dir)
-    Dir.entries(dir).reject do |entry|
-      %w[. ..].include?(entry) ||
-        !File.directory?(File.join(dir, entry))
-    end
-  end
-
   def initialize(dir, metadata = nil)
     raise "nil dir passed to Shipment#initialize" if dir.nil?
     raise "invalid dir passed to Shipment#initialize" if dir.is_a? Shipment
@@ -124,10 +104,6 @@ class Shipment
     @source_directory ||= File.join @dir, "source"
   end
 
-  def top_level_directory_entries
-    self.class.top_level_directory_entries(@dir)
-  end
-
   def tmp_directory
     @tmp_directory ||= File.join @dir, "tmp"
   end
@@ -136,12 +112,8 @@ class Shipment
     objid.split(objid_config.separator)
   end
 
-  def objid_directories
-    objids.map { |objid| objid_directory objid }
-  end
-
   def objids
-    find_objids
+    items.objids
   end
 
   def objid_directory(objid)
@@ -149,7 +121,7 @@ class Shipment
   end
 
   def source_objids
-    find_objids source_directory
+    source_items.objids
   end
 
   def source_objid_directory(objid)
@@ -266,30 +238,5 @@ class Shipment
 
   def source_directory_exists?
     File.directory? source_directory
-  end
-
-  # Traverse to a depth of PATH_COMPONENTS under shipment directory
-  def find_objids(dir = @dir)
-    dirs = Dir.children(dir).reject do |entry|
-      ["source", "tmp"].include?(entry) ||
-        !File.directory?(File.join(dir, entry))
-    end
-    dirs.map do |entry|
-      find_objids_with_components(dir, [entry])
-    end.flatten.uniq.sort
-  end
-
-  def find_objids_with_components(dir, components)
-    bars = []
-    if components.count < objid_config.path_components_count
-      subdir = File.join(dir, components)
-      self.class.subdirectories(subdir).each do |entry|
-        more_bars = find_objids_with_components(dir, components + [entry])
-        bars = (bars + more_bars).uniq
-      end
-    elsif components.count == objid_config.path_components_count
-      bars << objid_config.path_components_to_objid(components)
-    end
-    bars
   end
 end
