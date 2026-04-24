@@ -1,4 +1,4 @@
-class Log
+class Logger
   include Enumerable
 
   attr_accessor :warnings, :errors

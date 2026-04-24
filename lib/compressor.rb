@@ -154,7 +154,7 @@ module TiffTools
 end
 
 class Compressor
-  attr_reader :tiffinfo, :image_file, :tmpdir
+  attr_reader :tiffinfo, :image_file, :tmpdir, :logger
 
   def self.contone_compressor(config)
     case config[:contone_compression]
@@ -186,11 +186,11 @@ class Compressor
     end
   end
 
-  def initialize(image_file:, tmpdir:, log:, now: Time.now)
+  def initialize(image_file:, tmpdir:, logger:, now: Time.now)
     @image_file = image_file
     @tiffinfo = TIFF.new(image_file.path).info
     @tmpdir = tmpdir
-    @log = log
+    @logger = logger
     @now = now
   end
 
@@ -221,7 +221,7 @@ class Compressor
   private
 
   def log_it(log_entry)
-    @log.log_it log_entry
+    @logger.add log_entry
   end
 end
 

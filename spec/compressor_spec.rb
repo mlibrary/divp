@@ -10,7 +10,7 @@ describe Compressor do
   def tiffinfo(path)
     `tiffinfo #{path}`
   end
-  let(:log) { Log.new(objids: [objid]) }
+  let(:logger) { Logger.new(objids: [objid]) }
   let(:compression_tool) { FakeCompressionTool }
   # image file has path, objid, objid_file, file
   # objid="omzhx8s5.0074.149"
@@ -26,7 +26,7 @@ describe Compressor do
     Compressor.klass_for(image_file: image_file, config: @config)
   }
   let(:compressor) do
-    compressor_klass.new(image_file: image_file, tmpdir: Pathname(temp_dir), log: log, now: now)
+    compressor_klass.new(image_file: image_file, tmpdir: Pathname(temp_dir), logger: logger, now: now)
   end
   context "color tif with jp2" do
     before(:each) do
@@ -54,33 +54,33 @@ describe Compressor do
       it "removes alpha when it exists" do
         @image_file = "10_10_8_400_alpha.tif"
         compressor.run(compression_tool)
-        expect(log.entries).to include(match("-alpha off"))
+        expect(logger.entries).to include(match("-alpha off"))
       end
 
       it "ignores alpha when it doesn't exist" do
         compressor.run(compression_tool)
-        expect(log.entries).not_to include(match("-alpha off"))
+        expect(logger.entries).not_to include(match("-alpha off"))
       end
 
       it "strips tiff profile data when it exists" do
         @image_file = "10_10_8_400_icc.tif"
         compressor.run(compression_tool)
-        expect(log.entries).to include(match("-strip"))
+        expect(logger.entries).to include(match("-strip"))
       end
 
       it "ignores tiff profile when it doesn't exist" do
         compressor.run(compression_tool)
-        expect(log.entries).not_to include(match("-strip"))
+        expect(logger.entries).not_to include(match("-strip"))
       end
 
       it "runs the compression tool" do
         compressor.run
-        expect(log.entries).to include(match("grk_compress"))
+        expect(logger.entries).to include(match("grk_compress"))
       end
 
       it "copies original metadata to the jpeg2000" do
         compressor.run
-        expect(log.entries).to include(match("tiff:Compression=JPEG 2000"))
+        expect(logger.entries).to include(match("tiff:Compression=JPEG 2000"))
       end
 
       xit "copies original image datetime when present" do
@@ -89,7 +89,7 @@ describe Compressor do
       it "copies alphaless metadata to the jp2 when tiff has alpha" do
         @image_file = "10_10_8_400_alpha.tif"
         compressor.run(compression_tool)
-        expect(log.entries).to include(match("PhotometricInterpretation>XMP-tiff")).twice
+        expect(logger.entries).to include(match("PhotometricInterpretation>XMP-tiff")).twice
       end
     end
   end
@@ -112,11 +112,11 @@ describe Compressor do
     context "#run" do
       it "runs the compression tool" do
         compressor.run
-        expect(log.entries).to include(match("tifftopnm"))
+        expect(logger.entries).to include(match("tifftopnm"))
       end
       it "runs copies the metadata from the original tiff to the compressed one" do
         compressor.run
-        expect(log.entries).to include(match("exiftool -tagsFromFile #{compressor.image_file.path}"))
+        expect(logger.entries).to include(match("exiftool -tagsFromFile #{compressor.image_file.path}"))
       end
       it "copies the first page of the tiff" do
         @image_file = "10_10_1_600_2pg.tif"
@@ -125,7 +125,7 @@ describe Compressor do
         compressor.run
         result_info = tiffinfo(compressor.output_path)
         expect(result_info).not_to include("directory 1")
-        expect(log.entries).to include(match("tiffcp"))
+        expect(logger.entries).to include(match("tiffcp"))
       end
 
       it "keeps the original datetime when the original image has one" do
@@ -160,13 +160,13 @@ describe Compressor do
         compressor.run
         result_software = TIFF.new(compressor.output_path).info[:software]
         expect(result_software).to eq("My Software")
-        expect(log.entries).to include(match("exiftool -IFD0:Software="))
+        expect(logger.entries).to include(match("exiftool -IFD0:Software="))
       end
       it "logs a warning if there is no software in the original" do
         compressor.run
         result_software = TIFF.new(compressor.output_path).info[:software]
         expect(result_software).to be_nil
-        expect(log.warnings).to_json include(match("could not extract software"))
+        expect(logger.warnings).to_json include(match("could not extract software"))
       end
     end
   end
