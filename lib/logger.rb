@@ -21,6 +21,10 @@ class Logger
   end
 
   def log(entry, time)
+    info(entry, time)
+  end
+
+  def info(entry, time)
     entry += format(" (%.3f sec)", time) unless time.nil?
     @log << entry
   end
@@ -32,19 +36,19 @@ class Logger
   def add(log_entry)
     case log_entry.level
     when :info
-      log(log_entry.command, log_entry.time)
+      info(log_entry.command, log_entry.time)
     when :warning
-      add_warning(log_entry.error)
+      warn(log_entry.error)
     when :error
-      add_error(log_entry.error)
+      error(log_entry.error)
     end
   end
 
-  def add_warning(warning)
+  def warn(warning)
     @warnings.add(warning)
   end
 
-  def add_error(error)
+  def error(error)
     @errors.add(error)
   end
 

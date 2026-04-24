@@ -45,15 +45,15 @@ class ImageValidator < Stage
     begin
       info = TIFF.new(image_file.path).info
     rescue => e
-      add_error Error.new(e.message, image_file.objid, image_file.file)
+      logger.error Error.new(e.message, image_file.objid, image_file.file)
       return nil
     end
-    log info[:cmd], info[:time]
+    logger.info info[:cmd], info[:time]
     info[:warnings].each do |err|
-      add_warning Error.new(err, image_file.objid, image_file.file)
+      logger.warn Error.new(err, image_file.objid, image_file.file)
     end
     info[:errors].each do |err|
-      add_error Error.new(err, image_file.objid, image_file.file)
+      logger.error Error.new(err, image_file.objid, image_file.file)
     end
     info
   end
@@ -100,15 +100,15 @@ class ImageValidator < Stage
     begin
       info = JP2.new(image_file.path).info
     rescue => e
-      add_error Error.new(e.message, image_file.objid, image_file.file)
+      logger.error Error.new(e.message, image_file.objid, image_file.file)
       return nil
     end
-    log info[:cmd], info[:time]
+    logger.info info[:cmd], info[:time]
     info[:warnings].each do |err|
-      add_warning Error.new(err, image_file.objid, image_file.file)
+      logger.warn Error.new(err, image_file.objid, image_file.file)
     end
     info[:errors].each do |err|
-      add_error Error.new(err, image_file.objid, image_file.file)
+      logger.error Error.new(err, image_file.objid, image_file.file)
     end
     info
   end
@@ -123,7 +123,7 @@ class ImageValidator < Stage
   end
 
   def image_error(image_file, err)
-    add_error Error.new(err, image_file.objid, image_file.path)
+    logger.error Error.new(err, image_file.objid, image_file.path)
   end
 end
 
