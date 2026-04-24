@@ -219,19 +219,23 @@ class Stage
 
   # this is a Log object
   def log_collection
+    logger
+  end
+
+  def logger
     @data[:log]
   end
 
   def log_entries
-    log_collection.entries
+    logger.entries
   end
 
   def log(entry, time = nil)
-    log_collection.log(entry, time)
+    logger.log(entry, time)
   end
 
   def log_it(log_entry)
-    log_collection.log_it log_entry
+    logger.add log_entry
   end
 
   def shipment_directory
