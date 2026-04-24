@@ -110,10 +110,6 @@ class Stage
     raise "#{self.class.name}#run method unimplemented"
   end
 
-  def add_error(err)
-    log_collection.error(err)
-  end
-
   def add_warning(err)
     log_collection.warn(err)
   end

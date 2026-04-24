@@ -187,9 +187,9 @@ class Processor
       stage.run! stage_agenda
     rescue Interrupt
       puts "\nInterrupted".red
-      stage.add_error Error.new("Interruped")
+      stage.logger.error Error.new("Interruped")
     rescue => e
-      stage.add_error Error.new("#{e.inspect} #{e.backtrace}")
+      stage.logger.error Error.new("#{e.inspect} #{e.backtrace}")
       puts "#{e.inspect} #{e.backtrace}"
     ensure
       stage.cleanup

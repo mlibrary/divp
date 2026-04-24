@@ -33,11 +33,11 @@ class Postflight < Stage
     s1 = Set.new shipment.metadata[:initial_barcodes]
     s2 = Set.new shipment.objids
     if (s1 - s2).any?
-      add_error Error.new("objids removed: #{(s1 - s2).to_a.join(", ")}")
+      logger.error Error.new("objids removed: #{(s1 - s2).to_a.join(", ")}")
     end
     return unless (s2 - s1).any?
 
-    add_error Error.new("objids added: #{(s2 - s1).to_a.join(", ")}")
+    logger.error Error.new("objids added: #{(s2 - s1).to_a.join(", ")}")
   end
 
   def verify_source_checksums
@@ -45,13 +45,13 @@ class Postflight < Stage
       @bar.next! image_file.objid_file
     end
     fixity[:added].each do |image_file|
-      add_error Error.new("SHA missing", image_file.objid, image_file.file)
+      logger.error Error.new("SHA missing", image_file.objid, image_file.file)
     end
     fixity[:removed].each do |image_file|
-      add_error Error.new("file missing", image_file.objid, image_file.file)
+      logger.error Error.new("file missing", image_file.objid, image_file.file)
     end
     fixity[:changed].each do |image_file|
-      add_error Error.new("SHA modified", image_file.objid, image_file.file)
+      logger.error Error.new("SHA modified", image_file.objid, image_file.file)
     end
   end
 
@@ -60,10 +60,10 @@ class Postflight < Stage
     begin
       jhove.run
     rescue => e
-      add_error Error.new(e.message, objid)
+      logger.error Error.new(e.message, objid)
     end
     jhove.errors.each do |err|
-      add_error JHOVE.error_object(err)
+      logger.error JHOVE.error_object(err)
     end
   end
 end

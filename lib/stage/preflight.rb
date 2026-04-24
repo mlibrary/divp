@@ -34,7 +34,7 @@ class Preflight < Stage
   def run(agenda)
     shipment.metadata[:initial_barcodes] = shipment.objids
     if shipment.metadata[:initial_barcodes].none?
-      add_error Error.new("no objids in #{shipment_directory}")
+      logger.error Error.new("no objids in #{shipment_directory}")
     end
     @bar.steps = steps agenda
     @bar.next! "validate #{File.split(shipment_directory)[-1]}"
@@ -74,7 +74,7 @@ class Preflight < Stage
         add_warning Error.new("unnecessary file deleted", nil, path)
         delete_on_success path
       else
-        add_error Error.new("unknown file", nil, path)
+        logger.error Error.new("unknown file", nil, path)
       end
     end
   end
@@ -90,7 +90,7 @@ class Preflight < Stage
 
       path = File.join(objid_directory, entry)
       if File.directory? path
-        add_error Error.new("illegal objid subdirectory '#{entry}'", objid)
+        logger.error Error.new("illegal objid subdirectory '#{entry}'", objid)
       elsif self.class.image_file? entry
         have_image = true
       elsif self.class.ignorable_files.include? entry
@@ -99,10 +99,10 @@ class Preflight < Stage
         add_warning Error.new("file deleted", objid, entry)
         delete_on_success path
       else
-        add_error Error.new("unknown file", objid, entry)
+        logger.error Error.new("unknown file", objid, entry)
       end
     end
-    add_error Error.new("no image files found", objid) unless have_image
+    logger.error Error.new("no image files found", objid) unless have_image
   end
 
   def setup_source_directory
