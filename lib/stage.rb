@@ -111,11 +111,11 @@ class Stage
   end
 
   def add_error(err)
-    log_collection.add_error(err)
+    log_collection.error(err)
   end
 
   def add_warning(err)
-    log_collection.add_warning(err)
+    log_collection.warn(err)
   end
 
   # Map of objids + nil -> [Errors]
