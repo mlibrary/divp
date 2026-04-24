@@ -25,12 +25,18 @@ class Log
     @log << entry
   end
 
-  def log_it(data)
-    case data.level
+  def log_it(log_entry)
+    add(log_entry)
+  end
+
+  def add(log_entry)
+    case log_entry.level
     when :info
-      log(data.command, data.time)
+      log(log_entry.command, log_entry.time)
     when :warning
-      add_warning(data.error)
+      add_warning(log_entry.error)
+    when :error
+      add_error(log_entry.error)
     end
   end
 
