@@ -110,10 +110,6 @@ class Stage
     raise "#{self.class.name}#run method unimplemented"
   end
 
-  def add_warning(err)
-    log_collection.warn(err)
-  end
-
   # Map of objids + nil -> [Errors]
   # Does not include objids with no errors
   def errors_by_objid

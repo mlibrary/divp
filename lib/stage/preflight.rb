@@ -55,7 +55,7 @@ class Preflight < Stage
   def validate_objects(agenda)
     agenda.each do |objid|
       err = shipment.validate_objid objid
-      add_warning Error.new(err, objid) unless err.nil?
+      logger.warn Error.new(err, objid) unless err.nil?
       @bar.next! "validate #{objid}"
       validate_objid_directory objid
     end
@@ -71,7 +71,7 @@ class Preflight < Stage
       next if File.directory? path
 
       if self.class.removable_files.include? entry
-        add_warning Error.new("unnecessary file deleted", nil, path)
+        logger.warn Error.new("unnecessary file deleted", nil, path)
         delete_on_success path
       else
         logger.error Error.new("unknown file", nil, path)
@@ -94,9 +94,9 @@ class Preflight < Stage
       elsif self.class.image_file? entry
         have_image = true
       elsif self.class.ignorable_files.include? entry
-        add_warning Error.new("file ignored", objid, entry)
+        logger.warn Error.new("file ignored", objid, entry)
       elsif self.class.removable_files.include? entry
-        add_warning Error.new("file deleted", objid, entry)
+        logger.warn Error.new("file deleted", objid, entry)
         delete_on_success path
       else
         logger.error Error.new("unknown file", objid, entry)

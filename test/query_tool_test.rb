@@ -123,8 +123,8 @@ class QueryToolTest < Minitest::Test
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
       shipment = processor.shipment
       stage = processor.stages[0]
-      stage.add_warning Error.new("err 1", shipment.objids[0], "00000001.tif")
-      stage.add_warning Error.new("err 2", shipment.objids[1], "00000002.tif")
+      stage.logger.warn Error.new("err 1", shipment.objids[0], "00000001.tif")
+      stage.logger.warn Error.new("err 2", shipment.objids[1], "00000002.tif")
       tool = QueryTool.new(processor)
       out, _err = capture_io do
         tool.warnings_cmd
