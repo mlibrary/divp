@@ -9,6 +9,10 @@ module ChecksumChecker
     FileUtils.cd(path) do
       status = Command.new(cmd).run
       LogEntry.info(command: cmd, time: status[:time])
+    rescue => e
+      e.stdout_arr.map do |entry|
+        LogEntry.error(error: entry)
+      end
     end
   end
 end

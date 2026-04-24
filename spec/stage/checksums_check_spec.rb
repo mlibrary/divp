@@ -21,6 +21,11 @@ describe ChecksumCheck do
     expect(subject.log_entries).to include(match("md5sum -c checksum.md5"))
   end
 
-  xit "warns on an incorrect checksum file" do
+  it "errors on on an incorrect checksum file" do
+    set_up_shipment
+    FileUtils.cp("spec/fixtures/bad_checksum.md5", "#{item_path}/checksum.md5")
+
+    subject.run!
+    expect(subject.log_entries).to include(match("md5sum -c checksum.md5"))
   end
 end
