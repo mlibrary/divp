@@ -17,7 +17,7 @@ class Compression < Stage
       @bar.step! i, "#{image_file.objid_file} #{compressor_klass.compression_type}"
       next if compressor_klass.compression_type == "None"
 
-      compressor = compressor_klass.new(image_file: image_file, tmpdir: create_tempdir, log: log_collection)
+      compressor = compressor_klass.new(image_file: image_file, tmpdir: create_tempdir, logger: logger)
 
       compressor.run
 

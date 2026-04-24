@@ -9,7 +9,7 @@ require "config"
 require "error"
 require "progress_bar"
 require "symbolize"
-require "log"
+require "logger"
 
 # Base class for conversion stages
 class Stage
@@ -59,7 +59,7 @@ class Stage
     @data = args[:data] || {}
 
     if @data[:log].instance_of?(::Array) || @data[:log].nil?
-      @data[:log] = Log.new(log: @data[:log],
+      @data[:log] = Logger.new(log: @data[:log],
         warnings: Warnings.new(bar: @bar, objids: objids, list: args[:warnings]),
         errors: Errors.new(bar: @bar, objids: objids, list: args[:errors]))
     end
