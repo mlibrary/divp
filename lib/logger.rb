@@ -44,11 +44,13 @@ class Logger
     end
   end
 
-  def warn(warning)
+  def warn(description, objid: nil, path: nil)
+    warning = description.is_a?(Error) ? description : Error.new(description, objid, path)
     @warnings.add(warning)
   end
 
-  def error(error)
+  def error(description, objid: nil, path: nil)
+    error = description.is_a?(Error) ? description : Error.new(description, objid, path)
     @errors.add(error)
   end
 

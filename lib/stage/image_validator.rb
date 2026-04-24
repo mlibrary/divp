@@ -45,12 +45,12 @@ class ImageValidator < Stage
     begin
       info = TIFF.new(image_file.path).info
     rescue => e
-      logger.error Error.new(e.message, image_file.objid, image_file.file)
+      logger.error(e.message, objid: image_file.objid, path: image_file.file)
       return nil
     end
     logger.info info[:cmd], info[:time]
     info[:warnings].each do |err|
-      logger.warn Error.new(err, image_file.objid, image_file.file)
+      logger.warn(err, objid: image_file.objid, path: image_file.file)
     end
     info[:errors].each do |err|
       logger.error Error.new(err, image_file.objid, image_file.file)
