@@ -76,8 +76,8 @@ class QueryToolTest < Minitest::Test
       test_shipment = test_shipment_class.new(dir, "BC T bad_16bps 1")
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
       stage = processor.stages[0]
-      stage.logger.error Error.new("err", processor.shipment.objids[0],
-        "00000001.tif")
+      stage.logger.error("err", objid: processor.shipment.objids[0],
+        path: "00000001.tif")
       tool = QueryTool.new(processor)
       out, _err = capture_io do
         tool.objids_cmd
@@ -95,8 +95,8 @@ class QueryToolTest < Minitest::Test
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
       shipment = processor.shipment
       stage = processor.stages[0]
-      stage.logger.error Error.new("err 1", shipment.objids[0], "00000001.tif")
-      stage.logger.error Error.new("err 2", shipment.objids[1], "00000002.tif")
+      stage.logger.error("err 1", objid: shipment.objids[0], path: "00000001.tif")
+      stage.logger.error("err 2", objid: shipment.objids[1], path: "00000002.tif")
       tool = QueryTool.new(processor)
       out, _err = capture_io do
         tool.errors_cmd
@@ -123,8 +123,8 @@ class QueryToolTest < Minitest::Test
       processor = Processor.new(test_shipment.directory, opts.merge(@options))
       shipment = processor.shipment
       stage = processor.stages[0]
-      stage.logger.warn Error.new("err 1", shipment.objids[0], "00000001.tif")
-      stage.logger.warn Error.new("err 2", shipment.objids[1], "00000002.tif")
+      stage.logger.warn("err 1", objid: shipment.objids[0], path: "00000001.tif")
+      stage.logger.warn("err 2", objid: shipment.objids[1], path: "00000002.tif")
       tool = QueryTool.new(processor)
       out, _err = capture_io do
         tool.warnings_cmd

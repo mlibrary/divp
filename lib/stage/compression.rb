@@ -30,7 +30,7 @@ class Compression < Stage
 
       system("rm -r #{compressor.tmpdir}/*")
     rescue => e
-      logger.error Error.new(e.message, image_file.objid, image_file.file)
+      logger.error(e.message, objid: image_file.objid, path: image_file.file)
       next
     end
   end

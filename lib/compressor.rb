@@ -325,7 +325,7 @@ class Compressor::G4 < Compressor
       log_it ExifTool.clear_software_tag(output_path)
       log_it TiffTools.set_tag(path: output_path, tag: :software, value: tiffinfo[:software])
     else
-      log_it LogEntry.warning(error: Error.new("could not extract software", image_file.objid, image_file.path))
+      @logger.warn("could not extract software", objid: image_file.objid, path: image_file.path)
     end
   end
 

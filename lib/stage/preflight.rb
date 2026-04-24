@@ -34,7 +34,7 @@ class Preflight < Stage
   def run(agenda)
     shipment.metadata[:initial_barcodes] = shipment.objids
     if shipment.metadata[:initial_barcodes].none?
-      logger.error Error.new("no objids in #{shipment_directory}")
+      logger.error("no objids in #{shipment_directory}")
     end
     @bar.steps = steps agenda
     @bar.next! "validate #{File.split(shipment_directory)[-1]}"
@@ -55,7 +55,7 @@ class Preflight < Stage
   def validate_objects(agenda)
     agenda.each do |objid|
       err = shipment.validate_objid objid
-      logger.warn Error.new(err, objid) unless err.nil?
+      logger.warn(err, objid: objid) unless err.nil?
       @bar.next! "validate #{objid}"
       validate_objid_directory objid
     end
@@ -71,10 +71,10 @@ class Preflight < Stage
       next if File.directory? path
 
       if self.class.removable_files.include? entry
-        logger.warn Error.new("unnecessary file deleted", nil, path)
+        logger.warn("unnecessary file deleted", path: path)
         delete_on_success path
       else
-        logger.error Error.new("unknown file", nil, path)
+        logger.error("unknown file", path: path)
       end
     end
   end
@@ -90,19 +90,19 @@ class Preflight < Stage
 
       path = File.join(objid_directory, entry)
       if File.directory? path
-        logger.error Error.new("illegal objid subdirectory '#{entry}'", objid)
+        logger.error("illegal objid subdirectory '#{entry}'", objid: objid)
       elsif self.class.image_file? entry
         have_image = true
       elsif self.class.ignorable_files.include? entry
-        logger.warn Error.new("file ignored", objid, entry)
+        logger.warn("file ignored", objid: objid, path: entry)
       elsif self.class.removable_files.include? entry
-        logger.warn Error.new("file deleted", objid, entry)
+        logger.warn("file deleted", objid: objid, path: entry)
         delete_on_success path
       else
-        logger.error Error.new("unknown file", objid, entry)
+        logger.error("unknown file", objid: objid, path: entry)
       end
     end
-    logger.error Error.new("no image files found", objid) unless have_image
+    logger.error("no image files found", objid: objid) unless have_image
   end
 
   def setup_source_directory

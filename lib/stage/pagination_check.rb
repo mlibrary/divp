@@ -21,12 +21,12 @@ class PaginationCheck < Stage
     pages = pages_in_dir(dir)
     missing = missing_pages(pages)
     if missing.count.positive?
-      logger.error Error.new("missing pages {#{missing.join(", ")}}", objid)
+      logger.error("missing pages {#{missing.join(", ")}}", objid: objid)
     end
     duplicate = duplicate_pages(pages)
     return unless duplicate.count.positive?
 
-    logger.error Error.new("duplicate pages {#{duplicate.join(", ")}}", objid)
+    logger.error("duplicate pages {#{duplicate.join(", ")}}", objid: objid)
   end
 
   def pages_in_dir(dir)

@@ -10,7 +10,7 @@ require "fixtures"
 
 class Fails < Stage
   def run(agenda)
-    logger.error Error.new("fails!")
+    logger.error("fails!")
   end
 end
 

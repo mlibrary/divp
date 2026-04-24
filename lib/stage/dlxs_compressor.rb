@@ -16,7 +16,7 @@ class DLXSCompressor < Stage
       begin
         handle_conversion image_file
       rescue => e
-        logger.error Error.new(e.message, image_file.objid, image_file.path)
+        logger.error(e.message, objid: image_file.objid, path: image_file.path)
       end
     end
   end
