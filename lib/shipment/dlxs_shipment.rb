@@ -3,13 +3,8 @@
 
 # Shipment directory class for DLXS nested id/volume/number directories
 class DLXSShipment < Shipment
-  PATH_COMPONENTS = 3
-  OBJID_SEPARATOR = "."
-  def initialize(dir, metadata = nil)
-    super
-  end
+  OBJID_CONFIG = ObjidConfig.new(path_components_count: 3, separator: ".")
 
-  # Returns an error message or nil
   def validate_objid(objid)
     /^.*?\.\d\d\d\d\.\d\d\d$/.match?(objid) ? nil : "invalid volume/number"
   end

@@ -13,6 +13,9 @@ require "shipment"
 require "stage"
 require "string_color"
 require "symbolize"
+require "image_file"
+require "item"
+require "items"
 
 Dir[File.join(__dir__, "stage", "*.rb")].sort.each { |file| require file }
 Dir[File.join(__dir__, "shipment", "*.rb")].sort.each { |file| require file }
@@ -70,7 +73,7 @@ class Processor
     return unless File.directory? shipment.source_directory
 
     bar = ProgressBar.new("(Restore)")
-    bar.steps = @shipment.source_objid_directories.count
+    bar.steps = @shipment.source_items.count
     @shipment.restore_from_source_directory(objids) do |objid|
       bar.next! "copying from source/#{objid}"
     end

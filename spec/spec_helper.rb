@@ -1,5 +1,5 @@
 require "dotenv"
-require "byebug"
+require "debug"
 require "rspec/temp_dir"
 
 Dotenv.load

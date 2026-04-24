@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "dotenv"
-require "byebug"
+require "debug"
 
 Dotenv.load
 

@@ -9,36 +9,50 @@ require "luhn"
 class FinalizedShipmentError < StandardError
 end
 
-ImageFile = Struct.new(:objid, :path, :objid_file, :file)
+class ObjidConfig
+  attr_reader :path_components_count, :separator
+  def initialize(path_components_count:, separator:)
+    @path_components_count = path_components_count
+    @separator = separator
+  end
+
+  def objid_to_path(objid)
+    File.join(objid_to_path_components(objid))
+  end
+
+  def objid_to_path_components(objid)
+    objid.split(separator)
+  end
+
+  def path_components_to_objid(path_components)
+    if path_components.count != path_components_count
+      raise "WARNING: #{self} is not designed for path components" \
+        " other than #{path_components_count} (#{path_components})"
+    end
+
+    path_components.join separator
+  end
+
+  def split_objid_file(objid_file)
+    components = objid_file.split(File::SEPARATOR)
+    objid = path_components_to_objid(components[0..-2])
+    file = components[-1] # beginning to second from end
+    [objid, file]
+  end
+end
 
 # Shipment directory class
 class Shipment
-  PATH_COMPONENTS = 1
-  OBJID_SEPARATOR = "/"
+  OBJID_CONFIG = ObjidConfig.new(path_components_count: 1, separator: "/")
+
   attr_reader :metadata
+
+  def self.objid_config
+    self::OBJID_CONFIG
+  end
 
   def self.json_create(hash)
     new hash["data"]["dir"], hash["data"]["metadata"]
-  end
-
-  def self.top_level_directory_entries(dir)
-    Dir.entries(dir).reject do |entry|
-      %w[. .. source tmp].include?(entry) ||
-        !File.directory?(File.join(dir, entry))
-    end
-  end
-
-  def self.directory_entries(dir)
-    Dir.entries(dir).reject do |entry|
-      %w[. ..].include?(entry)
-    end
-  end
-
-  def self.subdirectories(dir)
-    Dir.entries(dir).reject do |entry|
-      %w[. ..].include?(entry) ||
-        !File.directory?(File.join(dir, entry))
-    end
   end
 
   def initialize(dir, metadata = nil)
@@ -48,6 +62,61 @@ class Shipment
     @dir = dir
     @metadata = metadata || {}
     @metadata.transform_keys!(&:to_sym)
+  end
+
+  def objid_config
+    self.class.objid_config
+  end
+
+  def tmp_directory
+    @tmp_directory ||= File.join @dir, "tmp"
+  end
+
+  def items
+    @items ||= Items.new(path: @dir, objid_config: objid_config)
+  end
+
+  def objids
+    items.objids
+  end
+
+  def image_files(type = "tif")
+    items.map do |item|
+      item.image_files_by_type(type)
+    end.flatten
+  end
+
+  def objid_directory(objid)
+    items.objid_directory(objid)
+  end
+
+  def source_directory
+    @source_directory ||= File.join @dir, "source"
+  end
+
+  def source_items
+    @source_items ||= Items.new(path: source_directory, objid_config: objid_config)
+  end
+
+  def source_objids
+    source_items.objids
+  end
+
+  def source_image_files(type = "tif")
+    return [] unless File.directory? source_directory
+    source_items.map do |item|
+      item.image_files_by_type(type)
+    end.flatten
+  end
+
+  def source_objid_directory(objid)
+    source_items.objid_directory(objid)
+  end
+
+  def create_image_file(objid:, file_path:, objid_file:, file:)
+    ImageFile.new(
+      objid, file_path, objid_file, file, @objid_config
+    )
   end
 
   def to_json(*args)
@@ -71,75 +140,13 @@ class Shipment
     @tmp_directory = nil
   end
 
-  def source_directory
-    @source_directory ||= File.join @dir, "source"
-  end
-
-  def tmp_directory
-    @tmp_directory ||= File.join @dir, "tmp"
-  end
-
-  def path_to_objid(path_components)
-    if path_components.count != self.class::PATH_COMPONENTS
-      raise "WARNING: #{self.class} is not designed for path components" \
-            " other than #{self.class::PATH_COMPONENTS} (#{path_components})"
-    end
-
-    path_components.join self.class::OBJID_SEPARATOR
-  end
-
   def objid_to_path(objid)
-    objid.split self.class::OBJID_SEPARATOR
-  end
-
-  def objid_directories
-    objids.map { |objid| objid_directory objid }
-  end
-
-  def objids
-    find_objids
-  end
-
-  def objid_directory(objid)
-    File.join(@dir, objid_to_path(objid))
-  end
-
-  def source_objid_directories
-    source_objids.map { |objid| source_objid_directory objid }
-  end
-
-  def source_objids
-    find_objids source_directory
-  end
-
-  def source_objid_directory(objid)
-    File.join(source_directory, objid_to_path(objid))
+    objid_config.objid_to_path_components(objid)
   end
 
   # Returns an error message or nil
   def validate_objid(objid)
     Luhn.valid?(objid) ? nil : "Luhn checksum failed"
-  end
-
-  def image_files(type = "tif", dir = @dir)
-    files = []
-    find_objids(dir).each do |objid|
-      objid_path = objid_to_path objid
-      objid_dir = File.join(dir, objid_path)
-      self.class.directory_entries(objid_dir).sort.each do |entry|
-        next unless entry.end_with? type
-
-        files << ImageFile.new(objid, File.join(objid_dir, entry),
-          File.join(objid_path, entry), entry)
-      end
-    end
-    files
-  end
-
-  def source_image_files(type = "tif")
-    return [] unless File.directory? source_directory
-
-    image_files(type, source_directory)
   end
 
   # This is the very first step of the whole workflow.
@@ -179,9 +186,10 @@ class Shipment
     end
   end
 
+  ### === METADATA METHODS === ###
   def finalize
     metadata[:finalized] = true
-    return unless File.exist? source_directory
+    return unless source_directory_exists?
 
     FileUtils.rm_r(source_directory, force: true)
   end
@@ -190,13 +198,8 @@ class Shipment
     metadata[:finalized] ? true : false
   end
 
-  ### === METADATA METHODS === ###
   def checksums
     metadata[:checksums] || {}
-  end
-
-  def checksum(image_file)
-    Digest::SHA256.file(image_file.path).hexdigest
   end
 
   # Add SHA256 entries to metadata for each source/objid/file.
@@ -206,8 +209,8 @@ class Shipment
     metadata[:checksums] = {}
     last_objid = nil
     source_image_files.each do |image_file|
-      yield image_file.objid if block_given? && last_objid != image_file.objid
-      metadata[:checksums][image_file.objid_file] = checksum(image_file)
+      yield image_file.objid if block_given? && last_objid != image_file.objid # this is for providing an objid to the status bar
+      metadata[:checksums][image_file.objid_file] = image_file.checksum
       last_objid = image_file.objid
     end
   end
@@ -221,46 +224,22 @@ class Shipment
       yield image_file if block_given?
       if checksums[image_file.objid_file].nil?
         fixity[:added] << image_file
-      elsif checksums[image_file.objid_file] != checksum(image_file)
+      elsif checksums[image_file.objid_file] != image_file.checksum
         fixity[:changed] << image_file
       end
     end
 
     checksums.keys.sort.each do |objid_file|
-      components = objid_file.split(File::SEPARATOR)
-      objid = path_to_objid(components[0..-2])
-      image_file = ImageFile.new(objid,
-        File.join(source_directory, objid_file),
-        objid_file, components[-1])
+      image_file = ImageFile.source_for(objid_file: objid_file, source_path: source_directory, objid_config: objid_config)
       yield image_file if block_given?
-      fixity[:removed] << image_file unless File.exist? image_file.path
+      fixity[:removed] << image_file if !File.exist? image_file.path
     end
     fixity
   end
 
   private
 
-  # Traverse to a depth of PATH_COMPONENTS under shipment directory
-  def find_objids(dir = @dir)
-    bars = []
-    dirs = self.class.top_level_directory_entries(dir)
-    dirs.each do |entry|
-      bars = (bars + find_objids_with_components(dir, [entry])).uniq
-    end
-    bars.sort
-  end
-
-  def find_objids_with_components(dir, components)
-    bars = []
-    if components.count < self.class::PATH_COMPONENTS
-      subdir = File.join(dir, components)
-      self.class.subdirectories(subdir).each do |entry|
-        more_bars = find_objids_with_components(dir, components + [entry])
-        bars = (bars + more_bars).uniq
-      end
-    elsif components.count == self.class::PATH_COMPONENTS
-      bars << path_to_objid(components)
-    end
-    bars
+  def source_directory_exists?
+    File.directory? source_directory
   end
 end
