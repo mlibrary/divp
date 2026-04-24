@@ -1,6 +1,7 @@
 class Log
   include Enumerable
 
+  attr_accessor :warnings
   def initialize(log: nil, objids: [], warnings: Warnings.new(objids: objids))
     @log = log || []
     @warnings = warnings
@@ -14,10 +15,6 @@ class Log
 
   def entries
     @log
-  end
-
-  def warnings
-    @warnings.list
   end
 
   def log(entry, time)
@@ -54,9 +51,9 @@ class Exceptions
     @objids = objids
   end
 
-  def each
+  def each(&block)
     @list.each do |line|
-      yield line
+      block.call(line)
     end
   end
 
@@ -116,6 +113,10 @@ class LogEntry
 
   def self.warning(error:)
     new(level: :warning, error: error)
+  end
+
+  def self.error(error:)
+    new(level: :error, error: error)
   end
 
   attr_reader :level, :command, :time, :error

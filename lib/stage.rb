@@ -13,7 +13,7 @@ require "log"
 
 # Base class for conversion stages
 class Stage
-  attr_reader :errors, :warnings, :start, :end, :objids
+  attr_reader :errors, :start, :end, :objids
   attr_accessor :name, :config, :shipment
 
   def self.json_create(hash)
@@ -30,7 +30,7 @@ class Stage
       "json_class" => self.class.name,
       "data" => {name: @name,
                  errors: @errors,
-                 warnings: @warnings,
+                 warnings: warnings,
                  data: @data,
                  objids: @shipment.objids,
                  start: Stage.json_time(@start),
@@ -55,12 +55,15 @@ class Stage
       ProgressBar.new(self.class)
     end
     @errors = Errors.new(bar: @bar, objids: objids, list: args[:errors])
-    @warnings = Warnings.new(bar: @bar, objids: objids, list: args[:warnings])
 
-    @data = args[:data] || {log: Log.new(warnings: @warnings)} # Misc data structure including log
+    # Misc data structure including log
+    @data = args[:data] || {}
+
     if @data[:log].instance_of?(::Array) || @data[:log].nil?
-      @data[:log] = Log.new(log: @data[:log], warnings: @warnings)
+      @data[:log] = Log.new(log: @data[:log],
+        warnings: Warnings.new(bar: @bar, objids: objids, list: args[:warnings]))
     end
+
     # Time the stage was last run
     @start = if args[:start].to_s == ""
       nil
@@ -77,10 +80,15 @@ class Stage
   end
 
   # Get rid of errors, warnings, and anything that may have been memoized
+  # TODO fix this when getting rid of @warnings
   def reinitialize!
     @errors = Errors.new(bar: @bar, objids: objids)
-    @warnings = Warnings.new(bar: @bar, objids: objids)
+    log_collection.warnings = Warnings.new(bar: @bar, objids: objids)
     @bar.done = nil
+  end
+
+  def warnings
+    log_collection.warnings
   end
 
   def run!(agenda = nil)
@@ -100,23 +108,11 @@ class Stage
 
   def add_error(err)
     @errors.add(err)
-    # raise "#{err.class} passed to add_error" unless err.is_a? Error
-    # unless err.objid.nil? || objids.member?(err.objid)
-    # raise "unknown error objid #{err.objid}"
-    # end
-
-    # @bar.error = true
-    # @errors << err
   end
 
   def add_warning(err)
-    @warnings.add(err)
-    # unless err.objid.nil? || objids.member?(err.objid)
-    # raise "unknown warning objid #{err.objid}"
-    # end
-
-    # @bar.warning = true
-    # @warnings << err
+    log_collection.add_warning(err)
+    # @warnings.add(err)
   end
 
   # Map of objids + nil -> [Errors]
@@ -218,6 +214,7 @@ class Stage
     (@delete_on_success ||= []) << {path: path, objid: objid}
   end
 
+  # this is a Log object
   def log_collection
     @data[:log]
   end
