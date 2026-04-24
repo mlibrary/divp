@@ -18,7 +18,7 @@ describe ChecksumCheck do
     FileUtils.cp("spec/fixtures/good_checksum.md5", "#{item_path}/checksum.md5")
 
     subject.run!
-    expect(subject.log_entries).to include(match("md5sum -c checksum.md5"))
+    expect(subject.log_entries).to include(match("md5sum --quiet -c checksum.md5"))
   end
 
   it "errors on on an incorrect checksum file" do
@@ -26,6 +26,9 @@ describe ChecksumCheck do
     FileUtils.cp("spec/fixtures/bad_checksum.md5", "#{item_path}/checksum.md5")
 
     subject.run!
-    expect(subject.log_entries).to include(match("md5sum -c checksum.md5"))
+    expect(subject.errors[0].description).to eq("10_10_8_400.tif: FAILED open or read")
+    expect(subject.errors[0].objid).to eq(barcode)
+    expect(subject.errors[1].description).to eq("10_10_8_400.jp2: FAILED")
+    expect(subject.errors[1].objid).to eq(barcode)
   end
 end
