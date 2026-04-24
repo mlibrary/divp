@@ -10,7 +10,8 @@ module ChecksumChecker
       status = Command.new(cmd).run
       LogEntry.info(command: cmd, time: status[:time])
     rescue => e
-      e.stdout_arr.map do |entry|
+      error_arr = e.stdout_arr.empty? ? e.stderr_arr : e.stdout_arr
+      error_arr.map do |entry|
         LogEntry.error(error: entry, objid: item.objid)
       end
     end

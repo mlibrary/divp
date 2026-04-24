@@ -31,4 +31,11 @@ describe ChecksumCheck do
     expect(subject.errors[1].description).to eq("10_10_8_400.jp2: FAILED")
     expect(subject.errors[1].objid).to eq(barcode)
   end
+
+  it "errors on missing checksum file" do
+    set_up_shipment
+    subject.run!
+    expect(subject.errors[0].description).to eq("md5sum: checksum.md5: No such file or directory")
+    expect(subject.errors[0].objid).to eq(barcode)
+  end
 end
