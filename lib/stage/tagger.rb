@@ -28,7 +28,7 @@ class Tagger < Stage
   def calculate_tags
     artist = config[:tagger_artist] || "dcu"
     @artist_tag ||= if TagData::ARTIST[artist].nil?
-      add_warning Error.new("using custom artist '#{artist}'")
+      logger.warn("using custom artist '#{artist}'")
       artist
     else
       TagData::ARTIST[artist]
@@ -37,11 +37,11 @@ class Tagger < Stage
     unless scanner.nil?
       if TagData::SCANNER[scanner].nil?
         unless /\|/.match? scanner
-          add_error Error.new("user-defined scanner not in 'make|model' format")
+          logger.error("user-defined scanner not in 'make|model' format")
           return
         end
 
-        add_warning Error.new("using custom scanner '#{scanner}'")
+        logger.warn("using custom scanner '#{scanner}'")
         @make_tag, @model_tag = scanner.split("|")
       else
         @make_tag, @model_tag = TagData::SCANNER[scanner]
@@ -51,7 +51,7 @@ class Tagger < Stage
     return if software.nil?
 
     if TagData::SOFTWARE[software].nil?
-      add_warning Error.new("using custom software '#{software}'")
+      logger.warn("using custom software '#{software}'")
       @software_tag = software
     else
       @software_tag = TagData::SOFTWARE[software]
@@ -104,15 +104,15 @@ class Tagger < Stage
     begin
       info = TIFF.new(image_file.path).set(tag, value)
     rescue => e
-      add_error Error.new(e.message, image_file.objid, image_file.file)
+      logger.error(e.message, objid: image_file.objid, path: image_file.file)
       return
     end
     log info[:cmd], info[:time]
     info[:warnings].each do |err|
-      add_warning Error.new(err, image_file.objid, image_file.file)
+      logger.warn(err, objid: image_file.objid, path: image_file.file)
     end
     info[:errors].each do |err|
-      add_error Error.new(err, image_file.objid, image_file.file)
+      logger.error(err, objid: image_file.objid, path: image_file.file)
     end
   end
 end

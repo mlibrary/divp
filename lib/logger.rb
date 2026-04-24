@@ -1,14 +1,18 @@
-class Log
+class Logger
   include Enumerable
 
-  def initialize(log: nil, objids: [], warnings: Warnings.new(objids: objids))
+  attr_accessor :warnings, :errors
+  def initialize(log: nil, objids: [],
+    warnings: Warnings.new(objids: objids),
+    errors: Errors.new(objids: objids))
     @log = log || []
     @warnings = warnings
+    @errors = errors
   end
 
-  def each
+  def each(&block)
     @log.each do |line|
-      yield line
+      block.call(line)
     end
   end
 
@@ -16,26 +20,38 @@ class Log
     @log
   end
 
-  def warnings
-    @warnings.list
+  def log(entry, time)
+    info(entry, time)
   end
 
-  def log(entry, time)
+  def info(entry, time)
     entry += format(" (%.3f sec)", time) unless time.nil?
     @log << entry
   end
 
-  def log_it(data)
-    case data.level
+  def log_it(log_entry)
+    add(log_entry)
+  end
+
+  def add(log_entry)
+    case log_entry.level
     when :info
-      log(data.command, data.time)
+      info(log_entry.command, log_entry.time)
     when :warning
-      add_warning(data.error)
+      warn(log_entry.error)
+    when :error
+      error(log_entry.error)
     end
   end
 
-  def add_warning(warning)
+  def warn(description, objid: nil, path: nil)
+    warning = description.is_a?(Error) ? description : Error.new(description, objid, path)
     @warnings.add(warning)
+  end
+
+  def error(description, objid: nil, path: nil)
+    error = description.is_a?(Error) ? description : Error.new(description, objid, path)
+    @errors.add(error)
   end
 
   def to_json(state = nil, *)
@@ -54,9 +70,9 @@ class Exceptions
     @objids = objids
   end
 
-  def each
+  def each(&block)
     @list.each do |line|
-      yield line
+      block.call(line)
     end
   end
 
@@ -116,6 +132,10 @@ class LogEntry
 
   def self.warning(error:)
     new(level: :warning, error: error)
+  end
+
+  def self.error(error:)
+    new(level: :error, error: error)
   end
 
   attr_reader :level, :command, :time, :error

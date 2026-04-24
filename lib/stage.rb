@@ -9,11 +9,11 @@ require "config"
 require "error"
 require "progress_bar"
 require "symbolize"
-require "log"
+require "logger"
 
 # Base class for conversion stages
 class Stage
-  attr_reader :errors, :warnings, :start, :end, :objids
+  attr_reader :start, :end, :objids
   attr_accessor :name, :config, :shipment
 
   def self.json_create(hash)
@@ -29,8 +29,8 @@ class Stage
     {
       "json_class" => self.class.name,
       "data" => {name: @name,
-                 errors: @errors,
-                 warnings: @warnings,
+                 errors: errors,
+                 warnings: warnings,
                  data: @data,
                  objids: @shipment.objids,
                  start: Stage.json_time(@start),
@@ -54,13 +54,16 @@ class Stage
     else
       ProgressBar.new(self.class)
     end
-    @errors = Errors.new(bar: @bar, objids: objids, list: args[:errors])
-    @warnings = Warnings.new(bar: @bar, objids: objids, list: args[:warnings])
 
-    @data = args[:data] || {log: Log.new(warnings: @warnings)} # Misc data structure including log
+    # Misc data structure including log
+    @data = args[:data] || {}
+
     if @data[:log].instance_of?(::Array) || @data[:log].nil?
-      @data[:log] = Log.new(log: @data[:log], warnings: @warnings)
+      @data[:log] = Logger.new(log: @data[:log],
+        warnings: Warnings.new(bar: @bar, objids: objids, list: args[:warnings]),
+        errors: Errors.new(bar: @bar, objids: objids, list: args[:errors]))
     end
+
     # Time the stage was last run
     @start = if args[:start].to_s == ""
       nil
@@ -77,10 +80,19 @@ class Stage
   end
 
   # Get rid of errors, warnings, and anything that may have been memoized
+  # TODO fix this when getting rid of @warnings
   def reinitialize!
-    @errors = Errors.new(bar: @bar, objids: objids)
-    @warnings = Warnings.new(bar: @bar, objids: objids)
+    log_collection.errors = Errors.new(bar: @bar, objids: objids)
+    log_collection.warnings = Warnings.new(bar: @bar, objids: objids)
     @bar.done = nil
+  end
+
+  def warnings
+    log_collection.warnings
+  end
+
+  def errors
+    log_collection.errors
   end
 
   def run!(agenda = nil)
@@ -96,27 +108,6 @@ class Stage
   # This is the method that needs to be implemented by a subclass
   def run(_agenda)
     raise "#{self.class.name}#run method unimplemented"
-  end
-
-  def add_error(err)
-    @errors.add(err)
-    # raise "#{err.class} passed to add_error" unless err.is_a? Error
-    # unless err.objid.nil? || objids.member?(err.objid)
-    # raise "unknown error objid #{err.objid}"
-    # end
-
-    # @bar.error = true
-    # @errors << err
-  end
-
-  def add_warning(err)
-    @warnings.add(err)
-    # unless err.objid.nil? || objids.member?(err.objid)
-    # raise "unknown warning objid #{err.objid}"
-    # end
-
-    # @bar.warning = true
-    # @warnings << err
   end
 
   # Map of objids + nil -> [Errors]
@@ -147,15 +138,15 @@ class Stage
   # OK to make destructive changes to the shipment for this objid?
   # With nil objid checks for presence of any error.
   def make_changes?(objid = nil)
-    return @errors.none? if objid.nil?
+    return errors.none? if objid.nil?
 
-    @errors.none? { |err| err.objid == objid || err.objid.nil? }
+    errors.none? { |err| err.objid == objid || err.objid.nil? }
   end
 
   # True if the stage has been run and all possible errors have
   # had a chance to surface
   def complete?
-    @errors.none? && !@end.nil?
+    errors.none? && !@end.nil?
   end
 
   # Expected to be run as part of #run,
@@ -218,12 +209,25 @@ class Stage
     (@delete_on_success ||= []) << {path: path, objid: objid}
   end
 
+  # this is a Log object
   def log_collection
+    logger
+  end
+
+  def logger
     @data[:log]
   end
 
+  def log_entries
+    logger.entries
+  end
+
   def log(entry, time = nil)
-    log_collection.log(entry, time)
+    logger.log(entry, time)
+  end
+
+  def log_it(log_entry)
+    logger.add log_entry
   end
 
   def shipment_directory

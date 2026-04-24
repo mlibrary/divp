@@ -38,9 +38,7 @@ class AgendaTest < Minitest::Test
       test_shipment = test_shipment_class.new(dir, spec)
       processor = Processor.new(test_shipment.directory, opts)
       agenda = Agenda.new processor.shipment, processor.stages
-      err = Error.new "test error", processor.shipment.objids[0],
-        "00000001.tif"
-      processor.stages[0].add_error err
+      processor.stages[0].logger.error("test error", objid: processor.shipment.objids[0], path: "00000001.tif")
       agenda.update processor.stages[0]
       assert_equal processor.shipment.objids[1..],
         agenda.for_stage(processor.stages[1]),
@@ -55,8 +53,7 @@ class AgendaTest < Minitest::Test
       test_shipment = test_shipment_class.new(dir, spec)
       processor = Processor.new(test_shipment.directory, opts)
       agenda = Agenda.new processor.shipment, processor.stages
-      err = Error.new "fatal error"
-      processor.stages[0].add_error err
+      processor.stages[0].logger.error("fatal error")
       agenda.update processor.stages[0]
       assert_equal 0, agenda.for_stage(processor.stages[1]).count,
         "subsequent stage has no objids"
