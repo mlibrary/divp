@@ -12,5 +12,6 @@ stages:
   - name: Postflight
     class: Postflight
     file: postflight
-
-
+  - name: ChecksumCheck
+    class: ChecksumCheck
+    file: checksum_check
