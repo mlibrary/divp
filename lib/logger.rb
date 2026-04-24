@@ -33,14 +33,13 @@ class Logger
     add(log_entry)
   end
 
-  def add(log_entry)
-    case log_entry.level
-    when :info
-      info(log_entry.command, log_entry.time)
-    when :warning
-      warn(log_entry.error)
-    when :error
-      error(log_entry.error)
+  def add(input)
+    if input.is_a?(LogEntry)
+      add_log_entry(input)
+    else # it's an array
+      input.each do |log_entry|
+        add_log_entry(log_entry)
+      end
     end
   end
 
@@ -56,6 +55,19 @@ class Logger
 
   def to_json(state = nil, *)
     JSON::State.from_state(state).generate(@log)
+  end
+
+  private
+
+  def add_log_entry(log_entry)
+    case log_entry.level
+    when :info
+      info(log_entry.command, log_entry.time)
+    when :warning
+      warn(log_entry.error)
+    when :error
+      error(log_entry.error)
+    end
   end
 end
 
@@ -130,20 +142,25 @@ class LogEntry
     new(level: :info, command: command, time: time)
   end
 
-  def self.warning(error:)
-    new(level: :warning, error: error)
+  def self.warning(error:, objid: nil, path: nil)
+    new(level: :warning, error: error, objid: objid, path: path)
   end
 
-  def self.error(error:)
-    new(level: :error, error: error)
+  def self.error(error:, objid: nil, path: nil)
+    new(level: :error, error: error, objid: objid, path: path)
   end
 
   attr_reader :level, :command, :time, :error
 
-  def initialize(level:, command: nil, time: nil, error: nil)
+  def initialize(level:, command: nil, time: nil, error: nil, objid: nil, path: nil)
     @level = level
     @command = command
     @time = time
-    @error = error
+    if error.is_a?(Error)
+      @error = error
+    elsif error.is_a?(String)
+      @error = Error.new(error, objid, path)
+    end
+    @objid = objid
   end
 end
