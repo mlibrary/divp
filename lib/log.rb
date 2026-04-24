@@ -1,15 +1,18 @@
 class Log
   include Enumerable
 
-  attr_accessor :warnings
-  def initialize(log: nil, objids: [], warnings: Warnings.new(objids: objids))
+  attr_accessor :warnings, :errors
+  def initialize(log: nil, objids: [],
+    warnings: Warnings.new(objids: objids),
+    errors: Errors.new(objids: objids))
     @log = log || []
     @warnings = warnings
+    @errors = errors
   end
 
-  def each
+  def each(&block)
     @log.each do |line|
-      yield line
+      block.call(line)
     end
   end
 
@@ -33,6 +36,10 @@ class Log
 
   def add_warning(warning)
     @warnings.add(warning)
+  end
+
+  def add_error(error)
+    @errors.add(error)
   end
 
   def to_json(state = nil, *)

@@ -13,7 +13,7 @@ require "log"
 
 # Base class for conversion stages
 class Stage
-  attr_reader :errors, :start, :end, :objids
+  attr_reader :start, :end, :objids
   attr_accessor :name, :config, :shipment
 
   def self.json_create(hash)
@@ -29,7 +29,7 @@ class Stage
     {
       "json_class" => self.class.name,
       "data" => {name: @name,
-                 errors: @errors,
+                 errors: errors,
                  warnings: warnings,
                  data: @data,
                  objids: @shipment.objids,
@@ -54,14 +54,14 @@ class Stage
     else
       ProgressBar.new(self.class)
     end
-    @errors = Errors.new(bar: @bar, objids: objids, list: args[:errors])
 
     # Misc data structure including log
     @data = args[:data] || {}
 
     if @data[:log].instance_of?(::Array) || @data[:log].nil?
       @data[:log] = Log.new(log: @data[:log],
-        warnings: Warnings.new(bar: @bar, objids: objids, list: args[:warnings]))
+        warnings: Warnings.new(bar: @bar, objids: objids, list: args[:warnings]),
+        errors: Errors.new(bar: @bar, objids: objids, list: args[:errors]))
     end
 
     # Time the stage was last run
@@ -82,13 +82,17 @@ class Stage
   # Get rid of errors, warnings, and anything that may have been memoized
   # TODO fix this when getting rid of @warnings
   def reinitialize!
-    @errors = Errors.new(bar: @bar, objids: objids)
+    log_collection.errors = Errors.new(bar: @bar, objids: objids)
     log_collection.warnings = Warnings.new(bar: @bar, objids: objids)
     @bar.done = nil
   end
 
   def warnings
     log_collection.warnings
+  end
+
+  def errors
+    log_collection.errors
   end
 
   def run!(agenda = nil)
@@ -107,12 +111,11 @@ class Stage
   end
 
   def add_error(err)
-    @errors.add(err)
+    log_collection.add_error(err)
   end
 
   def add_warning(err)
     log_collection.add_warning(err)
-    # @warnings.add(err)
   end
 
   # Map of objids + nil -> [Errors]
@@ -143,15 +146,15 @@ class Stage
   # OK to make destructive changes to the shipment for this objid?
   # With nil objid checks for presence of any error.
   def make_changes?(objid = nil)
-    return @errors.none? if objid.nil?
+    return errors.none? if objid.nil?
 
-    @errors.none? { |err| err.objid == objid || err.objid.nil? }
+    errors.none? { |err| err.objid == objid || err.objid.nil? }
   end
 
   # True if the stage has been run and all possible errors have
   # had a chance to surface
   def complete?
-    @errors.none? && !@end.nil?
+    errors.none? && !@end.nil?
   end
 
   # Expected to be run as part of #run,
