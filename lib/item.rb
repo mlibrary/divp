@@ -22,8 +22,9 @@ class Item
     )
   end
 
+  # These can change so we can't memoize them
   def image_files
-    @image_files = (Dir.children(@path) || []).filter_map do |child|
+    (Dir.children(@path) || []).filter_map do |child|
       if valid_file_types.include?(ImageFile.file_type(child))
         file_path = File.join(@path, child)
         objid_file = File.join(objid_components, child)
