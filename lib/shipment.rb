@@ -115,7 +115,7 @@ class Shipment
 
   def create_image_file(objid:, file_path:, objid_file:, file:)
     ImageFile.new(
-      objid, file_path, objid_file, file, @objid_config
+      objid, file_path, objid_file, file
     )
   end
 
