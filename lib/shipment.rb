@@ -130,6 +130,10 @@ class Shipment
     @dir
   end
 
+  def name
+    @dir.split("/")[-1]
+  end
+
   # Should only be necessary when loading from a status.json that has moved.
   # Assign new value and blow away any and all memoized paths.
   def directory=(dir)

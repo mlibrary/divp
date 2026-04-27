@@ -22,6 +22,10 @@ class ImageFile
     self.class.file_type(@file)
   end
 
+  def basename
+    file.split(".")[0]
+  end
+
   def checksum
     Digest::SHA256.file(path).hexdigest
   end

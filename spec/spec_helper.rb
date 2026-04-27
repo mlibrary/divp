@@ -1,6 +1,7 @@
 require "dotenv"
 require "debug"
 require "rspec/temp_dir"
+require "climate_control"
 
 Dotenv.load
 require_relative "../rsvp"
