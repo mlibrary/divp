@@ -8,6 +8,9 @@
 /tmp/*
 !/tmp/.keep
 
+/qc/*
+!/qc/.keep
+
 
 
 .byebug_history

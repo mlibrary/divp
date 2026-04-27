@@ -115,7 +115,7 @@ class Shipment
 
   def create_image_file(objid:, file_path:, objid_file:, file:)
     ImageFile.new(
-      objid, file_path, objid_file, file, @objid_config
+      objid, file_path, objid_file, file
     )
   end
 
@@ -128,6 +128,10 @@ class Shipment
 
   def directory
     @dir
+  end
+
+  def name
+    @dir.split("/")[-1]
   end
 
   # Should only be necessary when loading from a status.json that has moved.

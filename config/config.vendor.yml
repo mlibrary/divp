@@ -15,3 +15,6 @@ stages:
   - name: ChecksumCheck
     class: ChecksumCheck
     file: checksum_check
+  - name: GenerateQC
+    class: GenerateQC
+    file: generate_qc
