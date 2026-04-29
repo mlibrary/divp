@@ -9,6 +9,30 @@ require "processor"
 
 # Facility for running command-line processor/shipment queries and commands
 class QueryTool
+  COMMANDS = ["agenda", "barcodes", "errors", "exit", "help", "ls", "metadata",
+    "objects", "quit", "run", "status", "?"].freeze
+  COMMAND_SUMMARY = <<~COMMANDS
+    COMMAND            SUMMARY                   ALIAS
+    ==========================================================
+    errors [OBJID]     List shipment errors
+    help               Print this message        ?
+    fixity             Show fixity summary
+    objects            List shipment object ids  barcodes, ls
+    quit               Quit the program          exit
+    run                Run processor
+    status             Query shipment status
+    warnings [OBJID]   List shipment warnings
+    ===========================================================
+  COMMANDS
+
+  def self.commands
+    COMMANDS
+  end
+
+  def self.command_summary
+    COMMAND_SUMMARY
+  end
+
   attr_reader :processor
 
   def initialize(processor)
