@@ -27,10 +27,20 @@ class GenerateQC < Stage
     if image_files.count <= 10
       image_files
     else
-      image_files.sort_by! { |x| x.basename }
-      greatest_starting_index = image_files.count - 10
-      starting_index = Random.rand(greatest_starting_index)
-      (starting_index...starting_index + 10).map { |i| image_files[i] }
+      select_10_or_10_percent(image_files)
     end
+  end
+
+  def select_10_or_10_percent(image_files)
+    number_to_select = if image_files.count <= 100
+      10
+    else
+      image_files.count / 10
+    end
+
+    image_files.sort_by! { |x| x.basename }
+    greatest_starting_index = image_files.count - number_to_select
+    starting_index = Random.rand(greatest_starting_index)
+    (starting_index...starting_index + number_to_select).map { |i| image_files[i] }
   end
 end
