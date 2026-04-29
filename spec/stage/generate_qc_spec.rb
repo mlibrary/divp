@@ -43,7 +43,7 @@ describe GenerateQC do
     expect(Dir.new(qc_path)).not_to include("some_other_barcode")
   end
 
-  it "copies a set of 10 images in a row when there are more than 10 images" do
+  it "copies a set of 10 images in a row when there are more than 10 images but less than 100" do
     make_image_files(20)
     subject.run!
     qc_files = Dir.new(File.join(qc_path, "test_shipment", barcode)).children
@@ -57,5 +57,11 @@ describe GenerateQC do
         expect(num + 1).to eq(file_numbers[index + 1])
       end
     end
+  end
+  it "copies a 10% of images when there are more than 100" do
+    make_image_files(111)
+    subject.run!
+    qc_files = Dir.new(File.join(qc_path, "test_shipment", barcode)).children
+    expect(qc_files.count).to eq(11)
   end
 end
